@@ -1,0 +1,19 @@
+<!-- promptist-icon-macos.svg -->
+<svg width="1024" height="1024" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <title>Promptist App Icon Symbol</title>
+  <!-- 배경은 투명 상태. macOS 아이콘 만들 때는 별도 라운드 사각형 배경을 깔아도 됨 -->
+
+  <!-- Symbol centered -->
+  <g transform="translate(24,24) scale(0.8)" fill="#000000">
+    <!-- P-shaped speech bubble -->
+    <path d="M64 32
+             H176
+             A48 48 0 0 1 176 128
+             H112
+             L80 160
+             V32
+             Z" />
+    <!-- Prompt arrow ">" -->
+    <polygon points="104,80 136,96 104,112" fill="#FFFFFF"/>
+  </g>
+</svg>
