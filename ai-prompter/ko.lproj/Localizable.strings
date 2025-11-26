@@ -1,4 +1,4 @@
-"prompt_manager.window_title" = "프롬프트 관리자";
+"prompt_manager.window_title" = "Promptist";
 "search.placeholder" = "🔍 프롬프트 검색…";
 "button.manage" = "관리";
 "button.manage.help" = "프롬프트 템플릿 관리";
@@ -16,6 +16,9 @@
 "notification.copy_success.body.app" = "%@에 템플릿을 복사했습니다";
 "notification.copy_success.body.generic" = "\"%@\"을(를) 클립보드에 복사했습니다";
 "prompt_manager.title" = "프롬프트 관리자";
+"prompt_manager.nav.templates" = "템플릿";
+"prompt_manager.nav.shortcuts" = "단축키";
+"prompt_manager.nav.settings" = "설정";
 "prompt_manager.toolbar.new_prompt" = "새 프롬프트";
 "prompt_manager.toolbar.new_prompt.help" = "새 프롬프트 만들기";
 "prompt_manager.delete_alert.title" = "이 프롬프트를 삭제할까요?";
@@ -39,8 +42,74 @@
 "current_app_header.unknown" = "기타";
 "settings.language.title" = "언어";
 "settings.language.subtitle" = "앱에서 사용할 언어를 선택하세요. 시스템은 macOS 설정을 따릅니다.";
+"settings.title" = "설정";
 "settings.language.option.system" = "시스템 기본값";
 "settings.language.option.english" = "영어";
 "settings.language.option.korean" = "한국어";
+"settings.launchAtLogin.title" = "로그인 시 자동 실행";
+"settings.launchAtLogin.subtitle" = "Mac에 로그인할 때 앱을 자동으로 실행합니다.";
 "recent_searches.clear_help" = "최근 검색 기록을 지웁니다";
 "view_options.title" = "보기 옵션";
+
+// Shortcut Manager
+"shortcut_manager.title" = "키보드 단축키";
+"shortcut_manager.filter.all_apps" = "모든 앱";
+"shortcut_manager.filter.global" = "전역";
+"shortcut_manager.empty.title" = "단축키 없음";
+"shortcut_manager.empty.description" = "템플릿에 키보드 단축키를 생성하여 어디서든 빠르게 접근하세요.";
+"shortcut_manager.add_shortcut" = "단축키 추가";
+"shortcut_manager.add_another" = "다른 단축키 추가";
+"shortcut_manager.conflict.tooltip" = "단축키 충돌이 감지되었습니다";
+
+// Shortcut Recorder
+"shortcut_recorder.title" = "키보드 단축키 기록";
+"shortcut_recorder.button.click_to_record" = "클릭하여 단축키 기록";
+"shortcut_recorder.button.press_combination" = "키 조합을 누르세요...";
+"shortcut_recorder.help.cancel" = "ESC를 눌러 취소";
+"shortcut_recorder.help.modifiers" = "⌘, ⌥, ⌃, ⇧와 같은 수정 키를 사용하세요";
+"shortcut_recorder.scope.label" = "범위";
+"shortcut_recorder.scope.global" = "전역";
+"shortcut_recorder.error.need_modifier" = "최소 하나의 수정 키(⌘, ⌥, ⌃, ⇧)를 사용하세요";
+
+// Prompt Manager Content
+"prompt_manager.filter.all" = "전체";
+"prompt_manager.density.normal" = "일반 밀도";
+"prompt_manager.density.compact" = "압축 밀도";
+"prompt_manager.empty.title" = "프롬프트를 찾을 수 없음";
+"prompt_manager.empty.description" = "검색을 조정하거나 새 프롬프트를 만들어보세요";
+"prompt_manager.root.title" = "Promptist 관리자";
+
+// App Selector
+"app_selector.title" = "연결된 앱 추가";
+"app_selector.subtitle" = "기본 제공, 설치된 또는 사용자 지정 앱을 검색하고 선택하세요.";
+"app_selector.button.close" = "닫기";
+"app_selector.button.add_app" = "앱 추가";
+"app_selector.section.suggested" = "추천";
+"app_selector.section.installed" = "설치된 앱";
+"app_selector.section.custom" = "사용자 지정 앱";
+"app_selector.empty.suggested" = "추천 앱을 찾을 수 없습니다.";
+"app_selector.empty.installed" = "설치된 앱을 찾을 수 없습니다.";
+"app_selector.empty.custom" = "대상으로 지정할 사용자 지정 앱을 추가하세요.";
+"app_selector.button.add_custom" = "사용자 지정 앱 추가";
+"app_selector.button.remove" = "%@ 제거";
+
+// Prompt Row
+"prompt_row.copied" = "복사됨!";
+
+// Prompt Filter
+"prompt_filter.all" = "모든 프롬프트";
+"prompt_filter.by_app" = "앱별";
+
+// Accessibility Permissions
+"accessibility.alert.title" = "접근성 권한 필요";
+"accessibility.alert.step1" = "아래 '시스템 설정 열기' 버튼을 클릭하세요";
+"accessibility.alert.step2" = "자물쇠 아이콘을 클릭하고 비밀번호를 입력하세요";
+"accessibility.alert.step3" = "목록에서 'Promptist' 또는 'ai-prompter'를 찾으세요";
+"accessibility.alert.step4" = "옆의 체크박스를 활성화하세요";
+"accessibility.alert.step5" = "변경사항 적용을 위해 Promptist를 재시작하세요";
+"accessibility.alert.warning" = "이 권한 없이는 다른 앱에서 키보드 단축키가 작동하지 않습니다.";
+"accessibility.alert.open_settings" = "시스템 설정 열기";
+"accessibility.alert.later" = "나중에 하기";
+"accessibility.banner.title" = "접근성 권한 필요";
+"accessibility.banner.description" = "다른 앱에서 키보드 단축키를 사용하려면 활성화하세요";
+"accessibility.banner.button" = "권한 부여";

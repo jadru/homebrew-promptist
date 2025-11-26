@@ -1,4 +1,4 @@
-"prompt_manager.window_title" = "Prompt Manager";
+"prompt_manager.window_title" = "Promptist";
 "search.placeholder" = "🔍 Search prompts…";
 "button.manage" = "Manage";
 "button.manage.help" = "Manage Prompt Templates";
@@ -16,6 +16,9 @@
 "notification.copy_success.body.app" = "Template copied to %@";
 "notification.copy_success.body.generic" = "\"%@\" copied to clipboard";
 "prompt_manager.title" = "Prompt Manager";
+"prompt_manager.nav.templates" = "Templates";
+"prompt_manager.nav.shortcuts" = "Shortcuts";
+"prompt_manager.nav.settings" = "Settings";
 "prompt_manager.toolbar.new_prompt" = "New Prompt";
 "prompt_manager.toolbar.new_prompt.help" = "Create a new prompt";
 "prompt_manager.delete_alert.title" = "Delete this prompt?";
@@ -39,8 +42,74 @@
 "current_app_header.unknown" = "Other";
 "settings.language.title" = "Language";
 "settings.language.subtitle" = "Choose which language to show in the app. System uses your macOS preference.";
+"settings.title" = "Settings";
 "settings.language.option.system" = "System default";
 "settings.language.option.english" = "English";
 "settings.language.option.korean" = "Korean";
+"settings.launchAtLogin.title" = "Launch at Login";
+"settings.launchAtLogin.subtitle" = "Automatically open the app when you log in to your Mac.";
 "recent_searches.clear_help" = "Clear recent search history";
 "view_options.title" = "View Options";
+
+// Shortcut Manager
+"shortcut_manager.title" = "Keyboard Shortcuts";
+"shortcut_manager.filter.all_apps" = "All Apps";
+"shortcut_manager.filter.global" = "Global";
+"shortcut_manager.empty.title" = "No Shortcuts";
+"shortcut_manager.empty.description" = "Create keyboard shortcuts for your templates to access them quickly from anywhere.";
+"shortcut_manager.add_shortcut" = "Add Shortcut";
+"shortcut_manager.add_another" = "Add Another";
+"shortcut_manager.conflict.tooltip" = "Shortcut conflict detected";
+
+// Shortcut Recorder
+"shortcut_recorder.title" = "Record Keyboard Shortcut";
+"shortcut_recorder.button.click_to_record" = "Click to record shortcut";
+"shortcut_recorder.button.press_combination" = "Press key combination...";
+"shortcut_recorder.help.cancel" = "Press ESC to cancel";
+"shortcut_recorder.help.modifiers" = "Use modifier keys like ⌘, ⌥, ⌃, or ⇧";
+"shortcut_recorder.scope.label" = "Scope";
+"shortcut_recorder.scope.global" = "Global";
+"shortcut_recorder.error.need_modifier" = "Please use at least one modifier key (⌘, ⌥, ⌃, or ⇧)";
+
+// Prompt Manager Content
+"prompt_manager.filter.all" = "All";
+"prompt_manager.density.normal" = "Normal Density";
+"prompt_manager.density.compact" = "Compact Density";
+"prompt_manager.empty.title" = "No prompts found";
+"prompt_manager.empty.description" = "Try adjusting your search or create a new prompt";
+"prompt_manager.root.title" = "Promptist Manager";
+
+// App Selector
+"app_selector.title" = "Add Linked Apps";
+"app_selector.subtitle" = "Search and select built-in, installed, or custom apps.";
+"app_selector.button.close" = "Close";
+"app_selector.button.add_app" = "Add App";
+"app_selector.section.suggested" = "Suggested";
+"app_selector.section.installed" = "Installed Apps";
+"app_selector.section.custom" = "Custom Apps";
+"app_selector.empty.suggested" = "No suggested apps found.";
+"app_selector.empty.installed" = "No installed apps found.";
+"app_selector.empty.custom" = "Add custom apps you want to target.";
+"app_selector.button.add_custom" = "Add Custom App";
+"app_selector.button.remove" = "Remove %@";
+
+// Prompt Row
+"prompt_row.copied" = "Copied!";
+
+// Prompt Filter
+"prompt_filter.all" = "All prompts";
+"prompt_filter.by_app" = "By app";
+
+// Accessibility Permissions
+"accessibility.alert.title" = "Accessibility Permission Required";
+"accessibility.alert.step1" = "Click 'Open System Settings' below";
+"accessibility.alert.step2" = "Click the lock icon and enter your password";
+"accessibility.alert.step3" = "Find 'Promptist' or 'ai-prompter' in the list";
+"accessibility.alert.step4" = "Enable the checkbox next to it";
+"accessibility.alert.step5" = "Restart Promptist for changes to take effect";
+"accessibility.alert.warning" = "Without this permission, keyboard shortcuts will not work in other applications.";
+"accessibility.alert.open_settings" = "Open System Settings";
+"accessibility.alert.later" = "I'll Do This Later";
+"accessibility.banner.title" = "Accessibility permission required";
+"accessibility.banner.description" = "Enable this to use keyboard shortcuts in other apps";
+"accessibility.banner.button" = "Grant Permission";
