@@ -2,12 +2,6 @@ import Foundation
 import Combine
 
 /// Drives the prompt list, including persistence, filtering, and mutations.
-enum PromptQuickFilter: Equatable {
-    case currentApp
-    case app(TrackedApp)
-    case all
-}
-
 final class PromptListViewModel: ObservableObject {
     struct PromptCreationIntent: Equatable {
         let presetApps: [PromptAppTarget]
@@ -19,7 +13,6 @@ final class PromptListViewModel: ObservableObject {
     @Published var currentBundleIdentifier: String?
     @Published var currentAppName: String?
     @Published private(set) var recentSearches: [String] = []
-    @Published var quickFilter: PromptQuickFilter = .currentApp
     @Published var pendingCreationIntent: PromptCreationIntent?
 
     private let repository: PromptTemplateRepository
@@ -140,30 +133,6 @@ final class PromptListViewModel: ObservableObject {
         UserDefaults.standard.removeObject(forKey: Self.recentSearchesKey)
     }
 
-    func isFilterSelected(_ app: TrackedApp) -> Bool {
-        switch quickFilter {
-        case .app(let selected):
-            return selected == app
-        case .currentApp:
-            return currentTrackedApp == app
-        case .all:
-            return false
-        }
-    }
-
-    func selectFilter(_ filter: PromptQuickFilter) {
-        switch filter {
-        case .app(let app):
-            if quickFilter == .app(app) {
-                quickFilter = .currentApp
-            } else {
-                quickFilter = .app(app)
-            }
-        default:
-            quickFilter = filter
-        }
-    }
-
     private func persist() {
         repository.saveTemplates(allTemplates)
     }
@@ -196,19 +165,12 @@ final class PromptListViewModel: ObservableObject {
     }
 
     private var activeAppFilter: PromptAppFilter? {
-        switch quickFilter {
-        case .currentApp:
-            guard currentTrackedApp != nil || currentBundleIdentifier != nil || currentAppName != nil else { return nil }
-            return PromptAppFilter(
-                trackedApp: currentTrackedApp,
-                bundleIdentifier: currentBundleIdentifier,
-                displayName: currentAppName
-            )
-        case .app(let app):
-            return PromptAppFilter(trackedApp: app, bundleIdentifier: nil, displayName: nil)
-        case .all:
-            return nil
-        }
+        guard currentTrackedApp != nil || currentBundleIdentifier != nil || currentAppName != nil else { return nil }
+        return PromptAppFilter(
+            trackedApp: currentTrackedApp,
+            bundleIdentifier: currentBundleIdentifier,
+            displayName: currentAppName
+        )
     }
 
     private func applyAppFilter(to templates: [PromptTemplate]) -> [PromptTemplate] {
