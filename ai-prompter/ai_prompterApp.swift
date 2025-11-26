@@ -24,16 +24,26 @@ struct AiPrompterApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            PromptListView(viewModel: promptListViewModel)
+            PromptLauncherView()
                 .environmentObject(appContext)
                 .environmentObject(languageSettings)
                 .environment(\.locale, languageSettings.locale)
         } label: {
             MenuBarIconView(count: overlayCount)
+                .onAppear(perform: syncAppContext)
+                .onReceive(appContext.$currentTrackedApp) { _ in
+                    syncAppContext()
+                }
+                .onReceive(appContext.$frontmostBundleIdentifier) { _ in
+                    syncAppContext()
+                }
+                .onReceive(appContext.$frontmostAppName) { _ in
+                    syncAppContext()
+                }
         }
         .menuBarExtraStyle(.window)
 
-        WindowGroup("prompt_manager.window_title", id: "prompt-manager") {
+        WindowGroup("prompt_manager.window_title", id: "manager") {
             PromptManagerView(viewModel: promptListViewModel)
                 .environmentObject(appContext)
                 .environmentObject(languageSettings)
@@ -49,6 +59,14 @@ struct AiPrompterApp: App {
 
     private var overlayCount: Int {
         promptListViewModel.linkedTemplatesForCurrentApp.count
+    }
+
+    private func syncAppContext() {
+        promptListViewModel.updateCurrentApp(
+            trackedApp: appContext.currentTrackedApp,
+            bundleIdentifier: appContext.frontmostBundleIdentifier,
+            appDisplayName: appContext.frontmostAppName
+        )
     }
 }
 

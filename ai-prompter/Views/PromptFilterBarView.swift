@@ -18,7 +18,7 @@ struct PromptFilterBarView: View {
             PrimaryFilterSegmentedControl(mode: $mode)
 
             if mode == .byApp {
-                AppPillRow(
+                FilterAppPillRow(
                     apps: pinnedApps,
                     selectedApp: selectedApp,
                     onSelect: onSelectApp,
@@ -43,7 +43,7 @@ struct PrimaryFilterSegmentedControl: View {
     }
 }
 
-struct AppPillRow: View {
+private struct FilterAppPillRow: View {
     var apps: [AppInfo]
     var selectedApp: AppInfo?
     var onSelect: (AppInfo?) -> Void

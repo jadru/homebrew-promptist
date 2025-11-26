@@ -9,27 +9,27 @@ struct SearchBarView: View {
     var manageLabel: String = "Manage"
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 10) {
-                HStack(spacing: 6) {
+        VStack(spacing: DesignTokens.Spacing.sm) {
+            HStack(spacing: DesignTokens.Spacing.md) {
+                HStack(spacing: DesignTokens.Spacing.xs) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
 
                     TextField(placeholder, text: $text)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 14))
+                        .font(DesignTokens.Typography.body())
                         .onSubmit(onSubmit)
                         .disableAutocorrection(true)
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
+                .padding(.horizontal, DesignTokens.Spacing.md)
+                .padding(.vertical, DesignTokens.Spacing.xs)
                 .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color(nsColor: .textBackgroundColor))
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
+                        .fill(DesignTokens.Colors.backgroundElevated)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.primary.opacity(0.08), lineWidth: 0.8)
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
+                        .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 0.8)
                 )
 
                 if let manageAction {
@@ -39,16 +39,16 @@ struct SearchBarView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
-                    .tint(.accentColor.opacity(0.9))
+                    .tint(DesignTokens.Colors.accentPrimary.opacity(0.9))
                 }
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, DesignTokens.Spacing.md)
+        .padding(.vertical, DesignTokens.Spacing.xs)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
-                .shadow(color: Color.black.opacity(0.05), radius: 10, y: 2)
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.xl, style: .continuous)
+                .fill(DesignTokens.Colors.backgroundSecondary)
+                .shadow(color: DesignTokens.Shadow.sm.color, radius: DesignTokens.Shadow.sm.radius, y: DesignTokens.Shadow.sm.y)
         )
     }
 }
@@ -68,19 +68,19 @@ struct AppFilterSegmentView: View {
     @State private var hoveredSegment: Segment?
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: DesignTokens.Spacing.xs) {
             ForEach([Segment.chatGPT, .warp, .cursor, .all], id: \.self) { segment in
                 segmentButton(for: segment)
             }
         }
-        .padding(8)
+        .padding(DesignTokens.Spacing.sm)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(Color(nsColor: .controlBackgroundColor))
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.xl, style: .continuous)
+                .fill(DesignTokens.Colors.backgroundSecondary)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 0.8)
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.xl, style: .continuous)
+                .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 0.8)
         )
     }
 
@@ -92,22 +92,25 @@ struct AppFilterSegmentView: View {
             onSelect(filter(for: segment))
         } label: {
             Text(label(for: segment))
-                .font(.system(size: 13, weight: .semibold))
+                .font(DesignTokens.Typography.label(DesignTokens.Typography.labelMedium, weight: .semibold))
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .padding(.horizontal, 8)
-                .foregroundStyle(active ? Color.primary : Color.primary.opacity(0.8))
+                .padding(.vertical, DesignTokens.Spacing.xs)
+                .padding(.horizontal, DesignTokens.Spacing.sm)
+                .foregroundColor(active ? DesignTokens.Colors.foregroundPrimary : DesignTokens.Colors.foregroundSecondary)
                 .background(
                     Capsule()
                         .fill(
                             active
-                            ? Color.accentColor.opacity(0.18)
-                            : (hovering ? Color.primary.opacity(0.06) : Color.primary.opacity(0.03))
+                            ? DesignTokens.Colors.selectedBackground
+                            : (hovering ? DesignTokens.Colors.hoverBackground : Color.clear)
                         )
                 )
                 .overlay(
                     Capsule()
-                        .stroke(Color.primary.opacity(active ? 0.15 : 0.1), lineWidth: 0.8)
+                        .stroke(
+                            active ? DesignTokens.Colors.accentPrimary.opacity(0.3) : DesignTokens.Colors.borderSubtle.opacity(0.5),
+                            lineWidth: active ? 1 : 0.5
+                        )
                 )
         }
         .buttonStyle(.plain)
@@ -115,7 +118,7 @@ struct AppFilterSegmentView: View {
         .onHover { isHovering in
             hoveredSegment = isHovering ? segment : nil
         }
-        .animation(.easeInOut(duration: 0.12), value: hovering)
+        .animation(DesignTokens.Animation.normal, value: hovering)
     }
 
     private func isSelected(_ segment: Segment) -> Bool {
@@ -176,11 +179,12 @@ struct SectionHeaderView: View {
 
     var body: some View {
         Text(title.uppercased())
-            .font(.caption2.smallCaps())
-            .foregroundStyle(.secondary.opacity(0.8))
+            .font(DesignTokens.Typography.caption(DesignTokens.Typography.captionSmall, weight: .medium))
+            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+            .tracking(0.5)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 4)
-            .padding(.bottom, 2)
+            .padding(.top, DesignTokens.Spacing.xxs)
+            .padding(.bottom, DesignTokens.Spacing.micro)
     }
 }
 
@@ -195,10 +199,10 @@ struct TemplateRowView: View {
     @State private var showHoverPopover = false
     @State private var hoverPreviewWorkItem: DispatchWorkItem?
 
-    private var titleFont: Font { .system(size: isCompact ? 15 : 16, weight: .semibold) }
-    private var descriptionFont: Font { .system(size: isCompact ? 12 : 13) }
-    private var verticalSpacing: CGFloat { isCompact ? 5 : 6 }
-    private var rowPadding: CGFloat { isCompact ? 7 : 9 }
+    private var titleFont: Font { DesignTokens.Typography.headline(isCompact ? 15 : 16) }
+    private var descriptionFont: Font { DesignTokens.Typography.body(isCompact ? 12 : 13) }
+    private var verticalSpacing: CGFloat { isCompact ? DesignTokens.Spacing.xxs : DesignTokens.Spacing.xs }
+    private var rowPadding: CGFloat { isCompact ? DesignTokens.Spacing.xs : DesignTokens.Spacing.sm }
 
     var body: some View {
         Button {
@@ -207,18 +211,18 @@ struct TemplateRowView: View {
             onTap()
         } label: {
             VStack(alignment: .leading, spacing: verticalSpacing) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
                     Text(template.title)
                         .font(titleFont)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                         .lineLimit(1)
 
                     Spacer()
 
                     if let linkedAppsText {
                         Text(linkedAppsText)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary.opacity(0.6))
+                            .font(DesignTokens.Typography.caption(DesignTokens.Typography.captionSmall))
+                            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
                             .multilineTextAlignment(.trailing)
                             .lineLimit(1)
                     }
@@ -226,7 +230,7 @@ struct TemplateRowView: View {
 
                 Text(template.content)
                     .font(descriptionFont)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                     .lineLimit(2)
                     .lineSpacing(isCompact ? 1 : 2)
 
@@ -235,16 +239,16 @@ struct TemplateRowView: View {
                 }
             }
             .padding(.vertical, rowPadding)
-            .padding(.horizontal, 10)
+            .padding(.horizontal, DesignTokens.Spacing.md)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(isHovering ? Color.primary.opacity(0.04) : Color.primary.opacity(0.02))
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
+                    .fill(isHovering ? DesignTokens.Colors.hoverBackground : DesignTokens.Colors.backgroundSecondary.opacity(0.5))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(Color.primary.opacity(isHovering ? 0.12 : 0.06), lineWidth: 0.9)
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
+                    .stroke(isHovering ? DesignTokens.Colors.borderDefault : DesignTokens.Colors.borderSubtle, lineWidth: 0.5)
             )
-            .animation(.easeInOut(duration: 0.15), value: isHovering)
+            .animation(DesignTokens.Animation.normal, value: isHovering)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -296,13 +300,13 @@ private struct HoverPreview: View {
     let text: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             Text(text)
-                .font(.subheadline)
-                .foregroundColor(.primary)
+                .font(DesignTokens.Typography.body())
+                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                 .multilineTextAlignment(.leading)
         }
-        .padding(12)
+        .padding(DesignTokens.Spacing.md)
         .frame(maxWidth: 260, alignment: .leading)
     }
 }
@@ -313,22 +317,22 @@ private struct TemplateTagsView: View {
     let scale: CGFloat
 
     var body: some View {
-        let pillFont: Font = .system(size: 11, weight: .medium)
+        let pillFont: Font = DesignTokens.Typography.caption(11, weight: .medium)
 
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6 * scale) {
+            HStack(spacing: DesignTokens.Spacing.xs * scale) {
                 ForEach(tags, id: \.self) { tag in
                     Text(tag)
                         .font(pillFont)
-                        .padding(.vertical, 3 * scale)
-                        .padding(.horizontal, 8 * scale)
+                        .padding(.vertical, DesignTokens.Spacing.xxs * scale)
+                        .padding(.horizontal, DesignTokens.Spacing.sm * scale)
                         .background(
                             Capsule()
-                                .fill(Color.accentColor.opacity(0.12))
+                                .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
                         )
                         .overlay(
                             Capsule()
-                                .stroke(Color.accentColor.opacity(0.3), lineWidth: 0.5)
+                                .stroke(DesignTokens.Colors.accentPrimary.opacity(0.2), lineWidth: 0.5)
                         )
                 }
             }
