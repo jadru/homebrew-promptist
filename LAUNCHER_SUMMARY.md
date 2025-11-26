@@ -36,7 +36,7 @@ The menu bar popover has been completely redesigned from a feature-rich prompt b
 **AFTER (PromptLauncherView):**
 ```
 ┌─────────────────────────────────┐
-│ 🔍 [Search prompts...]     [×]  │ ← Search only
+│ 🔍 [Search prompts...]  [×] [⚙]│ ← Search + Manage button
 ├─────────────────────────────────┤ ← Thin divider
 │ Code Review                     │ ← Row
 │ Please review this code...      │ ← Subtitle
@@ -59,6 +59,7 @@ The menu bar popover has been completely redesigned from a feature-rich prompt b
 | Feature | Before | After |
 |---------|--------|-------|
 | **Search bar** | Small, with Manage button | Large, focused, auto-focused |
+| **Manage button** | In toolbar (top-right) | Compact icon button (top-right) |
 | **Current app display** | Header showing tracked app | None |
 | **App filter buttons** | ChatGPT, Warp, Cursor, All | None (search only) |
 | **Section headers** | "Templates for X", "General" | None |
@@ -95,7 +96,7 @@ PromptListView
 ### New Architecture
 ```
 PromptLauncherView
-├── PromptSearchBar (minimal)
+├── PromptSearchBar (with manage button)
 ├── Divider
 └── PromptList
     └── PromptRow (repeated)

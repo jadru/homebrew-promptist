@@ -52,6 +52,10 @@ struct LauncherDesignTokens {
 
         // Separator
         static let separator = Color.primary.opacity(0.08)
+
+        // Feedback overlay
+        static let copiedOverlayBackground = Color.black.opacity(0.85)
+        static let copiedOverlayText = Color.white
     }
 
     // MARK: - Typography
@@ -69,6 +73,9 @@ struct LauncherDesignTokens {
 
         // Empty state
         static let emptyStateFont = Font.system(size: 13, weight: .regular)
+
+        // Feedback overlay
+        static let copiedOverlayFont = Font.system(size: 14, weight: .semibold)
     }
 
     // MARK: - Shadows
@@ -86,9 +93,11 @@ struct LauncherDesignTokens {
         static let hoverDuration: Double = 0.15
         static let selectionDuration: Double = 0.12
         static let searchFilterDuration: Double = 0.2
+        static let feedbackDuration: Double = 0.2
 
         static let hoverAnimation = SwiftUI.Animation.easeOut(duration: hoverDuration)
         static let selectionAnimation = SwiftUI.Animation.easeInOut(duration: selectionDuration)
+        static let feedbackAnimation = SwiftUI.Animation.easeInOut(duration: feedbackDuration)
     }
 
     // MARK: - Interaction

@@ -24,7 +24,7 @@ The minimal prompt launcher has been successfully implemented and integrated int
 
 ✅ **Minimal UI**
 - No app metadata, headers, or secondary chrome
-- Pure search + list layout
+- Pure search + list layout with compact manage button
 - Clean, flat design with subtle depth
 
 ✅ **Instant Search**
@@ -138,6 +138,7 @@ Created comprehensive documentation:
 8. Check notification appears
 9. Test Escape to close
 10. Hover over rows to see tags
+11. Click [⚙] button to open manager window
 
 ### Edge Cases
 - [ ] Empty prompt list
@@ -149,39 +150,33 @@ Created comprehensive documentation:
 
 ## Known Limitations
 
-1. **Cmd+K Shortcut Removed**
-   - The `.onKeyPress()` API for modifier keys proved complex
-   - Removed to unblock the build
-   - Can be added later using `NSEvent` monitoring or command menus
-
-2. **No App Filtering**
+1. **No App Filtering**
    - The launcher shows all prompts regardless of current app
    - Users can search for app names (e.g., "xcode")
    - Future: Could add subtle app-aware sorting
 
-3. **No Recent Prompts**
+2. **No Recent Prompts**
    - Not implemented in initial version
    - Future: Track execution history and show at top
 
 ## Next Steps (Optional Enhancements)
 
 ### High Priority
-1. Add Cmd+K shortcut using NSEvent or menu commands
-2. Track recent/frequently used prompts
-3. Sort prompts by usage frequency
-4. Add keyboard shortcuts per prompt (Cmd+1-9)
+1. Track recent/frequently used prompts
+2. Sort prompts by usage frequency
+3. Add keyboard shortcuts per prompt (Cmd+1-9)
 
 ### Medium Priority
-5. Preview pane on right side (optional)
-6. Quick edit action (open manager with prompt pre-selected)
-7. Multi-select with Cmd+Click
-8. Custom color themes
+4. Preview pane on right side (optional)
+5. Quick edit action (open manager with prompt pre-selected)
+6. Multi-select with Cmd+Click
+7. Custom color themes
 
 ### Low Priority
-9. Prompt templates with variables
-10. AI-powered suggestions
-11. Export/import prompts
-12. Sync across devices
+8. Prompt templates with variables
+9. AI-powered suggestions
+10. Export/import prompts
+11. Sync across devices
 
 ## Migration Path
 

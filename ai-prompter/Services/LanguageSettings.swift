@@ -45,7 +45,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
-    var labelKey: LocalizedStringKey {
+    var localizationKey: String {
         switch self {
         case .system:
             return "settings.language.option.system"
@@ -54,5 +54,26 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .korean:
             return "settings.language.option.korean"
         }
+    }
+
+    private var fallbackLabel: String {
+        switch self {
+        case .system:
+            return "System default"
+        case .english:
+            return "English"
+        case .korean:
+            return "Korean"
+        }
+    }
+
+    func localizedLabel(in locale: Locale) -> String {
+        let localized = String(
+            localized: String.LocalizationValue(localizationKey),
+            locale: locale
+        )
+
+        // If the translation is missing return an English fallback value.
+        return localized == localizationKey ? fallbackLabel : localized
     }
 }

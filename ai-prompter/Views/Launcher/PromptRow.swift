@@ -13,11 +13,13 @@ struct PromptRow: View {
     let onExecute: () -> Void
 
     @State private var isHovered = false
+    @State private var showCopied = false
 
+    @EnvironmentObject private var languageSettings: LanguageSettings
     private let tokens = LauncherDesignTokens.self
 
     var body: some View {
-        Button(action: onExecute) {
+        Button(action: handleExecute) {
             HStack(spacing: 12) {
                 // Content
                 VStack(alignment: .leading, spacing: 4) {
@@ -60,11 +62,46 @@ struct PromptRow: View {
             .frame(height: tokens.Layout.rowHeight)
             .background(rowBackground)
             .contentShape(Rectangle())
+            .overlay(copiedOverlay)
         }
         .buttonStyle(PromptRowButtonStyle(isSelected: isSelected))
         .onHover { hovering in
             withAnimation(tokens.Animation.hoverAnimation) {
                 isHovered = hovering
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var copiedOverlay: some View {
+        if showCopied {
+            ZStack {
+                tokens.Colors.copiedOverlayBackground
+
+                Text(String(localized: "prompt_row.copied", locale: languageSettings.locale))
+                    .font(tokens.Typography.copiedOverlayFont)
+                    .foregroundColor(tokens.Colors.copiedOverlayText)
+            }
+            .transition(.opacity)
+        }
+    }
+
+    private func handleExecute() {
+        // Show copied feedback
+        withAnimation(tokens.Animation.feedbackAnimation) {
+            showCopied = true
+        }
+
+        // Hide after feedback duration and trigger execute
+        let feedbackDuration = tokens.Animation.feedbackDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
+            withAnimation(tokens.Animation.feedbackAnimation) {
+                showCopied = false
+            }
+
+            // Execute after fade out completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
+                onExecute()
             }
         }
     }

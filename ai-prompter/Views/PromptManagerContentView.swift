@@ -2,8 +2,8 @@ import SwiftUI
 import Combine
 import AppKit
 
-/// Dedicated window for creating, editing, and deleting prompt templates.
-struct PromptManagerView: View {
+/// Content view for the Template Manager tab
+struct PromptManagerContentView: View {
     enum PresentationStyle {
         case window
         case floatingPanel
@@ -11,7 +11,9 @@ struct PromptManagerView: View {
 
     @EnvironmentObject private var languageSettings: LanguageSettings
     @ObservedObject var viewModel: PromptListViewModel
+    @ObservedObject var shortcutViewModel: ShortcutManagerViewModel
     var presentationStyle: PresentationStyle = .window
+    let onNavigateToShortcut: (UUID) -> Void
 
     @State private var searchText = ""
     @State private var isPresentingEditor = false
@@ -51,7 +53,7 @@ struct PromptManagerView: View {
                         .frame(width: 28, height: 28)
                 }
                 .buttonStyle(.plain)
-                .help(isCompactMode ? "Normal Density" : "Compact Density")
+                .help(isCompactMode ? String(localized: "prompt_manager.density.normal", locale: languageSettings.locale) : String(localized: "prompt_manager.density.compact", locale: languageSettings.locale))
 
                 ActionButton(
                     String(localized: "prompt_manager.toolbar.new_prompt", locale: languageSettings.locale),
@@ -106,8 +108,6 @@ struct PromptManagerView: View {
         } message: { _ in
             Text("prompt_manager.delete_alert.message")
         }
-        .frame(minWidth: presentationStyle.minWidth,
-               minHeight: presentationStyle.minHeight)
         .onAppear {
             if let intent = viewModel.pendingCreationIntent {
                 handlePendingCreationIntent(intent)
@@ -139,7 +139,7 @@ struct PromptManagerView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DesignTokens.Spacing.xs) {
                         // All filter
-                        filterChip(title: "All", appName: nil, count: viewModel.allTemplates.count)
+                        filterChip(title: String(localized: "prompt_manager.filter.all", locale: languageSettings.locale), appName: nil, count: viewModel.allTemplates.count)
 
                         // Dynamic app filters
                         ForEach(appFilters, id: \.app) { filter in
@@ -191,12 +191,18 @@ struct PromptManagerView: View {
         PromptManagerRowView(
             template: template,
             isCompact: isCompactMode,
+            shortcutCount: shortcutCount(for: template.id),
             onEdit: { presentEditEditor(for: template) },
             onDelete: {
                 templatePendingDeletion = template
                 showDeleteConfirmation = true
-            }
+            },
+            onNavigateToShortcut: { onNavigateToShortcut(template.id) }
         )
+    }
+
+    private func shortcutCount(for templateId: UUID) -> Int {
+        shortcutViewModel.shortcuts.filter { $0.templateId == templateId }.count
     }
 
     private func presentCreateEditor() {
@@ -266,8 +272,10 @@ private struct FilterChipButton: View {
 private struct PromptManagerRowView: View {
     let template: PromptTemplate
     let isCompact: Bool
+    let shortcutCount: Int
     let onEdit: () -> Void
     let onDelete: () -> Void
+    let onNavigateToShortcut: () -> Void
 
     @State private var isHovering = false
 
@@ -278,6 +286,11 @@ private struct PromptManagerRowView: View {
                     Text(template.title)
                         .font(DesignTokens.Typography.headline(isCompact ? 15 : 16))
                         .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+
+                    // NEW: Shortcut badge
+                    if shortcutCount > 0 {
+                        ShortcutBadge(count: shortcutCount, action: onNavigateToShortcut)
+                    }
 
                     Spacer()
 
@@ -356,7 +369,7 @@ private struct LinkedAppsDisplay: View {
     }
 }
 
-private extension PromptManagerView.PresentationStyle {
+private extension PromptManagerContentView.PresentationStyle {
     var minWidth: CGFloat {
         switch self {
         case .window:
@@ -374,12 +387,4 @@ private extension PromptManagerView.PresentationStyle {
             return 460
         }
     }
-}
-
-#Preview {
-    let context = AppContextService()
-    context.currentTrackedApp = .chatGPT
-    let vm = PromptListViewModel(repository: FilePromptTemplateRepository())
-    return PromptManagerView(viewModel: vm)
-        .environmentObject(context)
 }

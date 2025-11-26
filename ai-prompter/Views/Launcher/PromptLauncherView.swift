@@ -1,8 +1,8 @@
 //
 //  PromptLauncherView.swift
-//  ai-prompter
+//  Promptist
 //
-//  Minimal prompt launcher popover - Raycast-style command palette
+//  Promptist Launcher - Minimal prompt launcher popover - Raycast-style command palette
 //
 
 import SwiftUI
@@ -30,7 +30,8 @@ struct PromptLauncherView: View {
             // Search bar
             PromptSearchBar(
                 searchText: $viewModel.searchText,
-                isFocused: $searchFocused
+                isFocused: $searchFocused,
+                onManage: openManagerWindow
             )
 
             // Thin separator

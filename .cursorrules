@@ -1,0 +1,491 @@
+# Promptist - AI Prompt Manager for macOS
+
+You are an expert SwiftUI engineer working on Promptist, a minimal macOS menu bar app for managing and quickly executing AI prompts with global keyboard shortcuts.
+
+## Project Overview
+
+**Tech Stack:**
+- SwiftUI for UI
+- AppKit integration for menu bar, global shortcuts, and clipboard
+- Combine for reactive programming
+- macOS 15.0+ deployment target
+- Pure Swift, no external dependencies
+
+**Core Features:**
+- Menu bar launcher with Raycast-style command palette
+- Global keyboard shortcuts for prompts
+- App-specific prompt filtering
+- Prompt management window
+- Localization (English, Korean)
+
+## Architecture Principles
+
+### 1. MVVM Pattern
+- **ViewModels**: Handle business logic, state management, published properties
+- **Views**: Pure SwiftUI, minimal logic, composition over inheritance
+- **Models**: Simple structs/enums, Codable for persistence
+- **Services**: Shared singletons (@MainActor classes) for app-wide state
+
+### 2. Component Structure
+```
+ai-prompter/
+├── Models/              # Data models (Codable structs)
+├── ViewModels/          # @ObservableObject ViewModels
+├── Views/               # SwiftUI views (organized by feature)
+│   ├── Launcher/        # Command palette components
+│   ├── AppSelectorDrawerView.swift
+│   ├── PromptEditorView.swift
+│   ├── PromptManagerContentView.swift
+│   ├── PromptManagerRootView.swift
+│   ├── SettingsView.swift
+│   ├── ShortcutManagerView.swift
+│   └── ShortcutRecorderSheet.swift
+├── Services/            # Business logic services
+├── DesignSystem/        # Reusable UI components & design tokens
+│   ├── Components/      # Buttons, Cards, Forms, etc.
+│   ├── Extensions/      # View extensions
+│   └── DesignTokens.swift
+└── Design/              # Feature-specific design tokens
+```
+
+**IMPORTANT - Deleted Files (2025-11-27):**
+The following files have been removed - DO NOT recreate them:
+- ❌ `Views/CurrentAppHeaderView.swift` - Old launcher component
+- ❌ `Views/PopoverComponents.swift` - Old launcher components
+- ❌ `Views/PromptListView.swift` - Replaced by PromptLauncherView
+- ❌ `Views/PromptManagerView.swift` - Replaced by PromptManagerRootView
+- ❌ `Views/PromptFilterBarView.swift` - Functionality in PromptManagerContentView
+- ❌ `DesignSystem/Layouts/PromptManagerLayout.swift` - Reference file only
+
+See `DELETED_CODE_REFERENCE.md` for recovery instructions if needed.
+
+### 3. State Management
+- Use `@StateObject` for view-owned ViewModels
+- Use `@EnvironmentObject` for shared services (AppContextService, LanguageSettings)
+- Use `@Published` in ViewModels for reactive updates
+- Avoid nested @ObservedObject to prevent view refresh issues
+
+## Code Style Guidelines
+
+### Swift Conventions
+- **Naming**: descriptive camelCase, avoid abbreviations
+- **Access Control**: Use `private`, `private(set)`, `fileprivate` appropriately
+- **Optionals**: Prefer guard-let for unwrapping, use optional chaining
+- **Closures**: Use trailing closure syntax when appropriate
+- **Async**: Use `@MainActor` for UI-related classes, Task for async operations
+
+### SwiftUI Best Practices
+```swift
+// ✅ GOOD: Composition with computed properties
+var body: some View {
+    VStack {
+        headerView
+        contentView
+        footerView
+    }
+}
+
+private var headerView: some View {
+    // Complex header logic
+}
+
+// ❌ BAD: Deeply nested views
+var body: some View {
+    VStack {
+        HStack {
+            VStack {
+                // 10+ levels of nesting
+            }
+        }
+    }
+}
+```
+
+### Design System Usage
+```swift
+// ✅ ALWAYS use DesignTokens instead of hardcoded values
+Text("Title")
+    .font(DesignTokens.Typography.headline())
+    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+    .padding(DesignTokens.Spacing.md)
+
+// ❌ NEVER hardcode design values
+Text("Title")
+    .font(.system(size: 16, weight: .semibold))
+    .foregroundColor(.black)
+    .padding(12)
+```
+
+### Component Patterns
+```swift
+// ✅ GOOD: Reusable component with clear API
+struct CustomButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+        }
+        .buttonStyle(PrimaryButtonStyle())
+    }
+}
+
+// Use custom ButtonStyles from DesignSystem/Components/Buttons.swift
+// - PrimaryButtonStyle, SecondaryButtonStyle, GhostButtonStyle, DestructiveButtonStyle
+```
+
+## Critical Implementation Rules
+
+### 1. Global Shortcuts
+- Use `NSEvent.addGlobalMonitorForEvents(matching: .keyDown)` for global shortcuts
+- ALWAYS require at least one modifier key (Cmd, Option, Control, Shift)
+- Check Accessibility permissions before enabling monitoring
+- Clean up event monitors in `deinit`
+- Use `ShortcutManager` service for all shortcut logic
+
+```swift
+// ✅ Correct pattern for global shortcuts
+eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+    Task { @MainActor [weak self] in
+        self?.handleKeyEvent(event)
+    }
+}
+```
+
+### 2. Menu Bar Integration
+```swift
+// Menu bar extra with custom icon and badge
+MenuBarExtra {
+    PromptLauncherView()
+} label: {
+    MenuBarIconView(count: promptCount)
+}
+.menuBarExtraStyle(.window)
+```
+
+### 3. Clipboard Operations
+```swift
+// ✅ Always clear before setting
+NSPasteboard.general.clearContents()
+NSPasteboard.general.setString(content, forType: .string)
+```
+
+### 4. Notifications
+```swift
+// Request permission first
+UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+
+// Show notification
+let content = UNMutableNotificationContent()
+content.title = "Prompt Copied"
+content.body = promptTitle
+```
+
+### 5. Keyboard Navigation
+- Use `.onKeyPress()` modifiers (not deprecated `.onCommand`)
+- Handle arrow keys, Enter, Escape explicitly
+- Auto-focus important inputs with `.focused()` binding
+- Support Cmd+W, Cmd+Q for standard macOS behavior
+
+```swift
+.onKeyPress(.upArrow) {
+    viewModel.moveSelectionUp()
+    return .handled
+}
+```
+
+## Feature-Specific Guidelines
+
+### Launcher (Command Palette)
+**Location**: `Views/Launcher/`
+
+**Design Philosophy**: Minimal, ultra-fast, Raycast-style
+- No app metadata section (unlike manager window)
+- Pure execution focus: search → select → execute
+- Fixed width 540pt, dynamic height 200-600pt
+- Keyboard-first interaction
+
+**Key Components**:
+- `PromptLauncherView`: Root view, keyboard handling
+- `PromptSearchBar`: Auto-focused search input
+- `PromptRow`: Individual prompt with hover states
+- `PromptList`: Lazy-loaded scrollable list
+- `PromptLauncherViewModel`: State + fuzzy search
+
+**Fuzzy Search**: "cr" matches "Code Review", "fb" matches "FooBar"
+
+### Design System
+**Location**: `DesignSystem/`
+
+**Philosophy**: Blend naturally with macOS, inspired by Cursor, Linear, GitHub Desktop
+
+**Components** (Use these, don't recreate):
+- `Buttons.swift`: PrimaryButtonStyle, SecondaryButtonStyle, GhostButtonStyle, etc.
+- `Cards.swift`: CardView, CompactCardView with shadows
+- `Form.swift`: FormRow, FormSection with proper spacing
+- `List.swift`: StyledList with selection states
+- `Modal.swift`: ModalView, ModalHeader, ModalFooter
+- `Toolbar.swift`: TopToolbar, ToolbarButton
+- `EmptyStates.swift`: EmptyStateView with icon + message
+
+**Design Tokens** (ALWAYS use these):
+```swift
+DesignTokens.Colors.backgroundPrimary        // Window background
+DesignTokens.Colors.backgroundSecondary      // Cards, panels
+DesignTokens.Colors.foregroundPrimary        // Primary text
+DesignTokens.Colors.foregroundSecondary      // Secondary text
+DesignTokens.Colors.hoverBackground          // Hover states
+DesignTokens.Colors.selectedBackground       // Selection (12% accent)
+DesignTokens.Typography.headline()           // Section headers
+DesignTokens.Typography.body()               // Body text
+DesignTokens.Spacing.md                      // 12pt
+DesignTokens.Radius.md                       // 8pt
+DesignTokens.Animation.fast                  // 150ms hover
+DesignTokens.Animation.normal                // 200ms transitions
+```
+
+### Localization
+**Files**: `en.lproj/Localizable.strings`, `ko.lproj/Localizable.strings`
+
+```swift
+// ✅ Use NSLocalizedString with descriptive keys
+Text(NSLocalizedString("launcher.search_placeholder", comment: "Search prompts"))
+
+// Keys follow dot notation: feature.component.element
+// Examples:
+// - "launcher.search_placeholder"
+// - "settings.general.title"
+// - "prompt_manager.empty_state.message"
+```
+
+### Repository Pattern
+```swift
+protocol PromptTemplateRepository {
+    func loadTemplates() -> [PromptTemplate]
+    func saveTemplates(_ templates: [PromptTemplate])
+}
+
+// FilePromptTemplateRepository uses JSON file in Application Support
+```
+
+## Common Pitfalls to Avoid
+
+### 1. Memory Leaks
+```swift
+// ❌ BAD: Strong reference cycle
+viewModel.onComplete = {
+    self.dismiss()
+}
+
+// ✅ GOOD: Weak capture
+viewModel.onComplete = { [weak self] in
+    self?.dismiss()
+}
+```
+
+### 2. Main Actor Violations
+```swift
+// ❌ BAD: UI update from background thread
+Task {
+    let data = await fetchData()
+    isLoading = false  // Crash!
+}
+
+// ✅ GOOD: Ensure main actor
+Task { @MainActor in
+    let data = await fetchData()
+    isLoading = false
+}
+```
+
+### 3. State Management Issues
+```swift
+// ❌ BAD: Nested @ObservedObject causes double refresh
+@ObservedObject var parentViewModel: ParentVM
+// parentViewModel has @ObservedObject childViewModel
+
+// ✅ GOOD: Pass only needed data
+let childData: ChildData  // Simple struct
+```
+
+### 4. LazyVStack vs VStack
+```swift
+// ✅ Use LazyVStack for long lists (100+ items)
+LazyVStack(spacing: DesignTokens.Spacing.micro) {
+    ForEach(items) { item in
+        RowView(item: item)
+    }
+}
+
+// ✅ Use VStack for short lists (<20 items)
+VStack(spacing: DesignTokens.Spacing.sm) {
+    // Simple static content
+}
+```
+
+## Testing & Previews
+
+### SwiftUI Previews
+```swift
+#Preview {
+    PromptLauncherView()
+        .environmentObject(AppContextService())
+        .environmentObject(LanguageSettings())
+        .frame(width: 540, height: 400)
+}
+
+// For components requiring data, use mock
+#Preview {
+    PromptRow(
+        prompt: PromptTemplate(
+            id: UUID(),
+            title: "Sample Prompt",
+            content: "Sample content",
+            tags: ["dev", "ai"],
+            linkedApps: [],
+            sortOrder: 0
+        ),
+        isSelected: false,
+        onExecute: {}
+    )
+}
+```
+
+## Performance Guidelines
+
+1. **Lazy Loading**: Use `LazyVStack` for lists with 20+ items
+2. **Computed Properties**: Prefer computed properties over repeated calculations
+3. **Animations**: Keep under 300ms, use `.fast` (150ms) for micro-interactions
+4. **Image Assets**: Use SF Symbols when possible, compress custom images
+5. **Search**: No debounce for <100 items, 400ms debounce for larger lists
+
+## Security & Privacy
+
+1. **Accessibility Permissions**: Required for global shortcuts - prompt user proactively
+2. **Pasteboard**: Clear before setting, don't read without user action
+3. **File Storage**: Use Application Support directory, not user-visible folders
+4. **No Analytics**: Privacy-first, no tracking or telemetry
+
+## Documentation Standards
+
+### Code Comments
+```swift
+// MARK: - Section Name
+// Use for major sections
+
+// MARK: Public Methods
+// Use for grouping
+
+/// Documentation for public APIs
+/// - Parameters:
+///   - template: The prompt template to save
+/// - Returns: Success boolean
+func saveTemplate(_ template: PromptTemplate) -> Bool {
+    // Implementation comments only when logic is non-obvious
+}
+```
+
+### Architecture Documentation
+- Keep `LAUNCHER_ARCHITECTURE.md` updated for major changes
+- Document component hierarchy, data flow, integration points
+- Include code examples for complex patterns
+
+## Code Cleanup & Maintenance Guidelines
+
+### Dead Code Prevention
+1. **Before Adding New Code**:
+   - Check if similar functionality exists
+   - Search for existing components in DesignSystem/
+   - Review DELETED_CODE_REFERENCE.md for previously removed patterns
+
+2. **Regular Cleanup Checks**:
+   - Search for unused imports: `grep -r "^import" --include="*.swift"`
+   - Find unused functions: Check for methods/properties with no references
+   - Identify duplicate code: Look for similar implementations across files
+
+3. **When Refactoring**:
+   - Mark old code with `// DEPRECATED:` comment before replacing
+   - Update DELETED_CODE_REFERENCE.md when removing files
+   - Ensure all references are migrated to new implementation
+   - Remove deprecated code in same commit as replacement
+
+4. **File Deletion Checklist**:
+   - [ ] Grep search confirms no imports of the file
+   - [ ] Check git blame to understand why it was created
+   - [ ] Verify no dynamic references (string-based lookups)
+   - [ ] Update documentation to reference replacement
+   - [ ] Add entry to DELETED_CODE_REFERENCE.md
+   - [ ] Build succeeds without errors
+
+### Unused Code Indicators
+- Functions/methods with zero call sites
+- Properties that are set but never read
+- Entire files with no imports (except in other unused files)
+- ViewModels that are never instantiated
+- Views that are never included in a view hierarchy
+- Duplicate implementations of the same logic
+
+### Code Organization Rules
+1. **Single Responsibility**: Each file should have one clear purpose
+2. **No Orphans**: Every component must be used or removed
+3. **DRY Principle**: Extract duplicate code into DesignSystem/Components/
+4. **Clear Dependencies**: If file A imports file B, file B must be essential
+5. **Documentation**: Complex patterns need architecture docs
+
+## Git Workflow
+
+**Commit Message Format**:
+```
+feat: Add fuzzy search to launcher
+fix: Resolve shortcut conflict detection
+refactor: Extract design tokens to centralized file
+docs: Update launcher architecture guide
+cleanup: Remove unused PopoverComponents and old launcher views
+```
+
+**Branch Naming**:
+- `feature/launcher-redesign`
+- `fix/clipboard-bug`
+- `refactor/design-system`
+- `cleanup/remove-unused-code`
+
+## When to Ask for Clarification
+
+1. **Architectural Changes**: Major refactoring affecting multiple components
+2. **Design Decisions**: Color changes, spacing adjustments, new UI patterns
+3. **Breaking Changes**: API changes affecting existing features
+4. **Performance Trade-offs**: Optimization vs readability decisions
+5. **User Experience**: New keyboard shortcuts, interaction patterns
+
+## Quick Reference
+
+**Key Files**:
+- `ai_prompterApp.swift` - App entry point, MenuBarExtra setup
+- `PromptLauncherView.swift` - Command palette root
+- `PromptListViewModel.swift` - Main data management
+- `ShortcutManager.swift` - Global shortcut handling
+- `DesignTokens.swift` - Complete design system
+
+**Key Concepts**:
+- Launcher = Fast command palette (Raycast-style)
+- Manager = Full prompt management window
+- Tracked Apps = Predefined apps (Cursor, Xcode, etc.)
+- Custom Apps = User-added by bundle ID/name
+- Fuzzy Search = "cr" matches "Code Review"
+
+**Build & Run**:
+```bash
+# Build from command line
+xcodebuild -scheme Promptist -configuration Debug
+
+# Run tests
+xcodebuild test -scheme Promptist
+
+# Archive for distribution
+xcodebuild archive -scheme Promptist -archivePath ./build/Promptist.xcarchive
+```
+
+---
+
+Remember: This is a **minimal, keyboard-first macOS app**. Prioritize speed, simplicity, and macOS native feel over feature bloat. Every feature should enhance the core use case: quickly finding and executing prompts.

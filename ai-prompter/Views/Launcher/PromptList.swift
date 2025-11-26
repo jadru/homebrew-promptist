@@ -21,7 +21,7 @@ struct PromptList: View {
                 if viewModel.filteredPrompts.isEmpty {
                     emptyStateView
                 } else {
-                    LazyVStack(spacing: tokens.Layout.rowSpacing) {
+                    LazyVStack(spacing: 0) {
                         ForEach(Array(viewModel.filteredPrompts.enumerated()), id: \.element.id) { index, prompt in
                             PromptRow(
                                 prompt: prompt,
@@ -33,8 +33,6 @@ struct PromptList: View {
                             .id(prompt.id)
                         }
                     }
-                    .padding(.horizontal, tokens.Layout.searchPadding)
-                    .padding(.bottom, tokens.Layout.searchPadding)
                 }
             }
             .onChange(of: viewModel.selectedIndex) { _, _ in
