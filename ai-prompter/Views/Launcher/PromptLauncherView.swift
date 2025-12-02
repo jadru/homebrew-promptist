@@ -81,6 +81,9 @@ struct PromptLauncherView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(prompt.content, forType: .string)
 
+        // Increment usage count
+        viewModel.incrementUsageCount(for: prompt.id)
+
         // Show notification
         showNotification(for: prompt)
 

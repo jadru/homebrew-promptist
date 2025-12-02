@@ -14,6 +14,10 @@ final class PromptLauncherViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedIndex: Int = 0
     @Published private(set) var allPrompts: [PromptTemplate] = []
+    @Published private(set) var allGroups: [PromptTemplateGroup] = []
+    @Published var showingAllPrompts: Bool = false
+    @Published var currentGroupId: UUID? = nil
+    @Published var isShowingGroupSubmenu: Bool = false
 
     // MARK: - Dependencies
     private let repository: PromptTemplateRepository
@@ -22,15 +26,62 @@ final class PromptLauncherViewModel: ObservableObject {
 
     // MARK: - Computed Properties
 
-    /// Filtered prompts based on search text
+    /// Get prompts for the current app
+    private var appSpecificPrompts: [PromptTemplate] {
+        guard let currentApp = appContext.currentTrackedApp else {
+            return []
+        }
+
+        let filter = PromptAppFilter(
+            trackedApp: currentApp,
+            bundleIdentifier: appContext.frontmostBundleIdentifier,
+            displayName: appContext.frontmostAppName
+        )
+
+        return allPrompts.filter { prompt in
+            prompt.linkedApps.contains { $0.matches(filter) }
+        }
+    }
+
+    /// Has app-specific prompts for the current app
+    var hasAppSpecificPrompts: Bool {
+        !appSpecificPrompts.isEmpty
+    }
+
+    /// Get groups that have prompts
+    var groupsWithPrompts: [PromptTemplateGroup] {
+        allGroups.filter { group in
+            allPrompts.contains { $0.groupId == group.id }
+        }
+    }
+
+    /// Get prompts without a group
+    var ungroupedPrompts: [PromptTemplate] {
+        allPrompts.filter { $0.groupId == nil }
+    }
+
+    /// Filtered prompts based on search text and app context
     var filteredPrompts: [PromptTemplate] {
+        let basePrompts: [PromptTemplate]
+
+        // If browsing a specific group, show only that group's prompts
+        if let groupId = currentGroupId {
+            basePrompts = allPrompts.filter { $0.groupId == groupId }
+        } else if showingAllPrompts || !hasAppSpecificPrompts {
+            // Show all prompts (ungrouped only if not in a group)
+            basePrompts = ungroupedPrompts
+        } else {
+            // Show app-specific prompts (ungrouped only)
+            basePrompts = appSpecificPrompts.filter { $0.groupId == nil }
+        }
+
         guard !searchText.isEmpty else {
-            return allPrompts
+            return basePrompts
         }
 
         let query = searchText.lowercased()
 
-        return allPrompts.filter { prompt in
+        return basePrompts.filter { prompt in
             // Match title
             if prompt.title.lowercased().contains(query) {
                 return true
@@ -85,11 +136,44 @@ final class PromptLauncherViewModel: ObservableObject {
 
     func loadPrompts() {
         allPrompts = repository.loadTemplates()
+            .sorted { $0.usageCount > $1.usageCount }
+        allGroups = repository.loadGroups()
+            .sorted { $0.sortOrder < $1.sortOrder }
     }
 
     func refresh() {
         loadPrompts()
         resetSelection()
+        showingAllPrompts = false
+        currentGroupId = nil
+        isShowingGroupSubmenu = false
+    }
+
+    func toggleShowAllPrompts() {
+        showingAllPrompts.toggle()
+        resetSelection()
+    }
+
+    // MARK: - Group Navigation
+
+    func enterGroup(_ groupId: UUID) {
+        currentGroupId = groupId
+        isShowingGroupSubmenu = false
+        resetSelection()
+    }
+
+    func exitGroup() {
+        currentGroupId = nil
+        resetSelection()
+    }
+
+    func toggleGroupSubmenu() {
+        isShowingGroupSubmenu.toggle()
+    }
+
+    var currentGroup: PromptTemplateGroup? {
+        guard let groupId = currentGroupId else { return nil }
+        return allGroups.first { $0.id == groupId }
     }
 
     // MARK: - Search
@@ -139,6 +223,12 @@ final class PromptLauncherViewModel: ObservableObject {
     /// Execute a specific prompt by ID
     func execute(promptId: UUID) -> PromptTemplate? {
         return filteredPrompts.first(where: { $0.id == promptId })
+    }
+
+    /// Increment usage count for a prompt
+    func incrementUsageCount(for promptId: UUID) {
+        repository.incrementUsageCount(for: promptId)
+        loadPrompts()
     }
 
     // MARK: - Fuzzy Matching
