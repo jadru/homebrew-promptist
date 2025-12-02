@@ -8,6 +8,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
     var tags: [String]
     var linkedApps: [PromptAppTarget]
     var sortOrder: Int
+    var usageCount: Int
+    var groupId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -17,6 +19,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         case linkedApps
         case linkedTrackedApps // Legacy key for backward compatibility.
         case sortOrder
+        case usageCount
+        case groupId
     }
 
     init(
@@ -25,7 +29,9 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         content: String,
         tags: [String],
         linkedApps: [PromptAppTarget],
-        sortOrder: Int
+        sortOrder: Int,
+        usageCount: Int = 0,
+        groupId: UUID? = nil
     ) {
         self.id = id
         self.title = title
@@ -33,6 +39,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         self.tags = tags
         self.linkedApps = linkedApps
         self.sortOrder = sortOrder
+        self.usageCount = usageCount
+        self.groupId = groupId
     }
 
     init(from decoder: Decoder) throws {
@@ -42,6 +50,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         content = try container.decode(String.self, forKey: .content)
         tags = try container.decode([String].self, forKey: .tags)
         sortOrder = try container.decode(Int.self, forKey: .sortOrder)
+        usageCount = try container.decodeIfPresent(Int.self, forKey: .usageCount) ?? 0
+        groupId = try container.decodeIfPresent(UUID.self, forKey: .groupId)
 
         if let decoded = try? container.decode([PromptAppTarget].self, forKey: .linkedApps) {
             linkedApps = decoded
@@ -60,5 +70,7 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         try container.encode(tags, forKey: .tags)
         try container.encode(linkedApps, forKey: .linkedApps)
         try container.encode(sortOrder, forKey: .sortOrder)
+        try container.encode(usageCount, forKey: .usageCount)
+        try container.encodeIfPresent(groupId, forKey: .groupId)
     }
 }

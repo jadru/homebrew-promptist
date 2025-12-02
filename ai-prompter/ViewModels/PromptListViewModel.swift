@@ -8,6 +8,7 @@ final class PromptListViewModel: ObservableObject {
     }
 
     @Published var allTemplates: [PromptTemplate] = []
+    @Published var allGroups: [PromptTemplateGroup] = []
     @Published var searchText: String = ""
     @Published var currentTrackedApp: TrackedApp?
     @Published var currentBundleIdentifier: String?
@@ -22,6 +23,7 @@ final class PromptListViewModel: ObservableObject {
     init(repository: PromptTemplateRepository) {
         self.repository = repository
         allTemplates = repository.loadTemplates()
+        allGroups = repository.loadGroups()
         recentSearches = UserDefaults.standard.stringArray(forKey: Self.recentSearchesKey) ?? []
 
         observeSearchText()
@@ -97,6 +99,40 @@ final class PromptListViewModel: ObservableObject {
     func deleteTemplate(_ template: PromptTemplate) {
         allTemplates.removeAll { $0.id == template.id }
         persist()
+    }
+
+    // MARK: - Group Management
+
+    func addGroup(_ group: PromptTemplateGroup) {
+        allGroups.append(group)
+        repository.addGroup(group)
+        allGroups = repository.loadGroups()
+    }
+
+    func updateGroup(_ group: PromptTemplateGroup) {
+        if let index = allGroups.firstIndex(where: { $0.id == group.id }) {
+            allGroups[index] = group
+        }
+        repository.updateGroup(group)
+        allGroups = repository.loadGroups()
+    }
+
+    func deleteGroup(_ groupId: UUID) {
+        allGroups.removeAll { $0.id == groupId }
+        repository.deleteGroup(groupId)
+        allTemplates = repository.loadTemplates()
+    }
+
+    func moveTemplateToGroup(templateId: UUID, groupId: UUID?) {
+        if let index = allTemplates.firstIndex(where: { $0.id == templateId }) {
+            allTemplates[index].groupId = groupId
+        }
+        repository.moveTemplateToGroup(templateId: templateId, groupId: groupId)
+        allTemplates = repository.loadTemplates()
+    }
+
+    var nextGroupSortOrder: Int {
+        (allGroups.map { $0.sortOrder }.max() ?? 0) + 1
     }
 
     /// Returns sorted templates matching a search term, without filtering by the current app.
