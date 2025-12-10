@@ -43,7 +43,7 @@ struct PromptManagerRootView: View {
 
     private var navigationSidebar: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text(String(localized: "prompt_manager.root.title", locale: languageSettings.locale))
+            Text(languageSettings.localized("prompt_manager.root.title"))
                 .font(DesignTokens.Typography.headline(16, weight: .semibold))
                 .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                 .padding(.horizontal, DesignTokens.Spacing.md)
@@ -53,7 +53,7 @@ struct PromptManagerRootView: View {
 
             VStack(spacing: DesignTokens.Spacing.xxs) {
                 NavigationTabButton(
-                    title: navTitle(for: "prompt_manager.nav.templates", fallback: "Templates"),
+                    title: languageSettings.localized("prompt_manager.nav.templates"),
                     icon: "doc.text",
                     isSelected: selectedTab == .templates,
                     action: {
@@ -64,7 +64,7 @@ struct PromptManagerRootView: View {
                 )
 
                 NavigationTabButton(
-                    title: navTitle(for: "prompt_manager.nav.shortcuts", fallback: "Shortcuts"),
+                    title: languageSettings.localized("prompt_manager.nav.shortcuts"),
                     icon: "command",
                     isSelected: selectedTab == .shortcuts,
                     action: {
@@ -75,7 +75,7 @@ struct PromptManagerRootView: View {
                 )
 
                 NavigationTabButton(
-                    title: navTitle(for: "prompt_manager.nav.settings", fallback: "Settings"),
+                    title: languageSettings.localized("prompt_manager.nav.settings"),
                     icon: "gearshape",
                     isSelected: selectedTab == .settings,
                     action: {
@@ -122,14 +122,6 @@ struct PromptManagerRootView: View {
             }
         }
         .animation(DesignTokens.Animation.normal, value: selectedTab)
-    }
-
-    private func navTitle(for key: String, fallback: String) -> String {
-        let localizedValue = String(
-            localized: String.LocalizationValue(key),
-            locale: languageSettings.locale
-        )
-        return localizedValue == key ? fallback : localizedValue
     }
 }
 

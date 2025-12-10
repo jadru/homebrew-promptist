@@ -1,14 +1,14 @@
 //
-//  PromptTemplateGroup.swift
+//  PromptTemplateCollection.swift
 //  ai-prompter
 //
-//  Represents a folder/group that can contain multiple prompt templates
+//  Represents a collection that can contain multiple prompt templates
 //
 
 import Foundation
 
-/// Represents a group/folder for organizing prompt templates
-struct PromptTemplateGroup: Identifiable, Codable, Hashable {
+/// Represents a collection for organizing prompt templates
+struct PromptTemplateCollection: Identifiable, Codable, Hashable {
     let id: UUID
     var name: String
     var sortOrder: Int

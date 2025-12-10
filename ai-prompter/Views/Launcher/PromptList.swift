@@ -11,6 +11,7 @@ struct PromptList: View {
     @ObservedObject var viewModel: PromptLauncherViewModel
     let onExecute: (PromptTemplate) -> Void
 
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @Namespace private var promptListNamespace
 
     private let tokens = LauncherDesignTokens.self
@@ -18,42 +19,61 @@ struct PromptList: View {
     var body: some View {
         ScrollViewReader { scrollProxy in
             ScrollView(.vertical, showsIndicators: true) {
-                if viewModel.filteredPrompts.isEmpty && viewModel.groupsWithPrompts.isEmpty {
+                if viewModel.allDisplayablePrompts.isEmpty && viewModel.collectionsWithPrompts.isEmpty {
                     emptyStateView
                 } else {
                     LazyVStack(spacing: 0) {
-                        // Show back button if in a group
-                        if viewModel.currentGroupId != nil {
+                        // Show back button if in a collection
+                        if viewModel.currentCollectionId != nil {
                             backToAllPromptsButton
                         }
 
-                        // Show groups if not in a group and not searching
-                        if viewModel.currentGroupId == nil && viewModel.searchText.isEmpty {
-                            ForEach(viewModel.groupsWithPrompts) { group in
-                                GroupRow(
-                                    group: group,
-                                    promptCount: viewModel.allPrompts.filter { $0.groupId == group.id }.count,
+                        // Show collections if not in a collection and not searching
+                        if viewModel.currentCollectionId == nil && !viewModel.isSearching {
+                            ForEach(viewModel.collectionsWithPrompts) { collection in
+                                CollectionRow(
+                                    collection: collection,
+                                    promptCount: viewModel.allPrompts.filter { $0.collectionId == collection.id }.count,
                                     onTap: {
-                                        viewModel.enterGroup(group.id)
+                                        viewModel.enterCollection(collection.id)
                                     }
                                 )
                             }
                         }
 
-                        // Show prompts
-                        ForEach(Array(viewModel.filteredPrompts.enumerated()), id: \.element.id) { index, prompt in
-                            PromptRow(
-                                prompt: prompt,
-                                isSelected: viewModel.isSelected(promptId: prompt.id),
-                                onExecute: {
-                                    onExecute(prompt)
+                        // MARK: - Sections (only when not searching)
+                        if !viewModel.isSearching {
+                            // Recent section
+                            if !viewModel.recentPrompts.isEmpty {
+                                SectionHeader(title: L("launcher.section.recent"))
+                                ForEach(viewModel.recentPrompts) { prompt in
+                                    promptRow(for: prompt)
                                 }
-                            )
-                            .id(prompt.id)
+                            }
+
+                            // Frequent section
+                            if !viewModel.frequentPrompts.isEmpty {
+                                SectionHeader(title: L("launcher.section.frequent"))
+                                ForEach(viewModel.frequentPrompts) { prompt in
+                                    promptRow(for: prompt)
+                                }
+                            }
+
+                            // All section header (only if there are section items)
+                            if !viewModel.recentPrompts.isEmpty || !viewModel.frequentPrompts.isEmpty {
+                                if !viewModel.mainPrompts.isEmpty {
+                                    SectionHeader(title: L("launcher.section.all"))
+                                }
+                            }
+                        }
+
+                        // Main prompts
+                        ForEach(viewModel.mainPrompts) { prompt in
+                            promptRow(for: prompt)
                         }
 
                         // Show "View other prompts" button if showing app-specific prompts
-                        if !viewModel.showingAllPrompts && viewModel.hasAppSpecificPrompts && viewModel.currentGroupId == nil {
+                        if !viewModel.showingAllPrompts && viewModel.hasAppSpecificPrompts && viewModel.currentCollectionId == nil {
                             showOtherPromptsButton
                         }
                     }
@@ -70,16 +90,40 @@ struct PromptList: View {
         }
     }
 
+    // MARK: - Prompt Row Helper
+
+    @ViewBuilder
+    private func promptRow(for prompt: PromptTemplate) -> some View {
+        PromptRow(
+            prompt: prompt,
+            isSelected: viewModel.isSelected(promptId: prompt.id),
+            shortcut: viewModel.shortcut(for: prompt.id),
+            onExecute: {
+                onExecute(prompt)
+            },
+            onHover: { isHovered in
+                viewModel.hoveredPromptId = isHovered ? prompt.id : nil
+            }
+        )
+        .id(prompt.id)
+    }
+
+    // MARK: - Localization Helper
+
+    private func L(_ key: String) -> String {
+        languageSettings.localized(key)
+    }
+
     // MARK: - Back Button
 
     private var backToAllPromptsButton: some View {
         Button(action: {
-            viewModel.exitGroup()
+            viewModel.exitCollection()
         }) {
             HStack(spacing: 8) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 12, weight: .semibold))
-                Text(viewModel.currentGroup?.name ?? "Back")
+                Text(viewModel.currentCollection?.name ?? L("launcher.back"))
                     .font(.system(size: 14, weight: .semibold))
                 Spacer()
             }
@@ -100,7 +144,7 @@ struct PromptList: View {
             HStack(spacing: 6) {
                 Image(systemName: "ellipsis.circle")
                     .font(.system(size: 13, weight: .medium))
-                Text("다른 프롬프트 보기")
+                Text(L("launcher.show_other_prompts"))
                     .font(.system(size: 13, weight: .medium))
             }
             .foregroundColor(tokens.Colors.secondaryText)
@@ -135,9 +179,9 @@ struct PromptList: View {
 
     private var emptyStateMessage: String {
         if viewModel.searchText.isEmpty {
-            return "No prompts yet.\nCreate your first prompt to get started."
+            return L("launcher.empty.no_prompts")
         } else {
-            return "No prompts match \"\(viewModel.searchText)\""
+            return String(format: L("launcher.empty.no_matches"), viewModel.searchText)
         }
     }
 
@@ -153,6 +197,27 @@ struct PromptList: View {
         } else {
             scrollProxy.scrollTo(selectedPrompt.id, anchor: .center)
         }
+    }
+}
+
+// MARK: - Section Header
+
+private struct SectionHeader: View {
+    let title: String
+
+    private let tokens = LauncherDesignTokens.self
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(tokens.Colors.tertiaryText)
+                .textCase(.uppercase)
+            Spacer()
+        }
+        .padding(.horizontal, tokens.Layout.horizontalPadding)
+        .padding(.top, 12)
+        .padding(.bottom, 4)
     }
 }
 
@@ -234,7 +299,7 @@ struct PromptList: View {
 
 private class MockPromptRepository: PromptTemplateRepository {
     private var prompts: [PromptTemplate]
-    private var groups: [PromptTemplateGroup] = []
+    private var collections: [PromptTemplateCollection] = []
 
     init(prompts: [PromptTemplate]) {
         self.prompts = prompts
@@ -254,31 +319,53 @@ private class MockPromptRepository: PromptTemplateRepository {
         }
     }
 
-    func loadGroups() -> [PromptTemplateGroup] {
-        groups
-    }
-
-    func saveGroups(_ groups: [PromptTemplateGroup]) {
-        self.groups = groups
-    }
-
-    func addGroup(_ group: PromptTemplateGroup) {
-        groups.append(group)
-    }
-
-    func updateGroup(_ group: PromptTemplateGroup) {
-        if let index = groups.firstIndex(where: { $0.id == group.id }) {
-            groups[index] = group
+    func updateTemplateSortOrder(templateId: UUID, newSortOrder: Int) {
+        if let index = prompts.firstIndex(where: { $0.id == templateId }) {
+            prompts[index].sortOrder = newSortOrder
         }
     }
 
-    func deleteGroup(_ groupId: UUID) {
-        groups.removeAll { $0.id == groupId }
+    func reorderTemplates(_ templateIds: [UUID]) {
+        for (newOrder, templateId) in templateIds.enumerated() {
+            if let index = prompts.firstIndex(where: { $0.id == templateId }) {
+                prompts[index].sortOrder = newOrder
+            }
+        }
     }
 
-    func moveTemplateToGroup(templateId: UUID, groupId: UUID?) {
+    func loadCollections() -> [PromptTemplateCollection] {
+        collections
+    }
+
+    func saveCollections(_ collections: [PromptTemplateCollection]) {
+        self.collections = collections
+    }
+
+    func addCollection(_ collection: PromptTemplateCollection) {
+        collections.append(collection)
+    }
+
+    func updateCollection(_ collection: PromptTemplateCollection) {
+        if let index = collections.firstIndex(where: { $0.id == collection.id }) {
+            collections[index] = collection
+        }
+    }
+
+    func deleteCollection(_ collectionId: UUID) {
+        collections.removeAll { $0.id == collectionId }
+    }
+
+    func moveTemplateToCollection(templateId: UUID, collectionId: UUID?) {
         if let index = prompts.firstIndex(where: { $0.id == templateId }) {
-            prompts[index].groupId = groupId
+            prompts[index].collectionId = collectionId
+        }
+    }
+
+    func reorderCollections(_ collectionIds: [UUID]) {
+        for (newOrder, collectionId) in collectionIds.enumerated() {
+            if let index = collections.firstIndex(where: { $0.id == collectionId }) {
+                collections[index].sortOrder = newOrder
+            }
         }
     }
 }

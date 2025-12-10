@@ -29,11 +29,14 @@
 "prompt_manager.help.edit_prompt" = "프롬프트 편집";
 "prompt_manager.help.delete_prompt" = "프롬프트 삭제";
 "prompt_editor.field.title" = "제목";
+"prompt_editor.field.title.optional" = "(선택사항)";
+"prompt_editor.field.title.placeholder" = "비워두면 프롬프트에서 자동 생성";
 "prompt_editor.field.prompt" = "프롬프트";
 "prompt_editor.toggle.show_line_numbers" = "줄 번호 표시";
 "prompt_editor.field.tags_placeholder" = "태그 (쉼표로 구분)";
 "prompt_editor.field.linked_apps" = "연결된 앱";
 "prompt_editor.hint.selection_macro" = "템플릿 내 {{selection}}은 현재 선택 텍스트 또는 클립보드로 자동 치환됩니다";
+"prompt_editor.hint.variables" = "지원 변수: {{selection}}, {{clipboard}}, {{date}}, {{time}}, {{datetime}}, {{input:질문}}";
 "prompt_editor.title_new" = "새 프롬프트";
 "prompt_editor.title_edit" = "프롬프트 편집";
 "button.cancel" = "취소";
@@ -48,6 +51,19 @@
 "settings.language.option.korean" = "한국어";
 "settings.launchAtLogin.title" = "로그인 시 자동 실행";
 "settings.launchAtLogin.subtitle" = "Mac에 로그인할 때 앱을 자동으로 실행합니다.";
+
+// Launcher Settings
+"settings.launcher.title" = "런처";
+"settings.launcher.autoSort" = "사용 빈도순 정렬";
+"settings.launcher.showRecent" = "최근 사용 표시";
+"settings.launcher.recentCount" = "최근 항목 개수";
+"settings.launcher.showFrequent" = "자주 사용 표시";
+
+// Launcher Sections
+"launcher.section.recent" = "최근 사용";
+"launcher.section.frequent" = "자주 사용";
+"launcher.section.all" = "전체";
+
 "recent_searches.clear_help" = "최근 검색 기록을 지웁니다";
 "view_options.title" = "보기 옵션";
 
@@ -113,3 +129,80 @@
 "accessibility.banner.title" = "접근성 권한 필요";
 "accessibility.banner.description" = "다른 앱에서 키보드 단축키를 사용하려면 활성화하세요";
 "accessibility.banner.button" = "권한 부여";
+
+// Onboarding
+"onboarding.window_title" = "Promptist에 오신 것을 환영합니다";
+"onboarding.welcome.title" = "Promptist에 오신 것을 환영합니다";
+"onboarding.welcome.subtitle" = "macOS를 위한 AI 프롬프트 도우미";
+"onboarding.welcome.language" = "언어를 선택하세요";
+"onboarding.welcome.get_started" = "시작하기";
+
+"onboarding.features.title" = "주요 기능";
+"onboarding.features.continue" = "계속";
+"onboarding.features.clipboard.title" = "즉시 복사";
+"onboarding.features.clipboard.description" = "클릭 한 번으로 프롬프트를 클립보드에 복사";
+"onboarding.features.apps.title" = "앱별 템플릿";
+"onboarding.features.apps.description" = "자주 사용하는 AI 앱에 프롬프트 연결";
+"onboarding.features.shortcuts.title" = "키보드 단축키";
+"onboarding.features.shortcuts.description" = "전역 단축키로 어디서든 프롬프트에 접근";
+"onboarding.features.menubar.title" = "메뉴바 접근";
+"onboarding.features.menubar.description" = "메뉴바에서 항상 사용 가능";
+
+"onboarding.permission.title" = "한 단계 더";
+"onboarding.permission.subtitle" = "키보드 단축키를 사용하려면 접근성 권한이 필요합니다";
+"onboarding.permission.status.pending" = "권한이 아직 부여되지 않음";
+"onboarding.permission.status.granted" = "권한이 부여됨!";
+"onboarding.permission.checking" = "권한 상태 확인 중...";
+"onboarding.permission.open_settings" = "시스템 설정 열기";
+"onboarding.permission.continue" = "계속";
+"onboarding.permission.show_instructions" = "설정 방법 보기";
+"onboarding.permission.step1" = "'시스템 설정 열기' 클릭";
+"onboarding.permission.step2" = "요청 시 비밀번호 입력";
+"onboarding.permission.step3" = "목록에서 'Promptist' 찾기";
+"onboarding.permission.step4" = "체크박스 활성화";
+"onboarding.permission.skip" = "건너뛰기";
+
+"onboarding.complete.title" = "준비 완료!";
+"onboarding.complete.subtitle" = "Promptist를 사용할 준비가 되었습니다";
+"onboarding.complete.tip" = "메뉴바 아이콘을 클릭하여 시작하거나, 키보드 단축키로 어디서든 프롬프트에 접근하세요.";
+"onboarding.complete.start" = "Promptist 시작하기";
+
+"onboarding.blocked.title" = "설정 필요";
+"onboarding.blocked.description" = "Promptist를 사용하려면 설정을 완료하세요";
+"onboarding.blocked.button" = "설정 완료하기";
+
+// Variable Input Dialog
+"variable_input.title" = "변수 입력";
+"variable_input.clipboard_section" = "클립보드에서 선택";
+"variable_input.input_section" = "값 입력";
+"variable_input.button.copy" = "프롬프트 복사";
+"variable_input.empty_clipboard" = "클립보드 기록이 없습니다";
+
+// Preview Panel
+"preview.content" = "내용";
+"preview.tags" = "태그";
+"preview.info" = "정보";
+"preview.usage_count" = "%d회 사용됨";
+"preview.last_used" = "%@ 전 사용";
+"preview.empty" = "프롬프트 위에 마우스를 올려 미리보기";
+
+// Collections
+"collection.create" = "컬렉션 만들기";
+"collection.rename" = "이름 변경";
+"collection.delete" = "삭제";
+"collection.add" = "컬렉션 추가";
+"collection.filter.all" = "모든 컬렉션";
+"collection.filter.none" = "컬렉션 없음";
+"collection.name_placeholder" = "컬렉션 이름";
+"collection.create_button" = "만들기";
+
+// Launcher
+"launcher.back" = "뒤로";
+"launcher.show_other_prompts" = "다른 프롬프트 보기";
+"launcher.empty.no_prompts" = "프롬프트가 없습니다.\n첫 번째 프롬프트를 만들어 시작하세요.";
+"launcher.empty.no_matches" = "\"%@\"에 해당하는 프롬프트가 없습니다";
+
+// Launcher Menu
+"launcher.menu.manage_templates" = "템플릿 관리";
+"launcher.menu.quit" = "Promptist 종료";
+"prompt_editor.button.add_edit_apps" = "연결된 앱 추가 또는 편집";

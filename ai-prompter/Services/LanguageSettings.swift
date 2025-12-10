@@ -11,19 +11,31 @@ final class LanguageSettings: ObservableObject {
     @Published var selectedLanguage: AppLanguage {
         didSet {
             userDefaults.set(selectedLanguage.rawValue, forKey: Keys.selection)
+            updateBundle()
         }
     }
 
     private let userDefaults: UserDefaults
+    private(set) var bundle: Bundle = .main
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
         let storedValue = userDefaults.string(forKey: Keys.selection)
         selectedLanguage = AppLanguage(rawValue: storedValue ?? "") ?? .system
+        updateBundle()
     }
 
     var locale: Locale {
         selectedLanguage.locale ?? .autoupdatingCurrent
+    }
+
+    private func updateBundle() {
+        bundle = selectedLanguage.bundle
+    }
+
+    /// Helper function to get localized string with current language settings
+    func localized(_ key: String) -> String {
+        bundle.localizedString(forKey: key, value: nil, table: nil)
     }
 }
 
@@ -43,6 +55,26 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .korean:
             return Locale(identifier: "ko")
         }
+    }
+
+    /// Returns the appropriate bundle for this language
+    var bundle: Bundle {
+        let languageCode: String?
+        switch self {
+        case .system:
+            languageCode = nil
+        case .english:
+            languageCode = "en"
+        case .korean:
+            languageCode = "ko"
+        }
+
+        guard let languageCode = languageCode,
+              let path = Bundle.main.path(forResource: languageCode, ofType: "lproj"),
+              let bundle = Bundle(path: path) else {
+            return .main
+        }
+        return bundle
     }
 
     var localizationKey: String {
@@ -67,12 +99,8 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
-    func localizedLabel(in locale: Locale) -> String {
-        let localized = String(
-            localized: String.LocalizationValue(localizationKey),
-            locale: locale
-        )
-
+    func localizedLabel(using bundle: Bundle) -> String {
+        let localized = bundle.localizedString(forKey: localizationKey, value: nil, table: nil)
         // If the translation is missing return an English fallback value.
         return localized == localizationKey ? fallbackLabel : localized
     }

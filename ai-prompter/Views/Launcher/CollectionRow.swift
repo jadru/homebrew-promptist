@@ -1,14 +1,14 @@
 //
-//  GroupRow.swift
+//  CollectionRow.swift
 //  ai-prompter
 //
-//  Group row with folder icon and arrow for navigation
+//  Collection row with folder icon and arrow for navigation
 //
 
 import SwiftUI
 
-struct GroupRow: View {
-    let group: PromptTemplateGroup
+struct CollectionRow: View {
+    let collection: PromptTemplateCollection
     let promptCount: Int
     let onTap: () -> Void
 
@@ -24,8 +24,8 @@ struct GroupRow: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(tokens.Colors.accent)
 
-                // Group name
-                Text(group.name)
+                // Collection name
+                Text(collection.name)
                     .font(tokens.Typography.rowTitleFont)
                     .foregroundColor(tokens.Colors.primaryText)
                     .lineLimit(1)
@@ -68,15 +68,15 @@ struct GroupRow: View {
 
 #Preview {
     VStack(spacing: 0) {
-        GroupRow(
-            group: PromptTemplateGroup(name: "Development", sortOrder: 0),
+        CollectionRow(
+            collection: PromptTemplateCollection(name: "Development", sortOrder: 0),
             promptCount: 5,
             onTap: {
                 print("Tapped Development")
             }
         )
-        GroupRow(
-            group: PromptTemplateGroup(name: "Writing", sortOrder: 1),
+        CollectionRow(
+            collection: PromptTemplateCollection(name: "Writing", sortOrder: 1),
             promptCount: 3,
             onTap: {
                 print("Tapped Writing")

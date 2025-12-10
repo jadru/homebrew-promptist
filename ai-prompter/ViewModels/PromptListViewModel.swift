@@ -8,7 +8,7 @@ final class PromptListViewModel: ObservableObject {
     }
 
     @Published var allTemplates: [PromptTemplate] = []
-    @Published var allGroups: [PromptTemplateGroup] = []
+    @Published var allCollections: [PromptTemplateCollection] = []
     @Published var searchText: String = ""
     @Published var currentTrackedApp: TrackedApp?
     @Published var currentBundleIdentifier: String?
@@ -23,7 +23,7 @@ final class PromptListViewModel: ObservableObject {
     init(repository: PromptTemplateRepository) {
         self.repository = repository
         allTemplates = repository.loadTemplates()
-        allGroups = repository.loadGroups()
+        allCollections = repository.loadCollections()
         recentSearches = UserDefaults.standard.stringArray(forKey: Self.recentSearchesKey) ?? []
 
         observeSearchText()
@@ -101,50 +101,62 @@ final class PromptListViewModel: ObservableObject {
         persist()
     }
 
-    // MARK: - Group Management
+    // MARK: - Collection Management
 
-    func addGroup(_ group: PromptTemplateGroup) {
-        allGroups.append(group)
-        repository.addGroup(group)
-        allGroups = repository.loadGroups()
+    func addCollection(_ collection: PromptTemplateCollection) {
+        allCollections.append(collection)
+        repository.addCollection(collection)
+        allCollections = repository.loadCollections()
     }
 
-    func updateGroup(_ group: PromptTemplateGroup) {
-        if let index = allGroups.firstIndex(where: { $0.id == group.id }) {
-            allGroups[index] = group
+    func updateCollection(_ collection: PromptTemplateCollection) {
+        if let index = allCollections.firstIndex(where: { $0.id == collection.id }) {
+            allCollections[index] = collection
         }
-        repository.updateGroup(group)
-        allGroups = repository.loadGroups()
+        repository.updateCollection(collection)
+        allCollections = repository.loadCollections()
     }
 
-    func deleteGroup(_ groupId: UUID) {
-        allGroups.removeAll { $0.id == groupId }
-        repository.deleteGroup(groupId)
+    func deleteCollection(_ collectionId: UUID) {
+        allCollections.removeAll { $0.id == collectionId }
+        repository.deleteCollection(collectionId)
         allTemplates = repository.loadTemplates()
     }
 
-    func moveTemplateToGroup(templateId: UUID, groupId: UUID?) {
+    func moveTemplateToCollection(templateId: UUID, collectionId: UUID?) {
         if let index = allTemplates.firstIndex(where: { $0.id == templateId }) {
-            allTemplates[index].groupId = groupId
+            allTemplates[index].collectionId = collectionId
         }
-        repository.moveTemplateToGroup(templateId: templateId, groupId: groupId)
+        repository.moveTemplateToCollection(templateId: templateId, collectionId: collectionId)
         allTemplates = repository.loadTemplates()
     }
 
-    var nextGroupSortOrder: Int {
-        (allGroups.map { $0.sortOrder }.max() ?? 0) + 1
+    var nextCollectionSortOrder: Int {
+        (allCollections.map { $0.sortOrder }.max() ?? 0) + 1
+    }
+
+    func reorderTemplates(_ templateIds: [UUID]) {
+        repository.reorderTemplates(templateIds)
+        allTemplates = repository.loadTemplates()
+    }
+
+    func reorderCollections(_ collectionIds: [UUID]) {
+        repository.reorderCollections(collectionIds)
+        allCollections = repository.loadCollections()
     }
 
     /// Returns sorted templates matching a search term, without filtering by the current app.
+    /// This is used for the Template Manager view where all templates should be visible.
     func templatesForManagement(searchText: String) -> [PromptTemplate] {
         let searchTerm = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
 
-        let appFiltered = applyAppFilter(to: allTemplates)
+        guard !searchTerm.isEmpty else {
+            return sortTemplates(allTemplates)
+        }
 
-        let searched = appFiltered.filter { template in
-            guard !searchTerm.isEmpty else { return true }
+        let searched = allTemplates.filter { template in
             let inTitle = template.title.lowercased().contains(searchTerm)
-            let inTags = template.tags.map { $0.lowercased() }.contains { $0.contains(searchTerm) }
+            let inTags = template.tags.contains { $0.lowercased().contains(searchTerm) }
             return inTitle || inTags
         }
 

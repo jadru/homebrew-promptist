@@ -19,7 +19,7 @@ struct ShortcutRecorderSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.lg) {
-            Text(String(localized: "shortcut_recorder.title", locale: languageSettings.locale))
+            Text(languageSettings.localized("shortcut_recorder.title"))
                 .font(DesignTokens.Typography.headline(18))
                 .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
@@ -31,7 +31,7 @@ struct ShortcutRecorderSheet: View {
                             .font(DesignTokens.Typography.mono(14))
                             .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                     } else {
-                        Text(isRecording ? String(localized: "shortcut_recorder.button.press_combination", locale: languageSettings.locale) : String(localized: "shortcut_recorder.button.click_to_record", locale: languageSettings.locale))
+                        Text(isRecording ? languageSettings.localized("shortcut_recorder.button.press_combination") : languageSettings.localized("shortcut_recorder.button.click_to_record"))
                             .font(DesignTokens.Typography.body())
                             .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                     }
@@ -64,13 +64,13 @@ struct ShortcutRecorderSheet: View {
             .disabled(isRecording)
 
             // Help text
-            Text(isRecording ? String(localized: "shortcut_recorder.help.cancel", locale: languageSettings.locale) : String(localized: "shortcut_recorder.help.modifiers", locale: languageSettings.locale))
+            Text(isRecording ? languageSettings.localized("shortcut_recorder.help.cancel") : languageSettings.localized("shortcut_recorder.help.modifiers"))
                 .font(DesignTokens.Typography.caption())
                 .foregroundColor(DesignTokens.Colors.foregroundTertiary)
 
             // Scope selector
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                Text(String(localized: "shortcut_recorder.scope.label", locale: languageSettings.locale))
+                Text(languageSettings.localized("shortcut_recorder.scope.label"))
                     .font(DesignTokens.Typography.label())
                     .foregroundColor(DesignTokens.Colors.foregroundSecondary)
 
@@ -171,9 +171,9 @@ struct ShortcutRecorderSheet: View {
 
     private var scopeOptions: [String] {
         if let app = currentApp {
-            return [String(localized: "shortcut_recorder.scope.global", locale: languageSettings.locale), app.displayName]
+            return [languageSettings.localized("shortcut_recorder.scope.global"), app.displayName]
         } else {
-            return [String(localized: "shortcut_recorder.scope.global", locale: languageSettings.locale)]
+            return [languageSettings.localized("shortcut_recorder.scope.global")]
         }
     }
 
