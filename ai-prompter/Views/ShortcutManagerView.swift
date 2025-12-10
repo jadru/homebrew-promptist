@@ -16,7 +16,7 @@ struct ShortcutManagerView: View {
         VStack(spacing: 0) {
             // Toolbar
             HStack {
-                Text(String(localized: "shortcut_manager.title", locale: languageSettings.locale))
+                Text(languageSettings.localized("shortcut_manager.title"))
                     .font(DesignTokens.Typography.headline(18))
                     .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                 Spacer()
@@ -38,8 +38,8 @@ struct ShortcutManagerView: View {
             if !appFilters.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DesignTokens.Spacing.xs) {
-                        filterChip(title: String(localized: "shortcut_manager.filter.all_apps", locale: languageSettings.locale), scope: .all)
-                        filterChip(title: String(localized: "shortcut_manager.filter.global", locale: languageSettings.locale), scope: .global)
+                        filterChip(title: languageSettings.localized("shortcut_manager.filter.all_apps"), scope: .all)
+                        filterChip(title: languageSettings.localized("shortcut_manager.filter.global"), scope: .global)
                         ForEach(appFilters, id: \.self) { app in
                             filterChip(title: app.displayName, scope: .app(app))
                         }
@@ -59,8 +59,8 @@ struct ShortcutManagerView: View {
                     if displayedItems.isEmpty {
                         EmptyStateView(
                             icon: "command",
-                            title: String(localized: "shortcut_manager.empty.title", locale: languageSettings.locale),
-                            description: String(localized: "shortcut_manager.empty.description", locale: languageSettings.locale),
+                            title: languageSettings.localized("shortcut_manager.empty.title"),
+                            description: languageSettings.localized("shortcut_manager.empty.description"),
                             actionLabel: nil,
                             action: nil
                         )
@@ -231,7 +231,7 @@ private struct ShortcutTemplateRow: View {
                     HStack(spacing: DesignTokens.Spacing.xs) {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: DesignTokens.IconSize.sm))
-                        Text(String(localized: "shortcut_manager.add_shortcut", locale: languageSettings.locale))
+                        Text(languageSettings.localized("shortcut_manager.add_shortcut"))
                             .font(DesignTokens.Typography.body())
                     }
                     .foregroundColor(DesignTokens.Colors.accentPrimary)
@@ -254,7 +254,7 @@ private struct ShortcutTemplateRow: View {
                     HStack(spacing: DesignTokens.Spacing.xs) {
                         Image(systemName: "plus.circle")
                             .font(.system(size: DesignTokens.IconSize.sm))
-                        Text(String(localized: "shortcut_manager.add_another", locale: languageSettings.locale))
+                        Text(languageSettings.localized("shortcut_manager.add_another"))
                             .font(DesignTokens.Typography.caption())
                     }
                     .foregroundColor(DesignTokens.Colors.foregroundSecondary)
@@ -325,7 +325,7 @@ private struct ShortcutItemRow: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: DesignTokens.IconSize.sm))
                     .foregroundColor(DesignTokens.Colors.warning)
-                    .help(String(localized: "shortcut_manager.conflict.tooltip", locale: languageSettings.locale))
+                    .help(languageSettings.localized("shortcut_manager.conflict.tooltip"))
             }
 
             // Enabled toggle

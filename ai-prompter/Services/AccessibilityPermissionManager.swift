@@ -9,9 +9,41 @@ import SwiftUI
 final class AccessibilityPermissionManager: ObservableObject {
     @Published var hasPermission: Bool = false
     @Published var shouldShowAlert: Bool = false
+    @Published var isPolling: Bool = false
+
+    private var pollingTimer: Timer?
 
     init() {
         checkPermission()
+    }
+
+    deinit {
+        pollingTimer?.invalidate()
+    }
+
+    // MARK: - Permission Polling
+
+    /// Start polling for permission status at regular intervals
+    func startPollingForPermission(interval: TimeInterval = 1.0) {
+        stopPolling()
+        isPolling = true
+
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.checkPermission()
+                // Auto-stop if permission is granted
+                if self?.hasPermission == true {
+                    self?.stopPolling()
+                }
+            }
+        }
+    }
+
+    /// Stop polling for permission status
+    func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+        isPolling = false
     }
 
     /// Check if app has Accessibility permissions
@@ -95,7 +127,7 @@ struct AccessibilityPermissionAlert: View {
                 .foregroundColor(DesignTokens.Colors.accentPrimary)
 
             // Title
-            Text(String(localized: "accessibility.alert.title", locale: languageSettings.locale))
+            Text(languageSettings.localized("accessibility.alert.title"))
                 .font(DesignTokens.Typography.headline(20, weight: .semibold))
                 .foregroundColor(DesignTokens.Colors.foregroundPrimary)
                 .multilineTextAlignment(.center)
@@ -104,23 +136,23 @@ struct AccessibilityPermissionAlert: View {
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
                 instructionStep(
                     number: "1",
-                    text: String(localized: "accessibility.alert.step1", locale: languageSettings.locale)
+                    text: languageSettings.localized("accessibility.alert.step1")
                 )
                 instructionStep(
                     number: "2",
-                    text: String(localized: "accessibility.alert.step2", locale: languageSettings.locale)
+                    text: languageSettings.localized("accessibility.alert.step2")
                 )
                 instructionStep(
                     number: "3",
-                    text: String(localized: "accessibility.alert.step3", locale: languageSettings.locale)
+                    text: languageSettings.localized("accessibility.alert.step3")
                 )
                 instructionStep(
                     number: "4",
-                    text: String(localized: "accessibility.alert.step4", locale: languageSettings.locale)
+                    text: languageSettings.localized("accessibility.alert.step4")
                 )
                 instructionStep(
                     number: "5",
-                    text: String(localized: "accessibility.alert.step5", locale: languageSettings.locale)
+                    text: languageSettings.localized("accessibility.alert.step5")
                 )
             }
             .padding(DesignTokens.Spacing.md)
@@ -135,7 +167,7 @@ struct AccessibilityPermissionAlert: View {
                     .font(.system(size: DesignTokens.IconSize.md))
                     .foregroundColor(DesignTokens.Colors.warning)
 
-                Text(String(localized: "accessibility.alert.warning", locale: languageSettings.locale))
+                Text(languageSettings.localized("accessibility.alert.warning"))
                     .font(DesignTokens.Typography.caption())
                     .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -152,7 +184,7 @@ struct AccessibilityPermissionAlert: View {
             // Buttons
             VStack(spacing: DesignTokens.Spacing.sm) {
                 ActionButton(
-                    String(localized: "accessibility.alert.open_settings", locale: languageSettings.locale),
+                    languageSettings.localized("accessibility.alert.open_settings"),
                     variant: .primary
                 ) {
                     permissionManager.openSystemSettings()
@@ -166,7 +198,7 @@ struct AccessibilityPermissionAlert: View {
                 }
 
                 ActionButton(
-                    String(localized: "accessibility.alert.later", locale: languageSettings.locale),
+                    languageSettings.localized("accessibility.alert.later"),
                     variant: .secondary,
                     action: onDismiss
                 )
@@ -212,11 +244,11 @@ struct AccessibilityPermissionBanner: View {
                 .foregroundColor(DesignTokens.Colors.warning)
 
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
-                Text(String(localized: "accessibility.banner.title", locale: languageSettings.locale))
+                Text(languageSettings.localized("accessibility.banner.title"))
                     .font(DesignTokens.Typography.label(weight: .semibold))
                     .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
-                Text(String(localized: "accessibility.banner.description", locale: languageSettings.locale))
+                Text(languageSettings.localized("accessibility.banner.description"))
                     .font(DesignTokens.Typography.caption())
                     .foregroundColor(DesignTokens.Colors.foregroundSecondary)
             }
@@ -226,7 +258,7 @@ struct AccessibilityPermissionBanner: View {
             Button(action: {
                 permissionManager.openSystemSettings()
             }) {
-                Text(String(localized: "accessibility.banner.button", locale: languageSettings.locale))
+                Text(languageSettings.localized("accessibility.banner.button"))
                     .font(DesignTokens.Typography.label(weight: .medium))
                     .foregroundColor(DesignTokens.Colors.accentPrimary)
                     .padding(.horizontal, DesignTokens.Spacing.md)

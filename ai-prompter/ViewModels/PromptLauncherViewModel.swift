@@ -14,15 +14,21 @@ final class PromptLauncherViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var selectedIndex: Int = 0
     @Published private(set) var allPrompts: [PromptTemplate] = []
-    @Published private(set) var allGroups: [PromptTemplateGroup] = []
+    @Published private(set) var allCollections: [PromptTemplateCollection] = []
     @Published var showingAllPrompts: Bool = false
-    @Published var currentGroupId: UUID? = nil
-    @Published var isShowingGroupSubmenu: Bool = false
+    @Published var currentCollectionId: UUID? = nil
+    @Published var isShowingCollectionSubmenu: Bool = false
+    @Published var hoveredPromptId: UUID? = nil
 
     // MARK: - Dependencies
     private let repository: PromptTemplateRepository
     private let appContext: AppContextService
+    private let shortcutStore: ShortcutStore
+    private let launcherSettings: LauncherSettings
     private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Shortcuts Cache
+    private var shortcutsMap: [UUID: TemplateShortcut] = [:]
 
     // MARK: - Computed Properties
 
@@ -48,31 +54,31 @@ final class PromptLauncherViewModel: ObservableObject {
         !appSpecificPrompts.isEmpty
     }
 
-    /// Get groups that have prompts
-    var groupsWithPrompts: [PromptTemplateGroup] {
-        allGroups.filter { group in
-            allPrompts.contains { $0.groupId == group.id }
+    /// Get collections that have prompts
+    var collectionsWithPrompts: [PromptTemplateCollection] {
+        allCollections.filter { collection in
+            allPrompts.contains { $0.collectionId == collection.id }
         }
     }
 
-    /// Get prompts without a group
-    var ungroupedPrompts: [PromptTemplate] {
-        allPrompts.filter { $0.groupId == nil }
+    /// Get prompts without a collection
+    var uncollectedPrompts: [PromptTemplate] {
+        allPrompts.filter { $0.collectionId == nil }
     }
 
     /// Filtered prompts based on search text and app context
     var filteredPrompts: [PromptTemplate] {
         let basePrompts: [PromptTemplate]
 
-        // If browsing a specific group, show only that group's prompts
-        if let groupId = currentGroupId {
-            basePrompts = allPrompts.filter { $0.groupId == groupId }
+        // If browsing a specific collection, show only that collection's prompts
+        if let collectionId = currentCollectionId {
+            basePrompts = allPrompts.filter { $0.collectionId == collectionId }
         } else if showingAllPrompts || !hasAppSpecificPrompts {
-            // Show all prompts (ungrouped only if not in a group)
-            basePrompts = ungroupedPrompts
+            // Show all prompts (uncollected only if not in a collection)
+            basePrompts = uncollectedPrompts
         } else {
-            // Show app-specific prompts (ungrouped only)
-            basePrompts = appSpecificPrompts.filter { $0.groupId == nil }
+            // Show app-specific prompts (uncollected only)
+            basePrompts = appSpecificPrompts.filter { $0.collectionId == nil }
         }
 
         guard !searchText.isEmpty else {
@@ -119,16 +125,98 @@ final class PromptLauncherViewModel: ObservableObject {
         return filteredPrompts[selectedIndex]
     }
 
+    // MARK: - Section Properties
+
+    /// Whether user is currently searching
+    var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// Recent prompts (sorted by lastUsedAt, limited by settings)
+    var recentPrompts: [PromptTemplate] {
+        guard !isSearching, launcherSettings.showRecentSection else { return [] }
+        return allPrompts
+            .filter { $0.lastUsedAt != nil }
+            .sorted { ($0.lastUsedAt ?? .distantPast) > ($1.lastUsedAt ?? .distantPast) }
+            .prefix(launcherSettings.recentSectionCount)
+            .map { $0 }
+    }
+
+    /// Frequently used prompts (usage >= 3, excluding those already in recent)
+    var frequentPrompts: [PromptTemplate] {
+        guard !isSearching, launcherSettings.showFrequentSection else { return [] }
+        let recentIds = Set(recentPrompts.map { $0.id })
+        return allPrompts
+            .filter { $0.usageCount >= 3 && !recentIds.contains($0.id) }
+            .sorted { $0.usageCount > $1.usageCount }
+            .prefix(5)
+            .map { $0 }
+    }
+
+    /// Main prompts list (excluding section items when not searching)
+    var mainPrompts: [PromptTemplate] {
+        let sectionIds = Set(recentPrompts.map { $0.id } + frequentPrompts.map { $0.id })
+        let basePrompts = isSearching ? filteredPrompts : filteredPrompts.filter { !sectionIds.contains($0.id) }
+
+        if launcherSettings.autoSortByUsage {
+            return basePrompts.sorted { $0.usageCount > $1.usageCount }
+        } else {
+            return basePrompts.sorted { $0.sortOrder < $1.sortOrder }
+        }
+    }
+
+    /// All displayable prompts in order (for keyboard navigation)
+    var allDisplayablePrompts: [PromptTemplate] {
+        if isSearching {
+            return mainPrompts
+        }
+        return recentPrompts + frequentPrompts + mainPrompts
+    }
+
+    /// Total count for keyboard navigation
+    var totalDisplayableCount: Int {
+        allDisplayablePrompts.count
+    }
+
+    // MARK: - Shortcut Access
+
+    /// Get shortcut for a template
+    func shortcut(for templateId: UUID) -> TemplateShortcut? {
+        shortcutsMap[templateId]
+    }
+
+    // MARK: - Preview Support
+
+    /// Currently hovered or selected prompt for preview
+    var previewPrompt: PromptTemplate? {
+        // Prefer hovered, fallback to selected
+        if let hoveredId = hoveredPromptId {
+            return allPrompts.first { $0.id == hoveredId }
+        }
+        return selectedPrompt
+    }
+
+    /// Shortcut for the preview prompt
+    var previewShortcut: TemplateShortcut? {
+        guard let promptId = previewPrompt?.id else { return nil }
+        return shortcut(for: promptId)
+    }
+
     // MARK: - Initialization
 
     init(
         repository: PromptTemplateRepository,
-        appContext: AppContextService
+        appContext: AppContextService,
+        shortcutStore: ShortcutStore = FileShortcutStore(),
+        launcherSettings: LauncherSettings = .shared
     ) {
         self.repository = repository
         self.appContext = appContext
+        self.shortcutStore = shortcutStore
+        self.launcherSettings = launcherSettings
 
         loadPrompts()
+        loadShortcuts()
         observeSearchText()
     }
 
@@ -137,16 +225,22 @@ final class PromptLauncherViewModel: ObservableObject {
     func loadPrompts() {
         allPrompts = repository.loadTemplates()
             .sorted { $0.usageCount > $1.usageCount }
-        allGroups = repository.loadGroups()
+        allCollections = repository.loadCollections()
             .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func loadShortcuts() {
+        let shortcuts = shortcutStore.loadShortcuts()
+        shortcutsMap = Dictionary(uniqueKeysWithValues: shortcuts.map { ($0.templateId, $0) })
     }
 
     func refresh() {
         loadPrompts()
+        loadShortcuts()
         resetSelection()
         showingAllPrompts = false
-        currentGroupId = nil
-        isShowingGroupSubmenu = false
+        currentCollectionId = nil
+        isShowingCollectionSubmenu = false
     }
 
     func toggleShowAllPrompts() {
@@ -154,26 +248,26 @@ final class PromptLauncherViewModel: ObservableObject {
         resetSelection()
     }
 
-    // MARK: - Group Navigation
+    // MARK: - Collection Navigation
 
-    func enterGroup(_ groupId: UUID) {
-        currentGroupId = groupId
-        isShowingGroupSubmenu = false
+    func enterCollection(_ collectionId: UUID) {
+        currentCollectionId = collectionId
+        isShowingCollectionSubmenu = false
         resetSelection()
     }
 
-    func exitGroup() {
-        currentGroupId = nil
+    func exitCollection() {
+        currentCollectionId = nil
         resetSelection()
     }
 
-    func toggleGroupSubmenu() {
-        isShowingGroupSubmenu.toggle()
+    func toggleCollectionSubmenu() {
+        isShowingCollectionSubmenu.toggle()
     }
 
-    var currentGroup: PromptTemplateGroup? {
-        guard let groupId = currentGroupId else { return nil }
-        return allGroups.first { $0.id == groupId }
+    var currentCollection: PromptTemplateCollection? {
+        guard let collectionId = currentCollectionId else { return nil }
+        return allCollections.first { $0.id == collectionId }
     }
 
     // MARK: - Search

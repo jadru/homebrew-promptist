@@ -1,40 +1,42 @@
 //
-//  GroupEditorView.swift
+//  CollectionEditorView.swift
 //  ai-prompter
 //
-//  Simple group name editor
+//  Simple collection name editor
 //
 
 import SwiftUI
 
-struct GroupEditorView: View {
-    @Binding var groupName: String
+struct CollectionEditorView: View {
+    @Binding var collectionName: String
     let isEditing: Bool
     let onCreate: () -> Void
     let onCancel: () -> Void
 
+    @EnvironmentObject private var languageSettings: LanguageSettings
+
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.lg) {
-            Text(isEditing ? "Rename Group" : "Create Group")
+            Text(isEditing ? languageSettings.localized("collection.rename") : languageSettings.localized("collection.create"))
                 .font(DesignTokens.Typography.headline(18))
                 .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
-            TextField("Group Name", text: $groupName)
+            TextField(languageSettings.localized("collection.name_placeholder"), text: $collectionName)
                 .textFieldStyle(.roundedBorder)
                 .font(DesignTokens.Typography.body())
 
             HStack(spacing: DesignTokens.Spacing.md) {
-                Button("Cancel") {
+                Button(languageSettings.localized("button.cancel")) {
                     onCancel()
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(DesignTokens.Colors.foregroundSecondary)
 
-                Button(isEditing ? "Save" : "Create") {
+                Button(isEditing ? languageSettings.localized("button.save") : languageSettings.localized("collection.create_button")) {
                     onCreate()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(groupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(collectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .padding(DesignTokens.Spacing.lg)

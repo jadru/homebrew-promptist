@@ -9,7 +9,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
     var linkedApps: [PromptAppTarget]
     var sortOrder: Int
     var usageCount: Int
-    var groupId: UUID?
+    var lastUsedAt: Date?
+    var collectionId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -20,7 +21,9 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         case linkedTrackedApps // Legacy key for backward compatibility.
         case sortOrder
         case usageCount
-        case groupId
+        case lastUsedAt
+        case collectionId
+        case groupId // Legacy key for backward compatibility
     }
 
     init(
@@ -31,7 +34,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         linkedApps: [PromptAppTarget],
         sortOrder: Int,
         usageCount: Int = 0,
-        groupId: UUID? = nil
+        lastUsedAt: Date? = nil,
+        collectionId: UUID? = nil
     ) {
         self.id = id
         self.title = title
@@ -40,7 +44,8 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         self.linkedApps = linkedApps
         self.sortOrder = sortOrder
         self.usageCount = usageCount
-        self.groupId = groupId
+        self.lastUsedAt = lastUsedAt
+        self.collectionId = collectionId
     }
 
     init(from decoder: Decoder) throws {
@@ -51,7 +56,10 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         tags = try container.decode([String].self, forKey: .tags)
         sortOrder = try container.decode(Int.self, forKey: .sortOrder)
         usageCount = try container.decodeIfPresent(Int.self, forKey: .usageCount) ?? 0
-        groupId = try container.decodeIfPresent(UUID.self, forKey: .groupId)
+        lastUsedAt = try container.decodeIfPresent(Date.self, forKey: .lastUsedAt)
+        // Try new key first, fallback to legacy key
+        collectionId = try container.decodeIfPresent(UUID.self, forKey: .collectionId)
+            ?? container.decodeIfPresent(UUID.self, forKey: .groupId)
 
         if let decoded = try? container.decode([PromptAppTarget].self, forKey: .linkedApps) {
             linkedApps = decoded
@@ -71,6 +79,7 @@ struct PromptTemplate: Identifiable, Codable, Hashable {
         try container.encode(linkedApps, forKey: .linkedApps)
         try container.encode(sortOrder, forKey: .sortOrder)
         try container.encode(usageCount, forKey: .usageCount)
-        try container.encodeIfPresent(groupId, forKey: .groupId)
+        try container.encodeIfPresent(lastUsedAt, forKey: .lastUsedAt)
+        try container.encodeIfPresent(collectionId, forKey: .collectionId)
     }
 }
