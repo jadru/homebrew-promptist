@@ -29,11 +29,14 @@
 "prompt_manager.help.edit_prompt" = "Edit prompt";
 "prompt_manager.help.delete_prompt" = "Delete prompt";
 "prompt_editor.field.title" = "Title";
+"prompt_editor.field.title.optional" = "(optional)";
+"prompt_editor.field.title.placeholder" = "Auto-generated from prompt if empty";
 "prompt_editor.field.prompt" = "Prompt";
 "prompt_editor.toggle.show_line_numbers" = "Show line numbers";
 "prompt_editor.field.tags_placeholder" = "Tags (comma separated)";
 "prompt_editor.field.linked_apps" = "Linked Apps";
 "prompt_editor.hint.selection_macro" = "In the template, {{selection}} will be replaced with the current selection or clipboard.";
+"prompt_editor.hint.variables" = "Supported variables: {{selection}}, {{clipboard}}, {{date}}, {{time}}, {{datetime}}, {{input:question}}";
 "prompt_editor.title_new" = "New Prompt";
 "prompt_editor.title_edit" = "Edit Prompt";
 "button.cancel" = "Cancel";
@@ -48,6 +51,18 @@
 "settings.language.option.korean" = "Korean";
 "settings.launchAtLogin.title" = "Launch at Login";
 "settings.launchAtLogin.subtitle" = "Automatically open the app when you log in to your Mac.";
+
+// Launcher Settings
+"settings.launcher.title" = "Launcher";
+"settings.launcher.autoSort" = "Sort by usage frequency";
+"settings.launcher.showRecent" = "Show recent prompts";
+"settings.launcher.recentCount" = "Number of recent items";
+"settings.launcher.showFrequent" = "Show frequently used";
+
+// Launcher Sections
+"launcher.section.recent" = "Recent";
+"launcher.section.frequent" = "Frequently Used";
+"launcher.section.all" = "All Prompts";
 "recent_searches.clear_help" = "Clear recent search history";
 "view_options.title" = "View Options";
 
@@ -113,3 +128,80 @@
 "accessibility.banner.title" = "Accessibility permission required";
 "accessibility.banner.description" = "Enable this to use keyboard shortcuts in other apps";
 "accessibility.banner.button" = "Grant Permission";
+
+// Onboarding
+"onboarding.window_title" = "Welcome to Promptist";
+"onboarding.welcome.title" = "Welcome to Promptist";
+"onboarding.welcome.subtitle" = "Your AI prompt companion for macOS";
+"onboarding.welcome.language" = "Choose your language";
+"onboarding.welcome.get_started" = "Get Started";
+
+"onboarding.features.title" = "What You Can Do";
+"onboarding.features.continue" = "Continue";
+"onboarding.features.clipboard.title" = "Instant Copy";
+"onboarding.features.clipboard.description" = "Copy prompts to clipboard with a single click";
+"onboarding.features.apps.title" = "App-Specific Templates";
+"onboarding.features.apps.description" = "Link prompts to your favorite AI apps";
+"onboarding.features.shortcuts.title" = "Keyboard Shortcuts";
+"onboarding.features.shortcuts.description" = "Access prompts from anywhere with global shortcuts";
+"onboarding.features.menubar.title" = "Menu Bar Access";
+"onboarding.features.menubar.description" = "Always available in your menu bar";
+
+"onboarding.permission.title" = "One More Step";
+"onboarding.permission.subtitle" = "Promptist needs accessibility permission to enable keyboard shortcuts";
+"onboarding.permission.status.pending" = "Permission not yet granted";
+"onboarding.permission.status.granted" = "Permission granted!";
+"onboarding.permission.checking" = "Checking permission status...";
+"onboarding.permission.open_settings" = "Open System Settings";
+"onboarding.permission.continue" = "Continue";
+"onboarding.permission.show_instructions" = "Show setup instructions";
+"onboarding.permission.step1" = "Click 'Open System Settings'";
+"onboarding.permission.step2" = "Enter your password if prompted";
+"onboarding.permission.step3" = "Find 'Promptist' in the list";
+"onboarding.permission.step4" = "Enable the checkbox";
+"onboarding.permission.skip" = "Skip for Now";
+
+"onboarding.complete.title" = "You're All Set!";
+"onboarding.complete.subtitle" = "Promptist is ready to use";
+"onboarding.complete.tip" = "Click the menu bar icon to get started, or use keyboard shortcuts to access your prompts from anywhere.";
+"onboarding.complete.start" = "Start Using Promptist";
+
+"onboarding.blocked.title" = "Setup Required";
+"onboarding.blocked.description" = "Complete setup to use Promptist";
+"onboarding.blocked.button" = "Complete Setup";
+
+// Variable Input Dialog
+"variable_input.title" = "Complete Variables";
+"variable_input.clipboard_section" = "Select from Clipboard";
+"variable_input.input_section" = "Fill in Values";
+"variable_input.button.copy" = "Copy Prompt";
+"variable_input.empty_clipboard" = "No clipboard history available";
+
+// Preview Panel
+"preview.content" = "Content";
+"preview.tags" = "Tags";
+"preview.info" = "Info";
+"preview.usage_count" = "Used %d times";
+"preview.last_used" = "Last used %@";
+"preview.empty" = "Hover over a prompt to preview";
+
+// Collections
+"collection.create" = "Create Collection";
+"collection.rename" = "Rename";
+"collection.delete" = "Delete";
+"collection.add" = "Add Collection";
+"collection.filter.all" = "All Collections";
+"collection.filter.none" = "No Collection";
+"collection.name_placeholder" = "Collection Name";
+"collection.create_button" = "Create";
+
+// Launcher
+"launcher.back" = "Back";
+"launcher.show_other_prompts" = "Show other prompts";
+"launcher.empty.no_prompts" = "No prompts yet.\nCreate your first prompt to get started.";
+"launcher.empty.no_matches" = "No prompts match \"%@\"";
+
+// Launcher Menu
+"launcher.menu.manage_templates" = "Manage Templates";
+"launcher.menu.quit" = "Quit Promptist";
+"prompt_editor.button.add_edit_apps" = "Add or edit linked apps";

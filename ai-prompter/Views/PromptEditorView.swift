@@ -14,9 +14,9 @@ struct PromptEditorView: View {
     @State private var title: String
     @State private var content: String
     @State private var tagInput: String
-    @State private var showLineNumbers: Bool = true
     @State private var isShowingAppSelector = false
     @StateObject private var appSelectorViewModel: AppSelectorViewModel
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     init(mode: Mode, onSave: @escaping (PromptTemplate) -> Void, onCancel: @escaping () -> Void) {
         self.mode = mode
@@ -45,34 +45,40 @@ struct PromptEditorView: View {
             Text(modeTitle)
                 .font(.headline)
 
-            TextField("prompt_editor.field.title", text: $title)
-                .textFieldStyle(.roundedBorder)
-
+            // Prompt content (required) - now first
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("prompt_editor.field.prompt")
+                HStack(spacing: 4) {
+                    Text(languageSettings.localized("prompt_editor.field.prompt"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    Spacer()
-                    Toggle("prompt_editor.toggle.show_line_numbers", isOn: $showLineNumbers)
-                        .toggleStyle(.switch)
-                        .font(.caption)
+                    Text("*")
+                        .font(.subheadline)
+                        .foregroundColor(.red)
                 }
 
-                LineNumberedEditor(text: $content, showLineNumbers: showLineNumbers)
+                VariableHighlightedTextEditor(text: $content)
                     .frame(minHeight: 140)
-                    .background(Color(nsColor: .textBackgroundColor).opacity(0.4))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.secondary.opacity(0.2))
-                    )
             }
 
-            TextField("prompt_editor.field.tags_placeholder", text: $tagInput)
+            // Title (optional) - now below prompt
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Text(languageSettings.localized("prompt_editor.field.title"))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Text(languageSettings.localized("prompt_editor.field.title.optional"))
+                        .font(.caption)
+                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                }
+                TextField(languageSettings.localized("prompt_editor.field.title.placeholder"), text: $title)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            TextField(languageSettings.localized("prompt_editor.field.tags_placeholder"), text: $tagInput)
                 .textFieldStyle(.roundedBorder)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text("prompt_editor.field.linked_apps")
+                Text(languageSettings.localized("prompt_editor.field.linked_apps"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -85,21 +91,21 @@ struct PromptEditorView: View {
                 Button {
                     isShowingAppSelector = true
                 } label: {
-                    Label("Add or edit linked apps", systemImage: "link")
+                    Label(languageSettings.localized("prompt_editor.button.add_edit_apps"), systemImage: "link")
                 }
                 .buttonStyle(.borderless)
                 .font(.footnote)
             }
 
-            Text("prompt_editor.hint.selection_macro")
+            Text(languageSettings.localized("prompt_editor.hint.variables"))
                 .font(.footnote)
                 .foregroundColor(.secondary)
                 .padding(.top, 4)
 
             HStack {
                 Spacer()
-                Button("button.cancel", action: onCancel)
-                Button("button.save", action: save)
+                Button(languageSettings.localized("button.cancel"), action: onCancel)
+                Button(languageSettings.localized("button.save"), action: save)
                     .keyboardShortcut(.defaultAction)
             }
         }
@@ -117,21 +123,39 @@ struct PromptEditorView: View {
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    private var modeTitle: LocalizedStringKey {
+    private var modeTitle: String {
         switch mode {
-        case .create: return "prompt_editor.title_new"
-        case .edit: return "prompt_editor.title_edit"
+        case .create: return languageSettings.localized("prompt_editor.title_new")
+        case .edit: return languageSettings.localized("prompt_editor.title_edit")
         }
     }
 
     private func save() {
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Content is required
+        guard !trimmedContent.isEmpty else { return }
+
+        // Title is optional - auto-generate from content if empty
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalTitle: String
+        if trimmedTitle.isEmpty {
+            // Use first 30 characters of content + "..."
+            let firstLine = trimmedContent.components(separatedBy: .newlines).first ?? trimmedContent
+            let cleanFirstLine = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
+            if cleanFirstLine.count > 30 {
+                finalTitle = String(cleanFirstLine.prefix(30)) + "..."
+            } else {
+                finalTitle = cleanFirstLine
+            }
+        } else {
+            finalTitle = trimmedTitle
+        }
+
         let cleanTags = tagInput
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-
-        guard !trimmedTitle.isEmpty else { return }
 
         let linkedApps = appSelectorViewModel.linkedAppTargets()
 
@@ -140,8 +164,8 @@ struct PromptEditorView: View {
         case .create(let nextSortOrder, _):
             template = PromptTemplate(
                 id: UUID(),
-                title: trimmedTitle,
-                content: content,
+                title: finalTitle,
+                content: trimmedContent,
                 tags: cleanTags,
                 linkedApps: linkedApps,
                 sortOrder: nextSortOrder
@@ -149,8 +173,8 @@ struct PromptEditorView: View {
         case .edit(let existing):
             template = PromptTemplate(
                 id: existing.id,
-                title: trimmedTitle,
-                content: content,
+                title: finalTitle,
+                content: trimmedContent,
                 tags: cleanTags,
                 linkedApps: linkedApps,
                 sortOrder: existing.sortOrder
@@ -158,54 +182,5 @@ struct PromptEditorView: View {
         }
 
         onSave(template)
-    }
-}
-
-/// Text editor styled for prompt writing, with optional line numbers and monospace font.
-private struct LineNumberedEditor: View {
-    @Binding var text: String
-    let showLineNumbers: Bool
-
-    private let editorFont: Font = .system(size: 13, weight: .regular, design: .monospaced)
-
-    private var lines: [Substring] {
-        let components = text.split(separator: "\n", omittingEmptySubsequences: false)
-        return components.isEmpty ? [""] : components
-    }
-
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            TextEditor(text: $text)
-                .font(editorFont)
-                .padding(.leading, showLineNumbers ? 40 : 0)
-                .scrollContentBackground(.hidden)
-                .background(Color.clear)
-
-            if showLineNumbers {
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(alignment: .trailing, spacing: 0) {
-                        ForEach(Array(lines.enumerated()), id: \.offset) { index, _ in
-                            Text("\(index + 1)")
-                                .font(editorFont)
-                                .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 6)
-                }
-                .frame(width: 36)
-                .background(Color.black.opacity(0.03))
-                .overlay(
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.15))
-                        .frame(width: 1),
-                    alignment: .trailing
-                )
-                .allowsHitTesting(false)
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

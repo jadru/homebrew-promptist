@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import AppKit
+import UniformTypeIdentifiers
 
 /// Content view for the Template Manager tab
 struct PromptManagerContentView: View {
@@ -21,18 +22,25 @@ struct PromptManagerContentView: View {
     @State private var templatePendingDeletion: PromptTemplate?
     @State private var showDeleteConfirmation = false
     @State private var searchRecordWorkItem: DispatchWorkItem?
-    @State private var isCompactMode = false
     @State private var selectedAppFilter: String?
-    @State private var selectedGroupFilter: UUID?
-    @State private var showGroupEditor = false
-    @State private var editingGroupName = ""
-    @State private var editingGroupId: UUID?
+    @State private var selectedCollectionFilter: CollectionFilter = .all
+    @State private var showCollectionEditor = false
+    @State private var editingCollectionName = ""
+    @State private var editingCollectionId: UUID?
+    @State private var draggingTemplateId: UUID?
+
+    /// Represents a collection filter state for clear, unambiguous filtering
+    private enum CollectionFilter: Equatable {
+        case all
+        case noCollection
+        case collection(UUID)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Toolbar with search, density toggle, and new button
             HStack(spacing: DesignTokens.Spacing.md) {
-                SearchBar(text: $searchText, placeholder: String(localized: "search.placeholder", locale: languageSettings.locale)) {
+                SearchBar(text: $searchText, placeholder: languageSettings.localized("search.placeholder")) {
                     viewModel.recordRecentSearch(searchText)
                 }
                 .frame(maxWidth: 400)
@@ -45,22 +53,8 @@ struct PromptManagerContentView: View {
 
                 Spacer()
 
-                // Density toggle
-                Button(action: {
-                    withAnimation(DesignTokens.Animation.normal) {
-                        isCompactMode.toggle()
-                    }
-                }) {
-                    Image(systemName: isCompactMode ? "square.grid.2x2" : "square.grid.2x2.fill")
-                        .font(.system(size: DesignTokens.IconSize.sm, weight: .medium))
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
-                        .frame(width: 28, height: 28)
-                }
-                .buttonStyle(.plain)
-                .help(isCompactMode ? String(localized: "prompt_manager.density.normal", locale: languageSettings.locale) : String(localized: "prompt_manager.density.compact", locale: languageSettings.locale))
-
                 ActionButton(
-                    String(localized: "prompt_manager.toolbar.new_prompt", locale: languageSettings.locale),
+                    languageSettings.localized("prompt_manager.toolbar.new_prompt"),
                     icon: "plus",
                     variant: .primary,
                     action: presentCreateEditor
@@ -77,7 +71,7 @@ struct PromptManagerContentView: View {
 
             Separator()
 
-            // Content area with custom ScrollView
+            // Content area with custom ScrollView and drag-and-drop reordering
             ScrollView {
                 LazyVStack(spacing: DesignTokens.Spacing.md, pinnedViews: [.sectionHeaders]) {
                     if !displayedTemplates.isEmpty {
@@ -85,8 +79,8 @@ struct PromptManagerContentView: View {
                     } else {
                         EmptyStateView(
                             icon: "doc.text.magnifyingglass",
-                            title: String(localized: "prompt_manager.empty.title", locale: languageSettings.locale).isEmpty ? "No prompts found" : String(localized: "prompt_manager.empty.title", locale: languageSettings.locale),
-                            description: String(localized: "prompt_manager.empty.description", locale: languageSettings.locale).isEmpty ? "Try adjusting your search or create a new prompt" : String(localized: "prompt_manager.empty.description", locale: languageSettings.locale),
+                            title: languageSettings.localized("prompt_manager.empty.title"),
+                            description: languageSettings.localized("prompt_manager.empty.description"),
                             actionLabel: nil,
                             action: nil
                         )
@@ -104,21 +98,22 @@ struct PromptManagerContentView: View {
                 isPresentingEditor = false
             }
         }
-        .alert("prompt_manager.delete_alert.title", isPresented: $showDeleteConfirmation, presenting: templatePendingDeletion) { template in
-            Button("prompt_manager.delete_alert.delete", role: .destructive) {
+        .alert(languageSettings.localized("prompt_manager.delete_alert.title"), isPresented: $showDeleteConfirmation, presenting: templatePendingDeletion) { template in
+            Button(languageSettings.localized("prompt_manager.delete_alert.delete"), role: .destructive) {
                 viewModel.deleteTemplate(template)
             }
-            Button("prompt_manager.delete_alert.cancel", role: .cancel) { }
+            Button(languageSettings.localized("prompt_manager.delete_alert.cancel"), role: .cancel) { }
         } message: { _ in
-            Text("prompt_manager.delete_alert.message")
+            Text(languageSettings.localized("prompt_manager.delete_alert.message"))
         }
-        .sheet(isPresented: $showGroupEditor) {
-            GroupEditorView(
-                groupName: $editingGroupName,
-                isEditing: editingGroupId != nil,
-                onCreate: createOrUpdateGroup,
-                onCancel: { showGroupEditor = false }
+        .sheet(isPresented: $showCollectionEditor) {
+            CollectionEditorView(
+                collectionName: $editingCollectionName,
+                isEditing: editingCollectionId != nil,
+                onCreate: createOrUpdateCollection,
+                onCancel: { showCollectionEditor = false }
             )
+            .environmentObject(languageSettings)
         }
         .onAppear {
             if let intent = viewModel.pendingCreationIntent {
@@ -136,18 +131,18 @@ struct PromptManagerContentView: View {
         // Apply app filter if selected
         if let filterApp = selectedAppFilter {
             filtered = filtered.filter { template in
-                template.linkedApps.contains { target in
-                    target.displayName == filterApp
-                }
+                template.linkedApps.contains { $0.displayName == filterApp }
             }
         }
 
-        // Apply group filter if selected
-        if let groupId = selectedGroupFilter {
-            filtered = filtered.filter { $0.groupId == groupId }
-        } else if selectedGroupFilter == UUID(uuidString: "00000000-0000-0000-0000-000000000000") {
-            // Special UUID for "No Group"
-            filtered = filtered.filter { $0.groupId == nil }
+        // Apply collection filter
+        switch selectedCollectionFilter {
+        case .all:
+            break
+        case .noCollection:
+            filtered = filtered.filter { $0.collectionId == nil }
+        case .collection(let collectionId):
+            filtered = filtered.filter { $0.collectionId == collectionId }
         }
 
         return filtered
@@ -160,7 +155,7 @@ struct PromptManagerContentView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DesignTokens.Spacing.xs) {
                         // All filter
-                        filterChip(title: String(localized: "prompt_manager.filter.all", locale: languageSettings.locale), appName: nil, count: viewModel.allTemplates.count)
+                        filterChip(title: languageSettings.localized("prompt_manager.filter.all"), appName: nil, count: viewModel.allTemplates.count)
 
                         // Dynamic app filters
                         ForEach(appFilters, id: \.app) { filter in
@@ -171,49 +166,61 @@ struct PromptManagerContentView: View {
                 }
             }
 
-            // Group filters
-            if !viewModel.allGroups.isEmpty {
+            // Collection filters
+            if !viewModel.allCollections.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DesignTokens.Spacing.xs) {
-                        // All groups filter
-                        groupFilterChip(title: "All Groups", groupId: nil, count: viewModel.allTemplates.count)
+                        // All collections filter
+                        collectionFilterChip(
+                            title: languageSettings.localized("collection.filter.all"),
+                            filter: .all,
+                            count: viewModel.allTemplates.count
+                        )
 
-                        // No group filter
-                        groupFilterChip(title: "No Group", groupId: UUID(uuidString: "00000000-0000-0000-0000-000000000000"), count: viewModel.allTemplates.filter { $0.groupId == nil }.count)
+                        // No collection filter
+                        collectionFilterChip(
+                            title: languageSettings.localized("collection.filter.none"),
+                            filter: .noCollection,
+                            count: viewModel.allTemplates.filter { $0.collectionId == nil }.count
+                        )
 
-                        // Dynamic group filters
-                        ForEach(viewModel.allGroups) { group in
-                            groupFilterChip(title: group.name, groupId: group.id, count: viewModel.allTemplates.filter { $0.groupId == group.id }.count)
-                                .contextMenu {
-                                    Button("Rename") {
-                                        editingGroupName = group.name
-                                        editingGroupId = group.id
-                                        showGroupEditor = true
-                                    }
-                                    Button("Delete", role: .destructive) {
-                                        viewModel.deleteGroup(group.id)
-                                    }
+                        // Dynamic collection filters
+                        ForEach(viewModel.allCollections) { collection in
+                            collectionFilterChip(
+                                title: collection.name,
+                                filter: .collection(collection.id),
+                                count: viewModel.allTemplates.filter { $0.collectionId == collection.id }.count
+                            )
+                            .contextMenu {
+                                Button(languageSettings.localized("collection.rename")) {
+                                    editingCollectionName = collection.name
+                                    editingCollectionId = collection.id
+                                    showCollectionEditor = true
                                 }
+                                Button(languageSettings.localized("collection.delete"), role: .destructive) {
+                                    viewModel.deleteCollection(collection.id)
+                                }
+                            }
                         }
 
-                        // Add group button
-                        Button(action: { presentGroupCreator() }) {
+                        // Add collection button
+                        Button(action: { presentCollectionCreator() }) {
                             Image(systemName: "plus.circle")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(DesignTokens.Colors.accentPrimary)
                         }
                         .buttonStyle(.plain)
-                        .help("Add Group")
+                        .help(languageSettings.localized("collection.add"))
                     }
                     .padding(.horizontal, DesignTokens.Spacing.md)
                 }
             } else {
-                // Show add group button when no groups exist
+                // Show add collection button when no collections exist
                 HStack {
-                    Button(action: { presentGroupCreator() }) {
+                    Button(action: { presentCollectionCreator() }) {
                         HStack(spacing: DesignTokens.Spacing.xs) {
                             Image(systemName: "folder.badge.plus")
-                            Text("Create Group")
+                            Text(languageSettings.localized("collection.create"))
                         }
                         .font(DesignTokens.Typography.label())
                         .foregroundColor(DesignTokens.Colors.accentPrimary)
@@ -251,38 +258,45 @@ struct PromptManagerContentView: View {
         )
     }
 
-    private func groupFilterChip(title: String, groupId: UUID?, count: Int) -> some View {
-        GroupFilterChipWrapper(
+    private func collectionFilterChip(title: String, filter: CollectionFilter, count: Int) -> some View {
+        CollectionFilterChipWrapper(
             title: "\(title) (\(count))",
-            isSelected: selectedGroupFilter == groupId,
-            groupId: groupId,
+            isSelected: selectedCollectionFilter == filter,
+            filter: filter,
             action: {
-                selectedGroupFilter = groupId
+                selectedCollectionFilter = filter
             },
             onDrop: { templateId in
-                let targetGroupId = (groupId == UUID(uuidString: "00000000-0000-0000-0000-000000000000")) ? nil : groupId
-                viewModel.moveTemplateToGroup(templateId: templateId, groupId: targetGroupId)
+                let targetCollectionId: UUID? = {
+                    switch filter {
+                    case .all, .noCollection:
+                        return nil
+                    case .collection(let id):
+                        return id
+                    }
+                }()
+                viewModel.moveTemplateToCollection(templateId: templateId, collectionId: targetCollectionId)
             }
         )
     }
 
-    private struct GroupFilterChipWrapper: View {
+    private struct CollectionFilterChipWrapper: View {
         let title: String
         let isSelected: Bool
-        let groupId: UUID?
+        let filter: PromptManagerContentView.CollectionFilter
         let action: () -> Void
         let onDrop: (UUID) -> Void
 
         @State private var isDropTarget = false
 
         var body: some View {
-            GroupFilterChipButton(
+            CollectionFilterChipButton(
                 title: title,
                 isSelected: isSelected,
                 action: action,
                 isDropTarget: isDropTarget
             )
-            .dropDestination(for: String.self) { items, location in
+            .dropDestination(for: String.self) { items, _ in
                 guard let templateIdString = items.first,
                       let templateId = UUID(uuidString: templateIdString) else {
                     return false
@@ -295,61 +309,62 @@ struct PromptManagerContentView: View {
         }
     }
 
-    private func presentGroupCreator() {
-        editingGroupName = ""
-        editingGroupId = nil
-        showGroupEditor = true
+    private func presentCollectionCreator() {
+        editingCollectionName = ""
+        editingCollectionId = nil
+        showCollectionEditor = true
     }
 
-    private func createOrUpdateGroup() {
-        guard !editingGroupName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+    private func createOrUpdateCollection() {
+        guard !editingCollectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        if let groupId = editingGroupId {
-            // Update existing group
-            if let group = viewModel.allGroups.first(where: { $0.id == groupId }) {
-                var updated = group
-                updated.name = editingGroupName
-                viewModel.updateGroup(updated)
+        if let collectionId = editingCollectionId {
+            // Update existing collection
+            if let collection = viewModel.allCollections.first(where: { $0.id == collectionId }) {
+                var updated = collection
+                updated.name = editingCollectionName
+                viewModel.updateCollection(updated)
             }
         } else {
-            // Create new group
-            let newGroup = PromptTemplateGroup(
-                name: editingGroupName,
-                sortOrder: viewModel.nextGroupSortOrder
+            // Create new collection
+            let newCollection = PromptTemplateCollection(
+                name: editingCollectionName,
+                sortOrder: viewModel.nextCollectionSortOrder
             )
-            viewModel.addGroup(newGroup)
+            viewModel.addCollection(newCollection)
         }
 
-        showGroupEditor = false
+        showCollectionEditor = false
     }
 
     private func templateList(_ templates: [PromptTemplate]) -> some View {
         VStack(spacing: DesignTokens.Spacing.sm) {
-            ForEach(templates) { template in
-                managerRow(template)
+            ForEach(Array(templates.enumerated()), id: \.element.id) { index, template in
+                DraggablePromptRow(
+                    template: template,
+                    index: index,
+                    shortcutCount: shortcutCount(for: template.id),
+                    onEdit: { presentEditEditor(for: template) },
+                    onDelete: {
+                        templatePendingDeletion = template
+                        showDeleteConfirmation = true
+                    },
+                    onNavigateToShortcut: { onNavigateToShortcut(template.id) },
+                    onReorder: { fromIndex, toIndex in
+                        reorderTemplates(from: fromIndex, to: toIndex, in: templates)
+                    },
+                    draggingTemplateId: $draggingTemplateId
+                )
             }
         }
     }
 
-    private func managerRow(_ template: PromptTemplate) -> some View {
-        PromptManagerRowView(
-            template: template,
-            isCompact: isCompactMode,
-            shortcutCount: shortcutCount(for: template.id),
-            onEdit: { presentEditEditor(for: template) },
-            onDelete: {
-                templatePendingDeletion = template
-                showDeleteConfirmation = true
-            },
-            onNavigateToShortcut: { onNavigateToShortcut(template.id) }
-        )
-        .draggable(template.id.uuidString) {
-            // Preview while dragging
-            Text(template.title)
-                .padding(DesignTokens.Spacing.sm)
-                .background(DesignTokens.Colors.backgroundElevated)
-                .cornerRadius(DesignTokens.Radius.md)
-        }
+    private func reorderTemplates(from fromIndex: Int, to toIndex: Int, in templates: [PromptTemplate]) {
+        guard fromIndex != toIndex else { return }
+        var reorderedIds = templates.map { $0.id }
+        let movedId = reorderedIds.remove(at: fromIndex)
+        reorderedIds.insert(movedId, at: toIndex > fromIndex ? toIndex - 1 : toIndex)
+        viewModel.reorderTemplates(reorderedIds)
     }
 
     private func shortcutCount(for templateId: UUID) -> Int {
@@ -370,6 +385,59 @@ struct PromptManagerContentView: View {
         editorMode = .create(nextSortOrder: viewModel.nextSortOrder, presetApps: intent.presetApps)
         isPresentingEditor = true
         viewModel.pendingCreationIntent = nil
+    }
+}
+
+// MARK: - Draggable Prompt Row
+
+private struct DraggablePromptRow: View {
+    let template: PromptTemplate
+    let index: Int
+    let shortcutCount: Int
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    let onNavigateToShortcut: () -> Void
+    let onReorder: (Int, Int) -> Void
+    @Binding var draggingTemplateId: UUID?
+
+    @State private var isDropTarget = false
+
+    var body: some View {
+        PromptManagerRowView(
+            template: template,
+            shortcutCount: shortcutCount,
+            onEdit: onEdit,
+            onDelete: onDelete,
+            onNavigateToShortcut: onNavigateToShortcut
+        )
+        .draggable(template.id.uuidString) {
+            // Preview while dragging
+            Text(template.title)
+                .padding(DesignTokens.Spacing.sm)
+                .background(DesignTokens.Colors.backgroundElevated)
+                .cornerRadius(DesignTokens.Radius.md)
+        }
+        .dropDestination(for: String.self) { items, _ in
+            guard let draggedIdString = items.first,
+                  let draggedId = UUID(uuidString: draggedIdString),
+                  draggedId != template.id else {
+                return false
+            }
+            // Find the source index
+            if let sourceIdx = draggingTemplateId.flatMap({ _ in nil as Int? }) {
+                onReorder(sourceIdx, index)
+            }
+            return true
+        } isTargeted: { isTargeted in
+            isDropTarget = isTargeted
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
+                .stroke(
+                    isDropTarget ? DesignTokens.Colors.accentPrimary : Color.clear,
+                    lineWidth: isDropTarget ? 2 : 0
+                )
+        )
     }
 }
 
@@ -423,9 +491,9 @@ private struct FilterChipButton: View {
     }
 }
 
-// MARK: - Group Filter Chip Button
+// MARK: - Collection Filter Chip Button
 
-private struct GroupFilterChipButton: View {
+private struct CollectionFilterChipButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
@@ -489,7 +557,6 @@ private struct GroupFilterChipButton: View {
 
 private struct PromptManagerRowView: View {
     let template: PromptTemplate
-    let isCompact: Bool
     let shortcutCount: Int
     let onEdit: () -> Void
     let onDelete: () -> Void
@@ -499,13 +566,20 @@ private struct PromptManagerRowView: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: DesignTokens.Spacing.md) {
-            VStack(alignment: .leading, spacing: isCompact ? DesignTokens.Spacing.xs : DesignTokens.Spacing.sm) {
+            // Drag handle
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .frame(width: 20)
+                .opacity(isHovering ? 1 : 0.3)
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
                 HStack {
                     Text(template.title)
-                        .font(DesignTokens.Typography.headline(isCompact ? 15 : 16))
+                        .font(DesignTokens.Typography.headline(16))
                         .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
-                    // NEW: Shortcut badge
+                    // Shortcut badge
                     if shortcutCount > 0 {
                         ShortcutBadge(count: shortcutCount, action: onNavigateToShortcut)
                     }
@@ -513,18 +587,18 @@ private struct PromptManagerRowView: View {
                     Spacer()
 
                     if !template.linkedApps.isEmpty {
-                        LinkedAppsDisplay(apps: template.linkedApps, isCompact: isCompact)
+                        LinkedAppsDisplay(apps: template.linkedApps)
                     }
                 }
 
                 if !template.tags.isEmpty {
                     Text(template.tags.joined(separator: ", "))
-                        .font(DesignTokens.Typography.caption(isCompact ? 10 : 11))
+                        .font(DesignTokens.Typography.caption(11))
                         .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                 }
 
                 Text(template.content)
-                    .font(DesignTokens.Typography.body(isCompact ? 12 : 13))
+                    .font(DesignTokens.Typography.body(13))
                     .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                     .lineLimit(3)
             }
@@ -537,7 +611,7 @@ private struct PromptManagerRowView: View {
                 .transition(.opacity)
             }
         }
-        .padding(isCompact ? DesignTokens.Spacing.sm : DesignTokens.Spacing.md)
+        .padding(DesignTokens.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
                 .fill(isHovering ? DesignTokens.Colors.backgroundSecondary : DesignTokens.Colors.backgroundElevated)
@@ -561,16 +635,15 @@ private struct PromptManagerRowView: View {
 
 private struct LinkedAppsDisplay: View {
     let apps: [PromptAppTarget]
-    let isCompact: Bool
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DesignTokens.Spacing.xxs) {
                 ForEach(Array(apps.enumerated()), id: \.offset) { _, app in
                     Text(app.displayName)
-                        .font(DesignTokens.Typography.caption(isCompact ? 10 : 11, weight: .medium))
+                        .font(DesignTokens.Typography.caption(11, weight: .medium))
                         .foregroundColor(DesignTokens.Colors.accentPrimary)
-                        .padding(.horizontal, isCompact ? DesignTokens.Spacing.xs : DesignTokens.Spacing.sm)
+                        .padding(.horizontal, DesignTokens.Spacing.sm)
                         .padding(.vertical, DesignTokens.Spacing.xxs)
                         .background(
                             Capsule()

@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
     @StateObject private var launchAtLoginManager = LaunchAtLoginManager.shared
+    @StateObject private var launcherSettings = LauncherSettings.shared
 
     private let supportedLanguages = AppLanguage.allCases
 
@@ -18,6 +19,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xl) {
                     languageSection
                     launchAtLoginSection
+                    launcherSection
                 }
                 .frame(maxWidth: DesignTokens.Layout.contentWidthNarrow, alignment: .leading)
                 .padding(DesignTokens.Spacing.lg)
@@ -29,7 +31,7 @@ struct SettingsView: View {
 
     private var header: some View {
         HStack {
-            Text(localized("settings.title", fallback: "Settings"))
+            Text(languageSettings.localized("settings.title"))
                 .font(DesignTokens.Typography.headline(18))
                 .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
@@ -43,11 +45,11 @@ struct SettingsView: View {
         CardBackground(padding: DesignTokens.Layout.edgeInsetComfortable, elevation: .sm) {
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                    Text(localized("settings.language.title", fallback: "Language"))
+                    Text(languageSettings.localized("settings.language.title"))
                         .font(DesignTokens.Typography.headline())
                         .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
-                    Text(localized("settings.language.subtitle", fallback: "Choose which language to show in the app."))
+                    Text(languageSettings.localized("settings.language.subtitle"))
                         .font(DesignTokens.Typography.body())
                         .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -56,7 +58,7 @@ struct SettingsView: View {
                 LanguageSegmentedControl(
                     languages: supportedLanguages,
                     selectedLanguage: $languageSettings.selectedLanguage,
-                    locale: languageSettings.locale
+                    bundle: languageSettings.bundle
                 )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -67,11 +69,11 @@ struct SettingsView: View {
         CardBackground(padding: DesignTokens.Layout.edgeInsetComfortable, elevation: .sm) {
             HStack(alignment: .top, spacing: DesignTokens.Spacing.md) {
                 VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                    Text(localized("settings.launchAtLogin.title", fallback: "Launch at Login"))
+                    Text(languageSettings.localized("settings.launchAtLogin.title"))
                         .font(DesignTokens.Typography.headline())
                         .foregroundColor(DesignTokens.Colors.foregroundPrimary)
 
-                    Text(localized("settings.launchAtLogin.subtitle", fallback: "Automatically open the app when you log in to your Mac."))
+                    Text(languageSettings.localized("settings.launchAtLogin.subtitle"))
                         .font(DesignTokens.Typography.body())
                         .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -87,12 +89,72 @@ struct SettingsView: View {
         }
     }
 
-    private func localized(_ key: String, fallback: String) -> String {
-        let localizedValue = String(
-            localized: String.LocalizationValue(key),
-            locale: languageSettings.locale
-        )
-        return localizedValue == key ? fallback : localizedValue
+    private var launcherSection: some View {
+        CardBackground(padding: DesignTokens.Layout.edgeInsetComfortable, elevation: .sm) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                Text(languageSettings.localized("settings.launcher.title"))
+                    .font(DesignTokens.Typography.headline())
+                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+
+                Divider()
+
+                // Auto sort by usage
+                settingsToggleRow(
+                    title: languageSettings.localized("settings.launcher.autoSort"),
+                    isOn: $launcherSettings.autoSortByUsage
+                )
+
+                Divider()
+
+                // Show recent section
+                settingsToggleRow(
+                    title: languageSettings.localized("settings.launcher.showRecent"),
+                    isOn: $launcherSettings.showRecentSection
+                )
+
+                // Recent count stepper (only when showRecent is on)
+                if launcherSettings.showRecentSection {
+                    HStack {
+                        Text(languageSettings.localized("settings.launcher.recentCount"))
+                            .font(DesignTokens.Typography.body())
+                            .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        Spacer()
+                        Stepper(
+                            "\(launcherSettings.recentSectionCount)",
+                            value: $launcherSettings.recentSectionCount,
+                            in: 1...10
+                        )
+                        .labelsHidden()
+                        Text("\(launcherSettings.recentSectionCount)")
+                            .font(DesignTokens.Typography.body())
+                            .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                            .frame(width: 20)
+                    }
+                    .padding(.leading, DesignTokens.Spacing.lg)
+                }
+
+                Divider()
+
+                // Show frequent section
+                settingsToggleRow(
+                    title: languageSettings.localized("settings.launcher.showFrequent"),
+                    isOn: $launcherSettings.showFrequentSection
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func settingsToggleRow(title: String, isOn: Binding<Bool>) -> some View {
+        HStack {
+            Text(title)
+                .font(DesignTokens.Typography.body())
+                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+            Spacer()
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+        }
     }
 }
 
@@ -101,7 +163,7 @@ struct SettingsView: View {
 private struct LanguageSegmentedControl: View {
     let languages: [AppLanguage]
     @Binding var selectedLanguage: AppLanguage
-    let locale: Locale
+    let bundle: Bundle
 
     @State private var hoveredLanguage: AppLanguage?
 
@@ -127,7 +189,7 @@ private struct LanguageSegmentedControl: View {
                 selectedLanguage = language
             }
         } label: {
-            Text(language.localizedLabel(in: locale))
+            Text(language.localizedLabel(using: bundle))
                 .font(DesignTokens.Typography.label(weight: .medium))
                 .foregroundColor(
                     isSelected

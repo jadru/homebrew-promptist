@@ -10,13 +10,29 @@ import SwiftUI
 struct PromptRow: View {
     let prompt: PromptTemplate
     let isSelected: Bool
+    let shortcut: TemplateShortcut?
     let onExecute: () -> Void
+    let onHover: ((Bool) -> Void)?
 
     @State private var isHovered = false
     @State private var showCopied = false
 
     @EnvironmentObject private var languageSettings: LanguageSettings
     private let tokens = LauncherDesignTokens.self
+
+    init(
+        prompt: PromptTemplate,
+        isSelected: Bool,
+        shortcut: TemplateShortcut? = nil,
+        onExecute: @escaping () -> Void,
+        onHover: ((Bool) -> Void)? = nil
+    ) {
+        self.prompt = prompt
+        self.isSelected = isSelected
+        self.shortcut = shortcut
+        self.onExecute = onExecute
+        self.onHover = onHover
+    }
 
     var body: some View {
         Button(action: handleExecute) {
@@ -40,6 +56,11 @@ struct PromptRow: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Shortcut badge (always visible when available)
+                if let shortcut = shortcut, shortcut.isEnabled {
+                    ShortcutKeyBadge(keyCombo: shortcut.keyCombo)
+                }
 
                 // Tags (show on hover or when selected)
                 if (isHovered || isSelected) && !prompt.tags.isEmpty {
@@ -69,6 +90,7 @@ struct PromptRow: View {
             withAnimation(tokens.Animation.hoverAnimation) {
                 isHovered = hovering
             }
+            onHover?(hovering)
         }
     }
 
@@ -78,7 +100,7 @@ struct PromptRow: View {
             ZStack {
                 tokens.Colors.copiedOverlayBackground
 
-                Text(String(localized: "prompt_row.copied", locale: languageSettings.locale))
+                Text(languageSettings.localized("prompt_row.copied"))
                     .font(tokens.Typography.copiedOverlayFont)
                     .foregroundColor(tokens.Colors.copiedOverlayText)
             }

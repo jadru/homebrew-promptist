@@ -20,7 +20,7 @@ struct LinkedAppSummaryView: View {
 
                 if showAddButton {
                     Button(action: onAdd) {
-                        Label(String(localized: "app_selector.button.add_app", locale: languageSettings.locale), systemImage: "plus")
+                        Label(languageSettings.localized("app_selector.button.add_app"), systemImage: "plus")
                             .labelStyle(.titleAndIcon)
                             .font(.system(size: 13, weight: .semibold))
                             .padding(.vertical, 6)
@@ -54,7 +54,7 @@ struct LinkedAppSummaryView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help(String(localized: "app_selector.button.remove", locale: languageSettings.locale).replacingOccurrences(of: "%@", with: app.name))
+                .help(languageSettings.localized("app_selector.button.remove").replacingOccurrences(of: "%@", with: app.name))
             }
         }
         .padding(.vertical, 6)
@@ -83,9 +83,9 @@ struct AppSelectorDrawerView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    section(title: String(localized: "app_selector.section.suggested", locale: languageSettings.locale)) {
+                    section(title: languageSettings.localized("app_selector.section.suggested")) {
                         if viewModel.filteredBuiltInApps.isEmpty {
-                            EmptyStateRow(text: String(localized: "app_selector.empty.suggested", locale: languageSettings.locale))
+                            EmptyStateRow(text: languageSettings.localized("app_selector.empty.suggested"))
                         } else {
                             ForEach(viewModel.filteredBuiltInApps) { app in
                                 AppListRow(
@@ -97,9 +97,9 @@ struct AppSelectorDrawerView: View {
                         }
                     }
 
-                    section(title: String(localized: "app_selector.section.installed", locale: languageSettings.locale)) {
+                    section(title: languageSettings.localized("app_selector.section.installed")) {
                         if viewModel.filteredInstalledApps.isEmpty {
-                            EmptyStateRow(text: String(localized: "app_selector.empty.installed", locale: languageSettings.locale))
+                            EmptyStateRow(text: languageSettings.localized("app_selector.empty.installed"))
                         } else {
                             ForEach(viewModel.filteredInstalledApps) { app in
                                 AppListRow(
@@ -111,9 +111,9 @@ struct AppSelectorDrawerView: View {
                         }
                     }
 
-                    section(title: String(localized: "app_selector.section.custom", locale: languageSettings.locale)) {
+                    section(title: languageSettings.localized("app_selector.section.custom")) {
                         if viewModel.filteredCustomApps.isEmpty {
-                            EmptyStateRow(text: String(localized: "app_selector.empty.custom", locale: languageSettings.locale))
+                            EmptyStateRow(text: languageSettings.localized("app_selector.empty.custom"))
                         }
 
                         ForEach($viewModel.customApps) { $app in
@@ -129,7 +129,7 @@ struct AppSelectorDrawerView: View {
                         Button {
                             viewModel.addEmptyCustomApp()
                         } label: {
-                            Label(String(localized: "app_selector.button.add_custom", locale: languageSettings.locale), systemImage: "plus")
+                            Label(languageSettings.localized("app_selector.button.add_custom"), systemImage: "plus")
                                 .labelStyle(.titleAndIcon)
                         }
                         .buttonStyle(.bordered)
@@ -146,14 +146,14 @@ struct AppSelectorDrawerView: View {
     private var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "app_selector.title", locale: languageSettings.locale))
+                Text(languageSettings.localized("app_selector.title"))
                     .font(.title3.weight(.semibold))
-                Text(String(localized: "app_selector.subtitle", locale: languageSettings.locale))
+                Text(languageSettings.localized("app_selector.subtitle"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button(String(localized: "app_selector.button.close", locale: languageSettings.locale), action: onClose)
+            Button(languageSettings.localized("app_selector.button.close"), action: onClose)
                 .controlSize(.small)
         }
     }
