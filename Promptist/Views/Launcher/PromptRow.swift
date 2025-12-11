@@ -1,0 +1,205 @@
+//
+//  PromptRow.swift
+//  Promptist
+//
+//  Minimal prompt row with hover and selection states
+//
+
+import SwiftUI
+
+struct PromptRow: View {
+    let prompt: PromptTemplate
+    let isSelected: Bool
+    let shortcut: TemplateShortcut?
+    let onExecute: () -> Void
+    let onHover: ((Bool) -> Void)?
+
+    @State private var isHovered = false
+    @State private var showCopied = false
+
+    @EnvironmentObject private var languageSettings: LanguageSettings
+    private let tokens = LauncherDesignTokens.self
+
+    init(
+        prompt: PromptTemplate,
+        isSelected: Bool,
+        shortcut: TemplateShortcut? = nil,
+        onExecute: @escaping () -> Void,
+        onHover: ((Bool) -> Void)? = nil
+    ) {
+        self.prompt = prompt
+        self.isSelected = isSelected
+        self.shortcut = shortcut
+        self.onExecute = onExecute
+        self.onHover = onHover
+    }
+
+    var body: some View {
+        Button(action: handleExecute) {
+            HStack(spacing: 12) {
+                // Content
+                VStack(alignment: .leading, spacing: 4) {
+                    // Title
+                    Text(prompt.title)
+                        .font(tokens.Typography.rowTitleFont)
+                        .foregroundColor(tokens.Colors.primaryText)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+
+                    // Subtitle (content preview)
+                    if !prompt.content.isEmpty {
+                        Text(prompt.content)
+                            .font(tokens.Typography.rowSubtitleFont)
+                            .foregroundColor(tokens.Colors.secondaryText)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Shortcut badge (always visible when available)
+                if let shortcut = shortcut, shortcut.isEnabled {
+                    ShortcutKeyBadge(keyCombo: shortcut.keyCombo)
+                }
+
+                // Note: Tags/keywords are NOT displayed in the launcher per design spec.
+                // They are only used for search matching, not UI display.
+            }
+            .padding(.horizontal, tokens.Layout.horizontalPadding)
+            .padding(.vertical, tokens.Layout.verticalPadding)
+            .frame(height: tokens.Layout.rowHeight)
+            .background(rowBackground)
+            .contentShape(Rectangle())
+            .overlay(copiedOverlay)
+        }
+        .buttonStyle(PromptRowButtonStyle(isSelected: isSelected))
+        .onHover { hovering in
+            withAnimation(tokens.Animation.hoverAnimation) {
+                isHovered = hovering
+            }
+            onHover?(hovering)
+        }
+    }
+
+    @ViewBuilder
+    private var copiedOverlay: some View {
+        if showCopied {
+            ZStack {
+                tokens.Colors.copiedOverlayBackground
+
+                Text(languageSettings.localized("prompt_row.copied"))
+                    .font(tokens.Typography.copiedOverlayFont)
+                    .foregroundColor(tokens.Colors.copiedOverlayText)
+            }
+            .transition(.opacity)
+        }
+    }
+
+    private func handleExecute() {
+        // Show copied feedback
+        withAnimation(tokens.Animation.feedbackAnimation) {
+            showCopied = true
+        }
+
+        // Hide after feedback duration and trigger execute
+        let feedbackDuration = tokens.Animation.feedbackDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
+            withAnimation(tokens.Animation.feedbackAnimation) {
+                showCopied = false
+            }
+
+            // Execute after fade out completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
+                onExecute()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rowBackground: some View {
+        if isSelected {
+            tokens.Colors.rowSelected
+        } else if isHovered {
+            tokens.Colors.rowHover
+        } else {
+            Color.clear
+        }
+    }
+}
+
+// MARK: - Button Style
+
+private struct PromptRowButtonStyle: ButtonStyle {
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? LauncherDesignTokens.Interaction.rowPressedScale : 1.0)
+            .animation(LauncherDesignTokens.Animation.selectionAnimation, value: configuration.isPressed)
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    VStack(spacing: LauncherDesignTokens.Layout.rowSpacing) {
+        // Normal state
+        PromptRow(
+            prompt: PromptTemplate(
+                id: UUID(),
+                title: "Code Review",
+                content: "Please review this code for best practices and potential issues.",
+                keywords: ["dev", "review"],
+                linkedApps: [],
+                sortOrder: 0
+            ),
+            isSelected: false,
+            onExecute: {}
+        )
+
+        // Selected state
+        PromptRow(
+            prompt: PromptTemplate(
+                id: UUID(),
+                title: "Debug This",
+                content: "Help me debug this issue I'm experiencing with...",
+                keywords: ["debug", "help", "urgent"],
+                linkedApps: [],
+                sortOrder: 1
+            ),
+            isSelected: true,
+            onExecute: {}
+        )
+
+        // No content
+        PromptRow(
+            prompt: PromptTemplate(
+                id: UUID(),
+                title: "Short Prompt",
+                content: "",
+                keywords: [],
+                linkedApps: [],
+                sortOrder: 2
+            ),
+            isSelected: false,
+            onExecute: {}
+        )
+
+        // Long title
+        PromptRow(
+            prompt: PromptTemplate(
+                id: UUID(),
+                title: "This is a very long prompt title that should be truncated properly",
+                content: "This is also a very long content preview that should be truncated to a single line without overflowing the container",
+                keywords: ["long", "test", "example", "many"],
+                linkedApps: [],
+                sortOrder: 3
+            ),
+            isSelected: false,
+            onExecute: {}
+        )
+    }
+    .frame(width: 540)
+    .background(Color(nsColor: .windowBackgroundColor))
+    .padding()
+}
