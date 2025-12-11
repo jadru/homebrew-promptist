@@ -16,7 +16,7 @@ You are working on **Promptist**, a minimal macOS menu bar application for manag
 
 ### Directory Structure
 ```
-ai-prompter/
+Promptist/
 ├── Models/              → Data structures (Codable)
 ├── ViewModels/          → Business logic (@ObservableObject)
 ├── Views/               → SwiftUI views
@@ -628,7 +628,7 @@ test: Add unit tests for ShortcutValidator
 ## Quick Reference
 
 ### Essential Files
-- `ai_prompterApp.swift` - App entry point
+- `PromptistApp.swift` - App entry point
 - `PromptTemplate.swift` - Core data model
 - `PromptListViewModel.swift` - Main state management
 - `PromptLauncherView.swift` - Command palette

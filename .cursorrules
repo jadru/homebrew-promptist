@@ -28,7 +28,7 @@ You are an expert SwiftUI engineer working on Promptist, a minimal macOS menu ba
 
 ### 2. Component Structure
 ```
-ai-prompter/
+Promptist/
 ├── Models/              # Data models (Codable structs)
 ├── ViewModels/          # @ObservableObject ViewModels
 ├── Views/               # SwiftUI views (organized by feature)
@@ -461,7 +461,7 @@ cleanup: Remove unused PopoverComponents and old launcher views
 ## Quick Reference
 
 **Key Files**:
-- `ai_prompterApp.swift` - App entry point, MenuBarExtra setup
+- `PromptistApp.swift` - App entry point, MenuBarExtra setup
 - `PromptLauncherView.swift` - Command palette root
 - `PromptListViewModel.swift` - Main data management
 - `ShortcutManager.swift` - Global shortcut handling
