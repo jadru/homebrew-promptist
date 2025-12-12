@@ -313,6 +313,14 @@ private class MockPromptRepository: PromptTemplateRepository {
         self.prompts = templates
     }
 
+    func deleteTemplate(_ templateId: UUID) {
+        prompts.removeAll { $0.id == templateId }
+    }
+
+    func deleteTemplates(_ templateIds: [UUID]) {
+        prompts.removeAll { templateIds.contains($0.id) }
+    }
+
     func incrementUsageCount(for templateId: UUID) {
         if let index = prompts.firstIndex(where: { $0.id == templateId }) {
             prompts[index].usageCount += 1

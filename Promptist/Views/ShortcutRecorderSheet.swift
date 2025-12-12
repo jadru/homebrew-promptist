@@ -278,7 +278,7 @@ private struct KeyboardEventHandler: NSViewRepresentable {
 
         private func startCapture() {
             guard !hasStartedCapture else {
-                print("⚠️ Already capturing, ignoring duplicate start")
+                AppLogger.logShortcut("Already capturing, ignoring duplicate start", level: .debug)
                 return
             }
             hasStartedCapture = true
@@ -291,12 +291,12 @@ private struct KeyboardEventHandler: NSViewRepresentable {
             // Become first responder to receive key events
             window?.makeFirstResponder(self)
 
-            print("🎤 Started local key capture")
+            AppLogger.logShortcut("Started local key capture")
         }
 
         private func stopCapture() {
             guard hasStartedCapture else {
-                print("⚠️ Not capturing, ignoring duplicate stop")
+                AppLogger.logShortcut("Not capturing, ignoring duplicate stop", level: .debug)
                 return
             }
             hasStartedCapture = false
@@ -306,7 +306,7 @@ private struct KeyboardEventHandler: NSViewRepresentable {
                 coordinator?.shortcutManager.resumeMonitoring()
             }
 
-            print("🛑 Stopped local key capture")
+            AppLogger.logShortcut("Stopped local key capture")
         }
 
         override func keyDown(with event: NSEvent) {
@@ -315,11 +315,11 @@ private struct KeyboardEventHandler: NSViewRepresentable {
                 return
             }
 
-            print("🎹 Key captured: keyCode=\(event.keyCode)")
+            AppLogger.logShortcut("Key captured: keyCode=\(event.keyCode)", level: .debug)
 
             // Handle ESC to cancel (keyCode 53)
             if event.keyCode == 53 {
-                print("🚫 ESC pressed, canceling recording")
+                AppLogger.logShortcut("ESC pressed, canceling recording", level: .debug)
                 DispatchQueue.main.async { [weak self] in
                     self?.coordinator?.onCancel()
                 }
@@ -328,28 +328,28 @@ private struct KeyboardEventHandler: NSViewRepresentable {
 
             // Try to convert to KeyCombo
             if let keyCombo = event.toKeyCombo() {
-                print("✅ Captured key combo: \(keyCombo.displayString)")
+                AppLogger.logShortcut("Captured key combo: \(keyCombo.displayString)", level: .debug)
 
                 // Validate the key combo immediately
                 if let coordinator = self.coordinator {
                     let validationResult = coordinator.validator.validate(keyCombo)
                     switch validationResult {
                     case .success:
-                        print("✅ Valid shortcut: \(keyCombo.displayString)")
+                        AppLogger.logShortcut("Valid shortcut: \(keyCombo.displayString)")
                         // Immediately stop capturing to prevent duplicate captures
                         isCapturing = false
                         DispatchQueue.main.async { [weak self] in
                             self?.coordinator?.onKeyCaptured(keyCombo)
                         }
                     case .failure(let error):
-                        print("❌ Invalid shortcut: \(error.localizedDescription)")
+                        AppLogger.logShortcut("Invalid shortcut: \(error.localizedDescription)", level: .warning)
                         DispatchQueue.main.async { [weak self] in
                             self?.coordinator?.onError(error.localizedDescription)
                         }
                     }
                 }
             } else {
-                print("❌ Invalid key combo - need modifiers")
+                AppLogger.logShortcut("Invalid key combo - need modifiers", level: .debug)
                 DispatchQueue.main.async { [weak self] in
                     self?.coordinator?.onError(NSLocalizedString("shortcut_recorder.error.need_modifier", comment: ""))
                 }

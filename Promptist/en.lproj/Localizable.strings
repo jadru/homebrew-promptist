@@ -231,3 +231,7 @@
 // Keywords
 "prompt_editor.field.keywords" = "Keywords (for search)";
 "prompt_editor.field.keywords_hint" = "Add keywords to help find this template in search";
+
+// Accessibility Labels
+"accessibility.prompt_row_hint" = "Double-click to copy to clipboard";
+"accessibility.shortcut_prefix" = "Shortcut";

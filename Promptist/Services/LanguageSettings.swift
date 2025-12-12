@@ -4,13 +4,9 @@ import Combine
 /// Controls the UI language for the app, allowing a system-default option or manual overrides.
 @MainActor
 final class LanguageSettings: ObservableObject {
-    private enum Keys {
-        static let selection = "LanguageSettings.selectedLanguage"
-    }
-
     @Published var selectedLanguage: AppLanguage {
         didSet {
-            userDefaults.set(selectedLanguage.rawValue, forKey: Keys.selection)
+            userDefaults.set(selectedLanguage.rawValue, forKey: UserDefaultsKeys.selectedLanguage)
             updateBundle()
         }
     }
@@ -20,7 +16,7 @@ final class LanguageSettings: ObservableObject {
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        let storedValue = userDefaults.string(forKey: Keys.selection)
+        let storedValue = userDefaults.string(forKey: UserDefaultsKeys.selectedLanguage)
         selectedLanguage = AppLanguage(rawValue: storedValue ?? "") ?? .system
         updateBundle()
     }
