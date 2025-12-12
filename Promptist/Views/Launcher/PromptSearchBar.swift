@@ -76,6 +76,7 @@ struct PromptSearchBar: View {
             .menuIndicator(.hidden)
             .fixedSize()
         }
+        .padding(.horizontal, tokens.Layout.horizontalPadding)
         .padding(.top, tokens.Layout.searchPadding)
         .padding(.bottom, 8)
     }
