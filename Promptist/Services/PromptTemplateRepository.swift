@@ -3,6 +3,8 @@ import Foundation
 protocol PromptTemplateRepository {
     func loadTemplates() -> [PromptTemplate]
     func saveTemplates(_ templates: [PromptTemplate])
+    func deleteTemplate(_ templateId: UUID)
+    func deleteTemplates(_ templateIds: [UUID])
     func incrementUsageCount(for templateId: UUID)
     func updateTemplateSortOrder(templateId: UUID, newSortOrder: Int)
     func reorderTemplates(_ templateIds: [UUID])
@@ -38,7 +40,8 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    private static let v2MigrationKey = "PromptTemplateRepository.v2MigrationComplete"
+    /// Shortcut store for cascade delete operations
+    private lazy var shortcutStore: ShortcutStore = FileShortcutStore()
 
     init(fileManager: FileManager = .default) {
         self.fileManager = fileManager
@@ -80,8 +83,10 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try Data(contentsOf: fileURL)
             let decoded = try decoder.decode([PromptTemplate].self, from: data)
+            AppLogger.logPersistence("Loaded \(decoded.count) templates")
             return decoded.isEmpty ? seedDefaults() : decoded
         } catch {
+            AppLogger.logPersistence("Failed to load templates, using defaults", level: .error, error: error)
             return seedDefaults()
         }
     }
@@ -90,8 +95,32 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try encoder.encode(templates)
             try data.write(to: fileURL, options: [.atomic])
+            AppLogger.logPersistence("Saved \(templates.count) templates")
         } catch {
-            // Persisting failures shouldn't crash the menu bar app; they can be logged later.
+            AppLogger.logPersistence("Failed to save templates", level: .error, error: error)
+        }
+    }
+
+    func deleteTemplate(_ templateId: UUID) {
+        deleteTemplates([templateId])
+    }
+
+    func deleteTemplates(_ templateIds: [UUID]) {
+        guard !templateIds.isEmpty else { return }
+
+        var templates = loadTemplates()
+        let initialCount = templates.count
+
+        templates.removeAll { templateIds.contains($0.id) }
+
+        let removedCount = initialCount - templates.count
+        if removedCount > 0 {
+            saveTemplates(templates)
+
+            // Cascade delete: remove associated shortcuts
+            shortcutStore.removeShortcuts(forTemplateIds: templateIds)
+
+            AppLogger.logPersistence("Deleted \(removedCount) templates with cascade shortcut cleanup")
         }
     }
 
@@ -132,8 +161,10 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try Data(contentsOf: collectionsFileURL)
             let decoded = try decoder.decode([PromptTemplateCollection].self, from: data)
+            AppLogger.logPersistence("Loaded \(decoded.count) collections")
             return decoded
         } catch {
+            AppLogger.logPersistence("Failed to load collections", level: .error, error: error)
             return []
         }
     }
@@ -142,8 +173,9 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try encoder.encode(collections)
             try data.write(to: collectionsFileURL, options: [.atomic])
+            AppLogger.logPersistence("Saved \(collections.count) collections")
         } catch {
-            // Persisting failures shouldn't crash the menu bar app; they can be logged later.
+            AppLogger.logPersistence("Failed to save collections", level: .error, error: error)
         }
     }
 
@@ -241,8 +273,10 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try Data(contentsOf: categoriesFileURL)
             let decoded = try decoder.decode([PromptCategory].self, from: data)
+            AppLogger.logPersistence("Loaded \(decoded.count) categories")
             return decoded.isEmpty ? seedDefaultCategories() : decoded
         } catch {
+            AppLogger.logPersistence("Failed to load categories", level: .error, error: error)
             return seedDefaultCategories()
         }
     }
@@ -251,8 +285,9 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         do {
             let data = try encoder.encode(categories)
             try data.write(to: categoriesFileURL, options: [.atomic])
+            AppLogger.logPersistence("Saved \(categories.count) categories")
         } catch {
-            // Persisting failures shouldn't crash the menu bar app
+            AppLogger.logPersistence("Failed to save categories", level: .error, error: error)
         }
     }
 
@@ -325,7 +360,7 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
     // MARK: - V2 Migration
 
     func migrateToV2IfNeeded() {
-        guard !UserDefaults.standard.bool(forKey: Self.v2MigrationKey) else { return }
+        guard !UserDefaults.standard.bool(forKey: UserDefaultsKeys.v2MigrationComplete) else { return }
 
         // 1. Ensure default categories exist
         let (defaultCategories, generalQAId) = DefaultCategories.createDefaultHierarchy()
@@ -358,7 +393,8 @@ final class FilePromptTemplateRepository: PromptTemplateRepository {
         }
 
         // 3. Mark migration as complete
-        UserDefaults.standard.set(true, forKey: Self.v2MigrationKey)
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.v2MigrationComplete)
+        AppLogger.logPersistence("V2 migration completed successfully")
     }
 
     /// Get the General Q&A category ID for fallback assignments

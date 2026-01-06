@@ -73,12 +73,27 @@ struct PromptRow: View {
             .overlay(copiedOverlay)
         }
         .buttonStyle(PromptRowButtonStyle(isSelected: isSelected))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint(languageSettings.localized("accessibility.prompt_row_hint"))
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .onHover { hovering in
             withAnimation(tokens.Animation.hoverAnimation) {
                 isHovered = hovering
             }
             onHover?(hovering)
         }
+    }
+
+    private var accessibilityLabel: String {
+        var label = prompt.title
+        if !prompt.content.isEmpty {
+            label += ", " + prompt.content.prefix(50)
+        }
+        if let shortcut = shortcut, shortcut.isEnabled {
+            label += ", " + languageSettings.localized("accessibility.shortcut_prefix") + " " + shortcut.keyCombo.displayString
+        }
+        return label
     }
 
     @ViewBuilder
@@ -103,15 +118,15 @@ struct PromptRow: View {
 
         // Hide after feedback duration and trigger execute
         let feedbackDuration = tokens.Animation.feedbackDuration
-        DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(feedbackDuration))
             withAnimation(tokens.Animation.feedbackAnimation) {
                 showCopied = false
             }
 
             // Execute after fade out completes
-            DispatchQueue.main.asyncAfter(deadline: .now() + feedbackDuration) {
-                onExecute()
-            }
+            try? await Task.sleep(for: .seconds(feedbackDuration))
+            onExecute()
         }
     }
 

@@ -40,7 +40,7 @@ class LaunchAtLoginManager: ObservableObject {
         } catch {
             // Revert the state if registration/unregistration fails
             isEnabled = !isEnabled
-            print("Failed to update launch at login: \(error.localizedDescription)")
+            AppLogger.log("Failed to update launch at login", level: .error, error: error)
         }
     }
 

@@ -5,6 +5,12 @@ import Foundation
 protocol ShortcutStore {
     func loadShortcuts() -> [TemplateShortcut]
     func saveShortcuts(_ shortcuts: [TemplateShortcut])
+
+    /// Removes shortcuts associated with deleted templates (cascade delete)
+    func removeShortcuts(forTemplateIds templateIds: [UUID])
+
+    /// Returns shortcut for a specific template if exists
+    func shortcut(forTemplateId templateId: UUID) -> TemplateShortcut?
 }
 
 // MARK: - File Shortcut Store
@@ -13,19 +19,25 @@ final class FileShortcutStore: ShortcutStore {
     private let fileURL: URL
 
     init() {
-        let appSupport = FileManager.default.urls(
+        guard let appSupport = FileManager.default.urls(
             for: .applicationSupportDirectory,
             in: .userDomainMask
-        ).first!
+        ).first else {
+            fatalError("Unable to locate Application Support directory")
+        }
 
         let appDir = appSupport.appendingPathComponent("Promptist", isDirectory: true)
 
         // Ensure directory exists
-        try? FileManager.default.createDirectory(
-            at: appDir,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
+        do {
+            try FileManager.default.createDirectory(
+                at: appDir,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+        } catch {
+            AppLogger.logPersistence("Failed to create shortcuts directory", level: .error, error: error)
+        }
 
         self.fileURL = appDir.appendingPathComponent("shortcuts.json")
     }
@@ -55,10 +67,34 @@ final class FileShortcutStore: ShortcutStore {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
         guard let data = try? encoder.encode(shortcuts) else {
+            AppLogger.logPersistence("Failed to encode shortcuts", level: .error)
             return
         }
 
-        // Atomic write
-        try? data.write(to: fileURL, options: .atomic)
+        do {
+            try data.write(to: fileURL, options: .atomic)
+            AppLogger.logPersistence("Saved \(shortcuts.count) shortcuts")
+        } catch {
+            AppLogger.logPersistence("Failed to save shortcuts", level: .error, error: error)
+        }
+    }
+
+    func removeShortcuts(forTemplateIds templateIds: [UUID]) {
+        guard !templateIds.isEmpty else { return }
+
+        var shortcuts = loadShortcuts()
+        let initialCount = shortcuts.count
+
+        shortcuts.removeAll { templateIds.contains($0.templateId) }
+
+        let removedCount = initialCount - shortcuts.count
+        if removedCount > 0 {
+            saveShortcuts(shortcuts)
+            AppLogger.logPersistence("Cascade deleted \(removedCount) shortcuts for deleted templates")
+        }
+    }
+
+    func shortcut(forTemplateId templateId: UUID) -> TemplateShortcut? {
+        loadShortcuts().first { $0.templateId == templateId }
     }
 }

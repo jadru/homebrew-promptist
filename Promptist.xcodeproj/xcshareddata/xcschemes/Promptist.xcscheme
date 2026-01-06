@@ -47,7 +47,7 @@
             BlueprintIdentifier = "CC5462A92ED5F011002A5277"
             BuildableName = "Promptist.app"
             BlueprintName = "Promptist"
-            ReferencedContainer = "container:ai-prompter.xcodeproj">
+            ReferencedContainer = "container:Promptist.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -57,23 +57,13 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CC5462A92ED5F011002A5277"
-            BuildableName = "Promptist.app"
-            BlueprintName = "Promptist"
-            ReferencedContainer = "container:ai-prompter.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CC5462A92ED5F011002A5277"
             BuildableName = "Promptist.app"
             BlueprintName = "Promptist"
-            ReferencedContainer = "container:ai-prompter.xcodeproj">
+            ReferencedContainer = "container:Promptist.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
