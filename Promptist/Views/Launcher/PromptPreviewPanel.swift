@@ -166,7 +166,12 @@ struct PromptPreviewPanel: View {
         if args.isEmpty {
             return localized
         }
-        return String(format: localized, args.map { $0 as! CVarArg })
+        let cvarArgs = args.compactMap { $0 as? CVarArg }
+        guard cvarArgs.count == args.count else {
+            AppLogger.log("Localization format mismatch for key: \(key)", level: .warning)
+            return localized
+        }
+        return String(format: localized, arguments: cvarArgs)
     }
 
     // MARK: - Layout Constants

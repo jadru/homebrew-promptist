@@ -40,13 +40,17 @@ final class SelectionGrabber {
 
         guard focusResult == .success,
               let focused = focusedElement else {
+            AppLogger.logAccessibility("Failed to get focused element: \(focusResult.rawValue)", level: .debug)
             return nil
         }
+
+        // AXUIElement is a CFTypeRef, so we can cast it directly
+        let axElement = focused as! AXUIElement
 
         // Get the selected text from the focused element
         var selectedText: CFTypeRef?
         let textResult = AXUIElementCopyAttributeValue(
-            focused as! AXUIElement,
+            axElement,
             kAXSelectedTextAttribute as CFString,
             &selectedText
         )

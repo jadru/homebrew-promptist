@@ -66,26 +66,26 @@ final class ShortcutManager: ObservableObject {
     // Temporarily pause monitoring (e.g., when recording shortcuts)
     func pauseMonitoring() {
         guard !isPaused else {
-            print("⚠️ Already paused, ignoring duplicate pause")
+            AppLogger.logShortcut("Already paused, ignoring duplicate pause", level: .debug)
             return
         }
         isPaused = true
         stopMonitoring()
-        print("⏸️ Shortcut monitoring paused")
+        AppLogger.logShortcut("Shortcut monitoring paused")
     }
 
     // Resume monitoring after pause
     func resumeMonitoring() {
         guard isPaused else {
-            print("⚠️ Not paused, ignoring duplicate resume")
+            AppLogger.logShortcut("Not paused, ignoring duplicate resume", level: .debug)
             return
         }
         isPaused = false
         if !registeredShortcuts.isEmpty {
             startMonitoring()
-            print("▶️ Shortcut monitoring resumed")
+            AppLogger.logShortcut("Shortcut monitoring resumed")
         } else {
-            print("⚠️ No shortcuts to monitor, skipping resume")
+            AppLogger.logShortcut("No shortcuts to monitor, skipping resume", level: .debug)
         }
     }
 
@@ -103,12 +103,12 @@ final class ShortcutManager: ObservableObject {
 
     private func startMonitoring() {
         guard eventMonitor == nil else {
-            print("⚠️ Event monitor already active")
+            AppLogger.logShortcut("Event monitor already active", level: .debug)
             return
         }
 
-        print("🎧 Starting global keyboard event monitoring...")
-        print("📝 Monitoring \(registeredShortcuts.count) shortcuts")
+        AppLogger.logShortcut("Starting global keyboard event monitoring...")
+        AppLogger.logShortcut("Monitoring \(registeredShortcuts.count) shortcuts")
 
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             Task { @MainActor [weak self] in
@@ -118,9 +118,9 @@ final class ShortcutManager: ObservableObject {
 
         if eventMonitor != nil {
             isMonitoring = true
-            print("✅ Global keyboard monitoring active")
+            AppLogger.logShortcut("Global keyboard monitoring active")
         } else {
-            print("❌ Failed to start global keyboard monitoring - check Accessibility permissions!")
+            AppLogger.logShortcut("Failed to start global keyboard monitoring - check Accessibility permissions!", level: .error)
         }
     }
 
@@ -129,14 +129,14 @@ final class ShortcutManager: ObservableObject {
             NSEvent.removeMonitor(monitor)
             eventMonitor = nil
             isMonitoring = false
-            print("⏹️ Global keyboard monitoring stopped")
+            AppLogger.logShortcut("Global keyboard monitoring stopped")
         }
     }
 
     private func handleKeyEvent(_ event: NSEvent) {
         guard let keyCombo = event.toKeyCombo() else { return }
 
-        print("⌨️ Key pressed: \(keyCombo.displayString)")
+        AppLogger.logShortcut("Key pressed: \(keyCombo.displayString)", level: .debug)
 
         // Get current app context
         let currentAppFilter = PromptAppFilter(
@@ -145,13 +145,13 @@ final class ShortcutManager: ObservableObject {
             displayName: appContext.frontmostAppName
         )
 
-        print("🎯 Current app: \(currentAppFilter.displayName ?? "unknown") (\(currentAppFilter.bundleIdentifier ?? "no bundle"))")
+        AppLogger.logShortcut("Current app: \(currentAppFilter.displayName ?? "unknown") (\(currentAppFilter.bundleIdentifier ?? "no bundle"))", level: .debug)
 
         // CRITICAL: Don't execute shortcuts inside our own app
         // Global monitor only captures events from OTHER apps
         if let bundleId = currentAppFilter.bundleIdentifier,
            bundleId.contains("Promptist") {
-            print("🚫 Ignoring shortcut in own app - shortcuts only work in external apps")
+            AppLogger.logShortcut("Ignoring shortcut in own app - shortcuts only work in external apps", level: .debug)
             return
         }
 
@@ -168,7 +168,7 @@ final class ShortcutManager: ObservableObject {
             }
         }
 
-        print("🔍 Found \(matches.count) matching shortcuts")
+        AppLogger.logShortcut("Found \(matches.count) matching shortcuts", level: .debug)
 
         // Priority: app-specific first, then global
         let appSpecific = matches.first { shortcut in
@@ -179,10 +179,10 @@ final class ShortcutManager: ObservableObject {
         let selected = appSpecific ?? matches.first
 
         if let shortcut = selected {
-            print("✨ Executing shortcut for template: \(shortcut.templateId)")
+            AppLogger.logShortcut("Executing shortcut for template: \(shortcut.templateId)")
             onShortcutTriggered?(shortcut.templateId)
         } else {
-            print("❌ No matching shortcut found")
+            AppLogger.logShortcut("No matching shortcut found", level: .debug)
         }
     }
 }
