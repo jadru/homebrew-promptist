@@ -1,0 +1,4 @@
+/* Localized versions of Info.plist keys */
+
+"CFBundleDisplayName" = "Promptist";
+"NSAccessibilityUsageDescription" = "Promptist가 글로벌 키보드 단축키를 사용하고 선택한 텍스트를 가져오려면 접근성 권한이 필요합니다.";
