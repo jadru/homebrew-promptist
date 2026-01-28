@@ -1,0 +1,14 @@
+# Build artifacts
+build/
+DerivedData/
+*.xcarchive
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# Context directory
+.context/
