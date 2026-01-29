@@ -15,7 +15,7 @@ struct Separator: View {
     init(
         orientation: Orientation = .horizontal,
         thickness: CGFloat = 1,
-        color: Color = DesignTokens.Colors.borderSubtle
+        color: Color = Color.primary.opacity(0.1)
     ) {
         self.orientation = orientation
         self.thickness = thickness

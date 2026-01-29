@@ -13,60 +13,54 @@ struct OnboardingPermissionStep: View {
     }
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.xl) {
+        VStack(spacing: 24) {
             Spacer()
 
-            // Icon
             ZStack {
                 Circle()
                     .fill(permissionManager.hasPermission
-                        ? DesignTokens.Colors.success.opacity(0.1)
-                        : DesignTokens.Colors.warning.opacity(0.1))
+                        ? Color.green.opacity(0.1)
+                        : Color.orange.opacity(0.1))
                     .frame(width: 88, height: 88)
 
                 Image(systemName: permissionManager.hasPermission
                     ? "checkmark.shield.fill"
                     : "lock.shield")
                     .font(.system(size: 40))
-                    .foregroundColor(permissionManager.hasPermission
-                        ? DesignTokens.Colors.success
-                        : DesignTokens.Colors.warning)
+                    .foregroundStyle(permissionManager.hasPermission ? .green : .orange)
             }
-            .animation(DesignTokens.Animation.normal, value: permissionManager.hasPermission)
+            .animation(.easeInOut(duration: 0.3), value: permissionManager.hasPermission)
 
-            // Title & Subtitle
-            VStack(spacing: DesignTokens.Spacing.sm) {
+            VStack(spacing: 8) {
                 Text(languageSettings.localized("onboarding.permission.title"))
-                    .font(DesignTokens.Typography.display(24, weight: .bold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized("onboarding.permission.subtitle"))
-                    .font(DesignTokens.Typography.body(15))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, DesignTokens.Spacing.xl)
+                    .padding(.horizontal, 24)
             }
 
-            // Permission Status
             PermissionStatusBadge(hasPermission: permissionManager.hasPermission)
 
             Spacer()
 
-            // Instructions Toggle
             if !permissionManager.hasPermission {
                 Button {
-                    withAnimation(DesignTokens.Animation.normal) {
+                    withAnimation(.easeInOut(duration: 0.3)) {
                         showingInstructions.toggle()
                     }
                 } label: {
-                    HStack(spacing: DesignTokens.Spacing.xs) {
+                    HStack(spacing: 4) {
                         Text(languageSettings.localized("onboarding.permission.show_instructions"))
-                            .font(DesignTokens.Typography.caption())
-                            .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
 
                         Image(systemName: showingInstructions ? "chevron.up" : "chevron.down")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                            .foregroundStyle(.tertiary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -79,8 +73,7 @@ struct OnboardingPermissionStep: View {
 
             Spacer()
 
-            // Action Buttons
-            VStack(spacing: DesignTokens.Spacing.sm) {
+            VStack(spacing: 8) {
                 if permissionManager.hasPermission {
                     ActionButton(
                         languageSettings.localized("onboarding.permission.continue"),
@@ -99,34 +92,32 @@ struct OnboardingPermissionStep: View {
                     .frame(width: 220)
 
                     if permissionManager.isPolling {
-                        HStack(spacing: DesignTokens.Spacing.xs) {
+                        HStack(spacing: 4) {
                             ProgressView()
                                 .scaleEffect(0.7)
 
                             Text(languageSettings.localized("onboarding.permission.checking"))
-                                .font(DesignTokens.Typography.caption())
-                                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
                         }
                     }
 
-                    // Skip button for users who can't confirm permission status
                     Button {
-                        // Skip goes to complete step for consistent UX
                         onboardingManager.nextStep()
                     } label: {
                         Text(languageSettings.localized("onboarding.permission.skip"))
-                            .font(DesignTokens.Typography.caption())
-                            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(.plain)
-                    .padding(.top, DesignTokens.Spacing.xs)
+                    .padding(.top, 4)
                 }
             }
 
             Spacer()
-                .frame(height: DesignTokens.Spacing.lg)
+                .frame(height: 20)
         }
-        .padding(.horizontal, DesignTokens.Spacing.xl)
+        .padding(.horizontal, 24)
         .onAppear {
             permissionManager.startPollingForPermission()
         }
@@ -134,7 +125,6 @@ struct OnboardingPermissionStep: View {
             permissionManager.stopPolling()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            // Check permission immediately when app becomes active (e.g., returning from System Settings)
             permissionManager.checkPermission()
         }
     }
@@ -147,28 +137,26 @@ private struct PermissionStatusBadge: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.sm) {
+        HStack(spacing: 8) {
             Circle()
-                .fill(hasPermission ? DesignTokens.Colors.success : DesignTokens.Colors.warning)
+                .fill(hasPermission ? Color.green : Color.orange)
                 .frame(width: 8, height: 8)
 
             Text(hasPermission
                 ? languageSettings.localized("onboarding.permission.status.granted")
                 : languageSettings.localized("onboarding.permission.status.pending"))
-                .font(DesignTokens.Typography.label(weight: .medium))
-                .foregroundColor(hasPermission
-                    ? DesignTokens.Colors.success
-                    : DesignTokens.Colors.warning)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(hasPermission ? .green : .orange)
         }
-        .padding(.horizontal, DesignTokens.Spacing.md)
-        .padding(.vertical, DesignTokens.Spacing.sm)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.full, style: .continuous)
+            Capsule()
                 .fill(hasPermission
-                    ? DesignTokens.Colors.success.opacity(0.1)
-                    : DesignTokens.Colors.warning.opacity(0.1))
+                    ? Color.green.opacity(0.1)
+                    : Color.orange.opacity(0.1))
         )
-        .animation(DesignTokens.Animation.normal, value: hasPermission)
+        .animation(.easeInOut(duration: 0.3), value: hasPermission)
     }
 }
 
@@ -185,31 +173,31 @@ private struct InstructionsList: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             ForEach(steps, id: \.number) { step in
-                HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+                HStack(alignment: .top, spacing: 8) {
                     Text(step.number)
-                        .font(DesignTokens.Typography.caption(weight: .semibold))
-                        .foregroundColor(DesignTokens.Colors.accentPrimary)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.accent)
                         .frame(width: 18, height: 18)
                         .background(
                             Circle()
-                                .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
+                                .fill(Color.accentColor.opacity(0.1))
                         )
 
                     Text(languageSettings.localized(step.key))
-                        .font(DesignTokens.Typography.caption())
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
-        .padding(DesignTokens.Spacing.md)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.backgroundSecondary)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.quaternary)
         )
-        .padding(.horizontal, DesignTokens.Spacing.lg)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -218,7 +206,7 @@ private struct InstructionsList: View {
 #Preview {
     OnboardingPermissionStep()
         .frame(width: 520, height: 480)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(OnboardingManager())
         .environmentObject(LanguageSettings())
 }

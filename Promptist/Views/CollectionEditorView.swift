@@ -16,21 +16,21 @@ struct CollectionEditorView: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.lg) {
+        VStack(spacing: 20) {
             Text(isEditing ? languageSettings.localized("collection.rename") : languageSettings.localized("collection.create"))
-                .font(DesignTokens.Typography.headline(18))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
 
             TextField(languageSettings.localized("collection.name_placeholder"), text: $collectionName)
                 .textFieldStyle(.roundedBorder)
-                .font(DesignTokens.Typography.body())
+                .font(.system(size: 14))
 
-            HStack(spacing: DesignTokens.Spacing.md) {
+            HStack(spacing: 12) {
                 Button(languageSettings.localized("button.cancel")) {
                     onCancel()
                 }
                 .buttonStyle(.plain)
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .foregroundStyle(.secondary)
 
                 Button(isEditing ? languageSettings.localized("button.save") : languageSettings.localized("collection.create_button")) {
                     onCreate()
@@ -39,8 +39,7 @@ struct CollectionEditorView: View {
                 .disabled(collectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
-        .padding(DesignTokens.Spacing.lg)
+        .padding(20)
         .frame(width: 400)
-        .background(DesignTokens.Colors.backgroundPrimary)
     }
 }

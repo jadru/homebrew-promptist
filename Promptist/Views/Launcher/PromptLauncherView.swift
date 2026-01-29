@@ -27,8 +27,6 @@ struct PromptLauncherView: View {
     @State private var previewOnLeft = false
     @State private var lastCheckedFrame: CGRect = .zero
 
-    private let tokens = LauncherDesignTokens.self
-
     init(repository: PromptTemplateRepository = FilePromptTemplateRepository()) {
         _viewModel = StateObject(wrappedValue: PromptLauncherViewModel(
             repository: repository,
@@ -51,24 +49,20 @@ struct PromptLauncherView: View {
 
                 // Main launcher content
                 VStack(spacing: 0) {
-                    // Search bar
                     PromptSearchBar(
                         searchText: $viewModel.searchText,
                         isFocused: $searchFocused,
                         onManage: openManagerWindow
                     )
 
-                    // Thin separator
                     Divider()
-                        .background(tokens.Colors.separator)
 
-                    // Prompt list
                     PromptList(
                         viewModel: viewModel,
                         onExecute: executePrompt
                     )
                 }
-                .frame(width: tokens.Layout.popoverWidth)
+                .frame(width: 540)
 
                 // Preview panel on right (default)
                 if viewModel.previewPrompt != nil && !previewOnLeft {
@@ -81,11 +75,7 @@ struct PromptLauncherView: View {
                 }
             }
         }
-        .frame(
-            minHeight: tokens.Layout.popoverMinHeight,
-            maxHeight: tokens.Layout.popoverMaxHeight
-        )
-        .background(tokens.Colors.popoverBackground)
+        .frame(minHeight: 200, maxHeight: 600)
         .onAppear {
             searchFocused = true
             viewModel.refresh()
@@ -317,5 +307,5 @@ struct PromptLauncherView: View {
         .environmentObject(AppContextService())
         .environmentObject(executionService)
         .environmentObject(LanguageSettings())
-        .frame(width: LauncherDesignTokens.Layout.popoverWidth)
+        .frame(width: 540)
 }

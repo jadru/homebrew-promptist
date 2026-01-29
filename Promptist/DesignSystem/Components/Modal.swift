@@ -28,24 +28,23 @@ struct ModalSheetContainer<Content: View>: View {
 
             ScrollView {
                 content
-                    .padding(DesignTokens.Spacing.lg)
+                    .padding(16)
             }
         }
-        .background(DesignTokens.Colors.backgroundElevated)
         .frame(minWidth: 480, minHeight: 560)
     }
 
     private var header: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(DesignTokens.Typography.headline(DesignTokens.Typography.headlineLarge))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.primary)
 
                 if let subtitle {
                     Text(subtitle)
-                        .font(DesignTokens.Typography.caption())
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -53,6 +52,6 @@ struct ModalSheetContainer<Content: View>: View {
 
             IconButton(icon: "xmark", action: onClose)
         }
-        .padding(DesignTokens.Spacing.lg)
+        .padding(16)
     }
 }

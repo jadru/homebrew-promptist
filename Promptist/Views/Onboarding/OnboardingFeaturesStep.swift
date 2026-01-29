@@ -30,24 +30,21 @@ struct OnboardingFeaturesStep: View {
     ]
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.xl) {
-            // Title
+        VStack(spacing: 24) {
             Text(languageSettings.localized("onboarding.features.title"))
-                .font(DesignTokens.Typography.display(24, weight: .bold))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
-                .padding(.top, DesignTokens.Spacing.xl)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(.primary)
+                .padding(.top, 24)
 
-            // Feature Cards
-            VStack(spacing: DesignTokens.Spacing.md) {
+            VStack(spacing: 12) {
                 ForEach(features) { feature in
                     FeatureCard(feature: feature)
                 }
             }
-            .padding(.horizontal, DesignTokens.Spacing.lg)
+            .padding(.horizontal, 20)
 
             Spacer()
 
-            // Continue Button
             ActionButton(
                 languageSettings.localized("onboarding.features.continue"),
                 variant: .primary
@@ -57,9 +54,9 @@ struct OnboardingFeaturesStep: View {
             .frame(width: 200)
 
             Spacer()
-                .frame(height: DesignTokens.Spacing.lg)
+                .frame(height: 20)
         }
-        .padding(.horizontal, DesignTokens.Spacing.lg)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -79,35 +76,33 @@ private struct FeatureCard: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
-            // Icon
+        HStack(spacing: 12) {
             Image(systemName: feature.icon)
-                .font(.system(size: DesignTokens.IconSize.lg))
-                .foregroundColor(DesignTokens.Colors.accentPrimary)
+                .font(.system(size: 20))
+                .foregroundStyle(.accent)
                 .frame(width: 40, height: 40)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                        .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.accentColor.opacity(0.1))
                 )
 
-            // Text
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(languageSettings.localized(feature.titleKey))
-                    .font(DesignTokens.Typography.label(weight: .semibold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized(feature.descriptionKey))
-                    .font(DesignTokens.Typography.caption())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
 
             Spacer()
         }
-        .padding(DesignTokens.Spacing.md)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.backgroundSecondary)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.quaternary)
         )
     }
 }
@@ -117,7 +112,7 @@ private struct FeatureCard: View {
 #Preview {
     OnboardingFeaturesStep()
         .frame(width: 520, height: 480)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(OnboardingManager())
         .environmentObject(LanguageSettings())
 }

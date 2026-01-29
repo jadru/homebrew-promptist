@@ -18,22 +18,22 @@ struct ShortcutRecorderSheet: View {
     private let validator = ShortcutValidator()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.lg) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(languageSettings.localized("shortcut_recorder.title"))
-                .font(DesignTokens.Typography.headline(18))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
 
             // Key capture button
             Button(action: startRecording) {
                 HStack {
                     if let keyCombo = recordedKeyCombo {
                         Text(keyCombo.displayString)
-                            .font(DesignTokens.Typography.mono(14))
-                            .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                            .font(.system(size: 14, weight: .regular, design: .monospaced))
+                            .foregroundStyle(.primary)
                     } else {
                         Text(isRecording ? languageSettings.localized("shortcut_recorder.button.press_combination") : languageSettings.localized("shortcut_recorder.button.click_to_record"))
-                            .font(DesignTokens.Typography.body())
-                            .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()
@@ -41,21 +41,21 @@ struct ShortcutRecorderSheet: View {
                     if recordedKeyCombo != nil && !isRecording {
                         Button(action: clearRecording) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                                .foregroundStyle(.tertiary)
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(DesignTokens.Spacing.md)
+                .padding(12)
                 .frame(height: 44)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                        .fill(isRecording ? DesignTokens.Colors.selectedBackground : DesignTokens.Colors.backgroundSecondary)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(isRecording ? AnyShapeStyle(Color.accentColor.opacity(0.12)) : AnyShapeStyle(.quaternary))
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .stroke(
-                            isRecording ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle,
+                            isRecording ? Color.accentColor : Color.primary.opacity(0.1),
                             lineWidth: isRecording ? 1.5 : 1
                         )
                 )
@@ -65,14 +65,14 @@ struct ShortcutRecorderSheet: View {
 
             // Help text
             Text(isRecording ? languageSettings.localized("shortcut_recorder.help.cancel") : languageSettings.localized("shortcut_recorder.help.modifiers"))
-                .font(DesignTokens.Typography.caption())
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
 
             // Scope selector
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(languageSettings.localized("shortcut_recorder.scope.label"))
-                    .font(DesignTokens.Typography.label())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary)
 
                 FilterSegmentedControl(
                     options: scopeOptions,
@@ -82,41 +82,41 @@ struct ShortcutRecorderSheet: View {
 
             // Error message
             if let error = errorMessage {
-                HStack(alignment: .top, spacing: DesignTokens.Spacing.xs) {
+                HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "exclamationmark.circle.fill")
-                        .font(.system(size: DesignTokens.IconSize.sm))
+                        .font(.system(size: 14))
                     Text(error)
-                        .font(DesignTokens.Typography.caption())
+                        .font(.caption)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .foregroundColor(DesignTokens.Colors.error)
-                .padding(DesignTokens.Spacing.sm)
+                .foregroundStyle(.red)
+                .padding(8)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                        .fill(DesignTokens.Colors.error.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.red.opacity(0.1))
                 )
             }
 
             // Warning message
             if let warning = warningMessage {
-                HStack(alignment: .top, spacing: DesignTokens.Spacing.xs) {
+                HStack(alignment: .top, spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: DesignTokens.IconSize.sm))
+                        .font(.system(size: 14))
                     Text(warning)
-                        .font(DesignTokens.Typography.caption())
+                        .font(.caption)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .foregroundColor(DesignTokens.Colors.warning)
-                .padding(DesignTokens.Spacing.sm)
+                .foregroundStyle(.orange)
+                .padding(8)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                        .fill(DesignTokens.Colors.warning.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.orange.opacity(0.1))
                 )
             }
 
             Spacer()
 
-            HStack(spacing: DesignTokens.Spacing.md) {
+            HStack(spacing: 12) {
                 ActionButton("Cancel", variant: .secondary, action: onCancel)
                 Spacer()
                 ActionButton("Save", variant: .primary) {
@@ -136,10 +136,9 @@ struct ShortcutRecorderSheet: View {
                 .disabled(recordedKeyCombo == nil || errorMessage != nil)
             }
         }
-        .padding(DesignTokens.Spacing.lg)
+        .padding(16)
         .frame(width: 480)
         .frame(minHeight: 320, maxHeight: 480)
-        .background(DesignTokens.Colors.backgroundElevated)
         .background(
             KeyboardEventHandler(
                 isRecording: $isRecording,

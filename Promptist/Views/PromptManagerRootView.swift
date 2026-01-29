@@ -1,18 +1,22 @@
 import SwiftUI
 
-struct PromptManagerRootView: View {
-    enum ManagerTab {
-        case templates
-        case shortcuts
-        case settings
-    }
+// MARK: - Sidebar Item
 
+enum SidebarItem: Hashable {
+    case allTemplates
+    case category(UUID)
+    case collection(UUID)
+    case shortcuts
+    case settings
+}
+
+struct PromptManagerRootView: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
     @ObservedObject var promptListViewModel: PromptListViewModel
     @ObservedObject var shortcutManager: ShortcutManager
     @StateObject var shortcutViewModel: ShortcutManagerViewModel
 
-    @State private var selectedTab: ManagerTab = .templates
+    @State private var sidebarSelection: SidebarItem? = .allTemplates
     @State private var focusedTemplateId: UUID?
 
     init(promptListViewModel: PromptListViewModel, shortcutManager: ShortcutManager) {
@@ -26,144 +30,158 @@ struct PromptManagerRootView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Left navigation sidebar
-            navigationSidebar
-                .frame(width: 180)
-
-            Separator(orientation: .vertical)
-
-            // Right content area
-            contentArea
-                .frame(minWidth: 460)
+        NavigationSplitView {
+            sidebar
+        } detail: {
+            detailContent
         }
-        .frame(minWidth: 640, minHeight: 520)
-        .background(DesignTokens.Colors.backgroundPrimary)
+        .navigationSplitViewStyle(.balanced)
+        .frame(minWidth: 700, minHeight: 520)
+        .onChange(of: sidebarSelection) { _, newValue in
+            applySidebarFilter(newValue)
+        }
     }
 
-    private var navigationSidebar: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            Text(languageSettings.localized("prompt_manager.root.title"))
-                .font(DesignTokens.Typography.headline(16, weight: .semibold))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
-                .padding(.horizontal, DesignTokens.Spacing.md)
-                .padding(.top, DesignTokens.Spacing.lg)
+    // MARK: - Sidebar
 
-            Separator()
-
-            VStack(spacing: DesignTokens.Spacing.xxs) {
-                NavigationTabButton(
-                    title: languageSettings.localized("prompt_manager.nav.templates"),
-                    icon: "doc.text",
-                    isSelected: selectedTab == .templates,
-                    action: {
-                        withAnimation(DesignTokens.Animation.normal) {
-                            selectedTab = .templates
-                        }
-                    }
-                )
-
-                NavigationTabButton(
-                    title: languageSettings.localized("prompt_manager.nav.shortcuts"),
-                    icon: "command",
-                    isSelected: selectedTab == .shortcuts,
-                    action: {
-                        withAnimation(DesignTokens.Animation.normal) {
-                            selectedTab = .shortcuts
-                        }
-                    }
-                )
-
-                NavigationTabButton(
-                    title: languageSettings.localized("prompt_manager.nav.settings"),
-                    icon: "gearshape",
-                    isSelected: selectedTab == .settings,
-                    action: {
-                        withAnimation(DesignTokens.Animation.normal) {
-                            selectedTab = .settings
-                        }
-                    }
-                )
+    private var sidebar: some View {
+        List(selection: $sidebarSelection) {
+            Section {
+                Label(languageSettings.localized("prompt_manager.nav.all_templates"), systemImage: "doc.text")
+                    .tag(SidebarItem.allTemplates)
             }
-            .padding(.horizontal, DesignTokens.Spacing.sm)
 
-            Spacer()
-        }
-        .background(DesignTokens.Colors.backgroundSecondary)
-    }
-
-    private var contentArea: some View {
-        Group {
-            switch selectedTab {
-            case .templates:
-                PromptManagerContentView(
-                    viewModel: promptListViewModel,
-                    shortcutViewModel: shortcutViewModel,
-                    onNavigateToShortcut: { templateId in
-                        focusedTemplateId = templateId
-                        withAnimation(DesignTokens.Animation.normal) {
-                            selectedTab = .shortcuts
-                        }
+            if !promptListViewModel.rootCategories.isEmpty {
+                Section(languageSettings.localized("prompt_manager.nav.categories")) {
+                    ForEach(promptListViewModel.rootCategories) { category in
+                        categoryRow(category)
                     }
-                )
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                }
+            }
 
-            case .shortcuts:
-                ShortcutManagerView(
-                    viewModel: shortcutViewModel,
-                    shortcutManager: shortcutManager,
-                    focusedTemplateId: $focusedTemplateId
-                )
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+            if !promptListViewModel.allCollections.isEmpty {
+                Section(languageSettings.localized("prompt_manager.nav.collections")) {
+                    ForEach(promptListViewModel.allCollections) { collection in
+                        Label {
+                            HStack {
+                                Text(collection.name)
+                                Spacer()
+                                Text("\(promptListViewModel.templateCount(forCollection: collection.id))")
+                                    .foregroundStyle(.secondary)
+                                    .font(.caption)
+                            }
+                        } icon: {
+                            Image(systemName: "tray")
+                        }
+                        .tag(SidebarItem.collection(collection.id))
+                    }
+                }
+            }
 
-            case .settings:
-                SettingsView()
-                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+            Section {
+                Label(languageSettings.localized("prompt_manager.nav.shortcuts"), systemImage: "command")
+                    .tag(SidebarItem.shortcuts)
+
+                Label(languageSettings.localized("prompt_manager.nav.settings"), systemImage: "gearshape")
+                    .tag(SidebarItem.settings)
             }
         }
-        .animation(DesignTokens.Animation.normal, value: selectedTab)
+        .listStyle(.sidebar)
+        .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 260)
     }
-}
 
-// MARK: - Navigation Tab Button
+    @ViewBuilder
+    private func categoryRow(_ category: PromptCategory) -> some View {
+        let children = promptListViewModel.childCategories(of: category.id)
 
-private struct NavigationTabButton: View {
-    let title: String
-    let icon: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: DesignTokens.Spacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: DesignTokens.IconSize.sm))
-                    .foregroundColor(isSelected ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.foregroundSecondary)
-
-                Text(title)
-                    .font(DesignTokens.Typography.body(weight: isSelected ? .medium : .regular))
-                    .foregroundColor(isSelected ? DesignTokens.Colors.foregroundPrimary : DesignTokens.Colors.foregroundSecondary)
-
-                Spacer()
+        if children.isEmpty {
+            Label {
+                HStack {
+                    Text(category.name)
+                    Spacer()
+                    Text("\(promptListViewModel.templateCount(for: category.id))")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
+            } icon: {
+                Image(systemName: category.icon)
             }
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, DesignTokens.Spacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .fill(
-                        isSelected ? DesignTokens.Colors.selectedBackground :
-                            (isHovering ? DesignTokens.Colors.hoverBackground : Color.clear)
-                    )
+            .tag(SidebarItem.category(category.id))
+        } else {
+            DisclosureGroup {
+                ForEach(children) { child in
+                    Label {
+                        HStack {
+                            Text(child.name)
+                            Spacer()
+                            Text("\(promptListViewModel.templateCount(for: child.id))")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    } icon: {
+                        Image(systemName: child.icon)
+                    }
+                    .tag(SidebarItem.category(child.id))
+                }
+            } label: {
+                Label {
+                    HStack {
+                        Text(category.name)
+                        Spacer()
+                        Text("\(promptListViewModel.templateCount(for: category.id))")
+                            .foregroundStyle(.secondary)
+                            .font(.caption)
+                    }
+                } icon: {
+                    Image(systemName: category.icon)
+                }
+                .tag(SidebarItem.category(category.id))
+            }
+        }
+    }
+
+    // MARK: - Detail Content
+
+    @ViewBuilder
+    private var detailContent: some View {
+        switch sidebarSelection {
+        case .allTemplates, .category, .collection, .none:
+            PromptManagerContentView(
+                viewModel: promptListViewModel,
+                shortcutViewModel: shortcutViewModel,
+                onNavigateToShortcut: { templateId in
+                    focusedTemplateId = templateId
+                    sidebarSelection = .shortcuts
+                }
             )
-            .liquidGlass(enabled: isSelected)
+
+        case .shortcuts:
+            ShortcutManagerView(
+                viewModel: shortcutViewModel,
+                shortcutManager: shortcutManager,
+                focusedTemplateId: $focusedTemplateId
+            )
+
+        case .settings:
+            SettingsView()
         }
-        .buttonStyle(.plain)
-        .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
-                isHovering = hovering
-            }
+    }
+
+    // MARK: - Sidebar Filter Sync
+
+    private func applySidebarFilter(_ item: SidebarItem?) {
+        switch item {
+        case .allTemplates, .none:
+            promptListViewModel.selectCategory(nil)
+            promptListViewModel.selectCollection(nil)
+        case .category(let id):
+            promptListViewModel.selectCategory(id)
+            promptListViewModel.selectCollection(nil)
+        case .collection(let id):
+            promptListViewModel.selectCategory(nil)
+            promptListViewModel.selectCollection(id)
+        case .shortcuts, .settings:
+            break
         }
     }
 }

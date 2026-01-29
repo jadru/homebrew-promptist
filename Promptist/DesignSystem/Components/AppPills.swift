@@ -16,41 +16,37 @@ struct AppPill: View {
     }
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.xs) {
+        HStack(spacing: 6) {
             if let icon = app.icon {
                 Image(nsImage: icon)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: DesignTokens.IconSize.sm, height: DesignTokens.IconSize.sm)
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.xs, style: .continuous))
+                    .frame(width: 14, height: 14)
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             }
 
             Text(app.name)
-                .font(DesignTokens.Typography.label(DesignTokens.Typography.labelSmall))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.primary)
                 .lineLimit(1)
 
             if showRemoveButton, let onRemove {
                 Button(action: onRemove) {
                     Image(systemName: "xmark")
-                        .font(.system(size: DesignTokens.IconSize.xs, weight: .semibold))
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, DesignTokens.Spacing.sm)
-        .padding(.vertical, DesignTokens.Spacing.xxs)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
         .background(
             Capsule()
-                .fill(isHovering ? DesignTokens.Colors.hoverBackground : DesignTokens.Colors.backgroundSecondary)
-        )
-        .overlay(
-            Capsule()
-                .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 0.5)
+                .fill(isHovering ? AnyShapeStyle(Color.primary.opacity(0.08)) : AnyShapeStyle(.quaternary))
         )
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovering = hovering
             }
         }
@@ -79,7 +75,7 @@ struct AppPillRow: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DesignTokens.Spacing.xs) {
+            HStack(spacing: 6) {
                 ForEach(apps) { app in
                     AppPill(
                         app: app,
@@ -90,18 +86,18 @@ struct AppPillRow: View {
 
                 if let onAdd {
                     Button(action: onAdd) {
-                        HStack(spacing: DesignTokens.Spacing.xxs) {
+                        HStack(spacing: 4) {
                             Image(systemName: "plus")
-                                .font(.system(size: DesignTokens.IconSize.xs, weight: .semibold))
+                                .font(.system(size: 12, weight: .semibold))
                             Text("Add")
-                                .font(DesignTokens.Typography.label(DesignTokens.Typography.labelSmall))
+                                .font(.system(size: 11, weight: .medium))
                         }
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
-                        .padding(.horizontal, DesignTokens.Spacing.sm)
-                        .padding(.vertical, DesignTokens.Spacing.xxs)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .strokeBorder(DesignTokens.Colors.borderDefault, lineWidth: 1)
+                                .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
                         )
                     }
                     .buttonStyle(.plain)

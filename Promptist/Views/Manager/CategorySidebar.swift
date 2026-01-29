@@ -17,12 +17,12 @@ struct CategorySidebar: View {
             // Header
             HStack {
                 Text("Categories")
-                    .font(DesignTokens.Typography.headline(14, weight: .semibold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
                 Spacer()
             }
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, DesignTokens.Spacing.sm)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
 
             Divider()
 
@@ -39,7 +39,7 @@ struct CategorySidebar: View {
             )
 
             Divider()
-                .padding(.vertical, DesignTokens.Spacing.xs)
+                .padding(.vertical, 6)
 
             // Category list
             ScrollView {
@@ -57,7 +57,7 @@ struct CategorySidebar: View {
             Spacer()
         }
         .frame(width: 220)
-        .background(DesignTokens.Colors.backgroundSecondary)
+        .background(.quaternary)
     }
 }
 
@@ -96,7 +96,7 @@ struct CategoryRowWithChildren: View {
                 isExpanded: isExpanded,
                 onSelect: { viewModel.selectCategory(category.id) },
                 onToggleExpand: children.isEmpty ? nil : {
-                    withAnimation(DesignTokens.Animation.fast) {
+                    withAnimation(.easeInOut(duration: 0.15)) {
                         if isExpanded {
                             expandedCategories.remove(category.id)
                         } else {
@@ -147,13 +147,13 @@ struct CategoryRow: View {
     @State private var isHovering = false
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.sm) {
+        HStack(spacing: 8) {
             // Expand/collapse button for parent categories
             if hasChildren {
                 Button(action: { onToggleExpand?() }) {
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                        .foregroundStyle(.tertiary)
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.plain)
@@ -165,13 +165,13 @@ struct CategoryRow: View {
             // Icon
             Image(systemName: icon)
                 .font(.system(size: 14))
-                .foregroundColor(isSelected ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.foregroundSecondary)
+                .foregroundStyle(isSelected ? Color.accentColor : .secondary)
                 .frame(width: 18)
 
             // Name
             Text(name)
-                .font(DesignTokens.Typography.body(13))
-                .foregroundColor(isSelected ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 13))
+                .foregroundStyle(isSelected ? Color.accentColor : .primary)
                 .lineLimit(1)
 
             Spacer()
@@ -179,21 +179,21 @@ struct CategoryRow: View {
             // Count badge
             if count > 0 {
                 Text("\(count)")
-                    .font(DesignTokens.Typography.caption(10))
-                    .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(
                         Capsule()
-                            .fill(DesignTokens.Colors.backgroundTertiary)
+                            .fill(.quaternary)
                     )
             }
         }
-        .padding(.horizontal, DesignTokens.Spacing.md)
+        .padding(.horizontal, 12)
         .padding(.leading, CGFloat(indentLevel) * 20)
-        .padding(.vertical, DesignTokens.Spacing.sm)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.sm)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(backgroundColor)
         )
         .contentShape(Rectangle())
@@ -207,9 +207,9 @@ struct CategoryRow: View {
 
     private var backgroundColor: Color {
         if isSelected {
-            return DesignTokens.Colors.selectedBackground
+            return Color.accentColor.opacity(0.12)
         } else if isHovering {
-            return DesignTokens.Colors.hoverBackground
+            return Color.primary.opacity(0.06)
         } else {
             return .clear
         }

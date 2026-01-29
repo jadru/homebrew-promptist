@@ -13,8 +13,6 @@ struct PromptPreviewPanel: View {
 
     @EnvironmentObject private var languageSettings: LanguageSettings
 
-    private let tokens = LauncherDesignTokens.self
-
     var body: some View {
         Group {
             if let prompt = prompt {
@@ -25,7 +23,6 @@ struct PromptPreviewPanel: View {
         }
         .frame(width: Layout.panelWidth)
         .frame(maxHeight: .infinity)
-        .background(tokens.Colors.popoverBackground)
     }
 
     // MARK: - Preview Content
@@ -64,22 +61,20 @@ struct PromptPreviewPanel: View {
             HStack {
                 Text(prompt.title)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(tokens.Colors.primaryText)
+                    .foregroundStyle(.primary)
                     .lineLimit(2)
 
                 Spacer()
 
-                // Shortcut badge
                 if let shortcut = shortcut, shortcut.isEnabled {
                     ShortcutKeyBadge(keyCombo: shortcut.keyCombo)
                 }
             }
 
-            // Usage info
             if prompt.usageCount > 0 {
                 Text(L("preview.usage_count", args: prompt.usageCount))
                     .font(.system(size: 11))
-                    .foregroundColor(tokens.Colors.tertiaryText)
+                    .foregroundStyle(.tertiary)
             }
         }
         .padding(Layout.padding)
@@ -92,12 +87,12 @@ struct PromptPreviewPanel: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(L("preview.content"))
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(tokens.Colors.tertiaryText)
+                .foregroundStyle(.tertiary)
                 .textCase(.uppercase)
 
             Text(content)
                 .font(.system(size: 13))
-                .foregroundColor(tokens.Colors.primaryText)
+                .foregroundStyle(.primary)
                 .textSelection(.enabled)
                 .lineSpacing(4)
         }
@@ -111,11 +106,10 @@ struct PromptPreviewPanel: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(L("preview.info"))
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(tokens.Colors.tertiaryText)
+                    .foregroundStyle(.tertiary)
                     .textCase(.uppercase)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    // Last used
                     if let lastUsed = prompt.lastUsedAt {
                         HStack(spacing: 6) {
                             Image(systemName: "clock")
@@ -123,10 +117,9 @@ struct PromptPreviewPanel: View {
                             Text(L("preview.last_used", args: lastUsed.relativeString))
                                 .font(.system(size: 11))
                         }
-                        .foregroundColor(tokens.Colors.secondaryText)
+                        .foregroundStyle(.secondary)
                     }
 
-                    // Linked apps
                     if !prompt.linkedApps.isEmpty {
                         HStack(spacing: 6) {
                             Image(systemName: "app.badge")
@@ -135,7 +128,7 @@ struct PromptPreviewPanel: View {
                                 .font(.system(size: 11))
                                 .lineLimit(1)
                         }
-                        .foregroundColor(tokens.Colors.secondaryText)
+                        .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -148,11 +141,11 @@ struct PromptPreviewPanel: View {
         VStack(spacing: 12) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 32, weight: .light))
-                .foregroundColor(tokens.Colors.tertiaryText)
+                .foregroundStyle(.tertiary)
 
             Text(L("preview.empty"))
                 .font(.system(size: 13))
-                .foregroundColor(tokens.Colors.secondaryText)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
