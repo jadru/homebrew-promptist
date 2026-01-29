@@ -111,8 +111,8 @@ struct OnboardingPermissionStep: View {
 
                     // Skip button for users who can't confirm permission status
                     Button {
-                        // Skip directly completes onboarding (no need to show complete step)
-                        onboardingManager.completeOnboarding()
+                        // Skip goes to complete step for consistent UX
+                        onboardingManager.nextStep()
                     } label: {
                         Text(languageSettings.localized("onboarding.permission.skip"))
                             .font(DesignTokens.Typography.caption())
@@ -132,6 +132,10 @@ struct OnboardingPermissionStep: View {
         }
         .onDisappear {
             permissionManager.stopPolling()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            // Check permission immediately when app becomes active (e.g., returning from System Settings)
+            permissionManager.checkPermission()
         }
     }
 }

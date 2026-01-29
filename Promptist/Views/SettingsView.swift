@@ -22,6 +22,7 @@ struct SettingsView: View {
                     languageSection
                     launchAtLoginSection
                     launcherSection
+                    quitSection
                 }
                 .frame(maxWidth: DesignTokens.Layout.contentWidthNarrow, alignment: .leading)
                 .padding(DesignTokens.Spacing.lg)
@@ -183,6 +184,33 @@ struct SettingsView: View {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .toggleStyle(.switch)
+        }
+    }
+
+    private var quitSection: some View {
+        CardBackground(padding: DesignTokens.Layout.edgeInsetComfortable, elevation: .sm) {
+            HStack(alignment: .center, spacing: DesignTokens.Spacing.md) {
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                    Text(languageSettings.localized("settings.quit.title"))
+                        .font(DesignTokens.Typography.headline())
+                        .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+
+                    Text(languageSettings.localized("settings.quit.subtitle"))
+                        .font(DesignTokens.Typography.body())
+                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                ActionButton(
+                    languageSettings.localized("settings.quit.button"),
+                    variant: .danger
+                ) {
+                    NSApplication.shared.terminate(nil)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

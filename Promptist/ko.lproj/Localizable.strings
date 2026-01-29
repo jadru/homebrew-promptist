@@ -236,3 +236,8 @@
 // Accessibility Labels
 "accessibility.prompt_row_hint" = "더블클릭하여 클립보드에 복사";
 "accessibility.shortcut_prefix" = "단축키";
+
+// Quit App
+"settings.quit.title" = "앱 종료";
+"settings.quit.subtitle" = "Promptist를 완전히 종료합니다.";
+"settings.quit.button" = "종료";
