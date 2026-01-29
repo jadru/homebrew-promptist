@@ -15,7 +15,7 @@ struct CollectionRail: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DesignTokens.Spacing.sm) {
+            HStack(spacing: 8) {
                 // "All" chip
                 CollectionChip(
                     name: "All",
@@ -28,7 +28,7 @@ struct CollectionRail: View {
                 if !viewModel.allCollections.isEmpty {
                     Divider()
                         .frame(height: 20)
-                        .padding(.horizontal, DesignTokens.Spacing.xs)
+                        .padding(.horizontal, 6)
                 }
 
                 // User collections
@@ -57,16 +57,16 @@ struct CollectionRail: View {
                         Image(systemName: "plus.circle")
                             .font(.system(size: 12))
                         Text("New")
-                            .font(DesignTokens.Typography.label())
+                            .font(.system(size: 12, weight: .medium))
                     }
-                    .foregroundColor(DesignTokens.Colors.accentPrimary)
+                    .foregroundStyle(.accent)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, DesignTokens.Spacing.sm)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         }
         .navigationBackground()
         .sheet(isPresented: $showAddCollection) {
@@ -111,13 +111,13 @@ struct CollectionChip: View {
                     .font(.system(size: 11))
 
                 Text(name)
-                    .font(DesignTokens.Typography.label())
+                    .font(.system(size: 12, weight: .medium))
                     .lineLimit(1)
 
                 if let count = count, count > 0 {
                     Text("(\(count))")
-                        .font(DesignTokens.Typography.caption(10))
-                        .foregroundColor(isSelected ? .white.opacity(0.7) : DesignTokens.Colors.foregroundTertiary)
+                        .font(.system(size: 10))
+                        .foregroundStyle(isSelected ? AnyShapeStyle(Color.white.opacity(0.7)) : AnyShapeStyle(.tertiary))
                 }
             }
             .padding(.horizontal, 12)
@@ -126,7 +126,7 @@ struct CollectionChip: View {
                 Capsule()
                     .fill(backgroundColor)
             )
-            .foregroundColor(foregroundColor)
+            .foregroundStyle(foregroundColor)
             .liquidGlass(.prominent, enabled: isSelected)
         }
         .buttonStyle(.plain)
@@ -137,11 +137,11 @@ struct CollectionChip: View {
 
     private var backgroundColor: Color {
         if isSelected {
-            return DesignTokens.Colors.accentPrimary
+            return Color.accentColor
         } else if isHovering {
-            return DesignTokens.Colors.hoverBackground
+            return Color.primary.opacity(0.06)
         } else {
-            return DesignTokens.Colors.backgroundSecondary
+            return .clear
         }
     }
 
@@ -149,7 +149,7 @@ struct CollectionChip: View {
         if isSelected {
             return .white
         } else {
-            return DesignTokens.Colors.foregroundPrimary
+            return .primary
         }
     }
 }

@@ -108,10 +108,10 @@ struct PromptEditorView: View {
 
             // Category selector
             if !categories.isEmpty {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(languageSettings.localized("category.select"))
-                        .font(DesignTokens.Typography.body(13))
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
 
                     Menu {
                         // Option to have no category
@@ -142,21 +142,17 @@ struct PromptEditorView: View {
                     } label: {
                         HStack {
                             Text(categoryName(for: selectedCategoryId))
-                                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                                .foregroundStyle(.primary)
                             Spacer()
                             Image(systemName: "chevron.down")
-                                .font(DesignTokens.Typography.caption())
-                                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .padding(.horizontal, DesignTokens.Spacing.sm)
-                        .padding(.vertical, DesignTokens.Spacing.xs)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
                         .background(
-                            RoundedRectangle(cornerRadius: DesignTokens.Radius.sm)
-                                .fill(DesignTokens.Colors.backgroundElevated)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: DesignTokens.Radius.sm)
-                                .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 0.5)
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .fill(.regularMaterial)
                         )
                     }
                     .menuStyle(.borderlessButton)
@@ -164,23 +160,23 @@ struct PromptEditorView: View {
             }
 
             // Keywords (for search, not displayed in UI filtering)
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
-                HStack(spacing: DesignTokens.Spacing.xxs) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
                     Text("Keywords")
-                        .font(DesignTokens.Typography.body(13))
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
                     Text("(for search)")
-                        .font(DesignTokens.Typography.caption())
-                        .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
                 TextField("e.g., code, review, debug", text: $keywordInput)
                     .textFieldStyle(.roundedBorder)
             }
 
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(languageSettings.localized("prompt_editor.field.linked_apps"))
-                    .font(DesignTokens.Typography.body(13))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
 
                 LinkedAppSummaryView(
                     selectedApps: selectedAppsSorted,

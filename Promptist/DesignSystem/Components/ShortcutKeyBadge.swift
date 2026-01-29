@@ -7,12 +7,12 @@ struct ShortcutKeyBadge: View {
     var body: some View {
         Text(keyCombo.displayString)
             .font(.system(size: 11, weight: .medium, design: .rounded))
-            .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+            .foregroundStyle(.secondary)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(
                 Capsule()
-                    .fill(DesignTokens.Colors.backgroundTertiary)
+                    .fill(.quaternary)
             )
             .liquidGlass(.clear)
     }

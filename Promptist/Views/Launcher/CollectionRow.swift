@@ -14,55 +14,40 @@ struct CollectionRow: View {
 
     @State private var isHovered: Bool = false
 
-    private let tokens = LauncherDesignTokens.self
-
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
-                // Folder icon
                 Image(systemName: "folder.fill")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(tokens.Colors.accent)
+                    .foregroundStyle(.accent)
 
-                // Collection name
                 Text(collection.name)
-                    .font(tokens.Typography.rowTitleFont)
-                    .foregroundColor(tokens.Colors.primaryText)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
 
                 Spacer()
 
-                // Prompt count
                 Text("\(promptCount)")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(tokens.Colors.secondaryText)
+                    .foregroundStyle(.secondary)
 
-                // Arrow icon
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(tokens.Colors.secondaryText)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .frame(height: tokens.Layout.rowHeight)
-            .background(
-                backgroundColor
-            )
+            .frame(height: 48)
+            .background(isHovered ? Color.primary.opacity(0.08) : Color.clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(tokens.Animation.hoverAnimation) {
+            withAnimation(.easeOut(duration: 0.15)) {
                 isHovered = hovering
             }
         }
-    }
-
-    private var backgroundColor: Color {
-        if isHovered {
-            return tokens.Colors.rowHover
-        }
-        return Color.clear
     }
 }
 

@@ -18,7 +18,6 @@ struct PromptRow: View {
     @State private var showCopied = false
 
     @EnvironmentObject private var languageSettings: LanguageSettings
-    private let tokens = LauncherDesignTokens.self
 
     init(
         prompt: PromptTemplate,
@@ -37,37 +36,30 @@ struct PromptRow: View {
     var body: some View {
         Button(action: handleExecute) {
             HStack(spacing: 12) {
-                // Content
                 VStack(alignment: .leading, spacing: 4) {
-                    // Title
                     Text(prompt.title)
-                        .font(tokens.Typography.rowTitleFont)
-                        .foregroundColor(tokens.Colors.primaryText)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                         .truncationMode(.tail)
 
-                    // Subtitle (content preview)
                     if !prompt.content.isEmpty {
                         Text(prompt.content)
-                            .font(tokens.Typography.rowSubtitleFont)
-                            .foregroundColor(tokens.Colors.secondaryText)
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Shortcut badge (always visible when available)
                 if let shortcut = shortcut, shortcut.isEnabled {
                     ShortcutKeyBadge(keyCombo: shortcut.keyCombo)
                 }
-
-                // Note: Tags/keywords are NOT displayed in the launcher per design spec.
-                // They are only used for search matching, not UI display.
             }
-            .padding(.horizontal, tokens.Layout.horizontalPadding)
-            .padding(.vertical, tokens.Layout.verticalPadding)
-            .frame(height: tokens.Layout.rowHeight)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(height: 48)
             .background(rowBackground)
             .contentShape(Rectangle())
             .overlay(copiedOverlay)
@@ -78,7 +70,7 @@ struct PromptRow: View {
         .accessibilityHint(languageSettings.localized("accessibility.prompt_row_hint"))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .onHover { hovering in
-            withAnimation(tokens.Animation.hoverAnimation) {
+            withAnimation(.easeOut(duration: 0.15)) {
                 isHovered = hovering
             }
             onHover?(hovering)
@@ -100,32 +92,27 @@ struct PromptRow: View {
     private var copiedOverlay: some View {
         if showCopied {
             ZStack {
-                tokens.Colors.copiedOverlayBackground
+                Color.black.opacity(0.85)
 
                 Text(languageSettings.localized("prompt_row.copied"))
-                    .font(tokens.Typography.copiedOverlayFont)
-                    .foregroundColor(tokens.Colors.copiedOverlayText)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
             }
             .transition(.opacity)
         }
     }
 
     private func handleExecute() {
-        // Show copied feedback
-        withAnimation(tokens.Animation.feedbackAnimation) {
+        withAnimation(.easeInOut(duration: 0.2)) {
             showCopied = true
         }
 
-        // Hide after feedback duration and trigger execute
-        let feedbackDuration = tokens.Animation.feedbackDuration
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(feedbackDuration))
-            withAnimation(tokens.Animation.feedbackAnimation) {
+            try? await Task.sleep(for: .seconds(0.2))
+            withAnimation(.easeInOut(duration: 0.2)) {
                 showCopied = false
             }
-
-            // Execute after fade out completes
-            try? await Task.sleep(for: .seconds(feedbackDuration))
+            try? await Task.sleep(for: .seconds(0.2))
             onExecute()
         }
     }
@@ -133,9 +120,9 @@ struct PromptRow: View {
     @ViewBuilder
     private var rowBackground: some View {
         if isSelected {
-            tokens.Colors.rowSelected
+            Color.accentColor.opacity(0.15)
         } else if isHovered {
-            tokens.Colors.rowHover
+            Color.primary.opacity(0.08)
         } else {
             Color.clear
         }
@@ -149,15 +136,15 @@ private struct PromptRowButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? LauncherDesignTokens.Interaction.rowPressedScale : 1.0)
-            .animation(LauncherDesignTokens.Animation.selectionAnimation, value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.995 : 1.0)
+            .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
 // MARK: - Preview
 
 #Preview {
-    VStack(spacing: LauncherDesignTokens.Layout.rowSpacing) {
+    VStack(spacing: 2) {
         // Normal state
         PromptRow(
             prompt: PromptTemplate(

@@ -15,45 +15,38 @@ struct PromptSearchBar: View {
 
     @EnvironmentObject private var languageSettings: LanguageSettings
 
-    private let tokens = LauncherDesignTokens.self
-
     var body: some View {
         HStack(spacing: 12) {
             // Search field
             HStack(spacing: 8) {
-                // Search icon
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(tokens.Colors.secondaryText)
+                    .foregroundStyle(.secondary)
                     .font(.system(size: 14, weight: .medium))
 
-                // Text field
                 TextField("Search prompts...", text: $searchText)
                     .textFieldStyle(.plain)
-                    .font(tokens.Typography.searchFont)
+                    .font(.system(size: 15))
                     .focused($isFocused)
                     .submitLabel(.search)
 
-                // Clear button (only when text is present)
                 if !searchText.isEmpty {
                     Button(action: {
                         searchText = ""
                         isFocused = true
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(tokens.Colors.tertiaryText)
+                            .foregroundStyle(.tertiary)
                             .font(.system(size: 14, weight: .medium))
                     }
                     .buttonStyle(.plain)
                     .help("Clear search")
                 }
             }
-            .padding(.horizontal, tokens.Layout.horizontalPadding)
+            .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(tokens.Colors.searchBackground)
-            .cornerRadius(8)
             .liquidGlass(.clear)
 
-            // More menu button (vertical ellipsis)
+            // More menu button
             Menu {
                 Button(action: onManage) {
                     Label(languageSettings.localized("launcher.menu.manage_templates"), systemImage: "doc.text")
@@ -67,19 +60,17 @@ struct PromptSearchBar: View {
             } label: {
                 Image(systemName: "ellipsis")
                     .rotationEffect(.degrees(90))
-                    .foregroundColor(tokens.Colors.secondaryText)
+                    .foregroundStyle(.secondary)
                     .font(.system(size: 14, weight: .medium))
                     .frame(width: 32, height: 32)
-                    .background(tokens.Colors.searchBackground)
-                    .cornerRadius(8)
                     .liquidGlass(.clear)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
         }
-        .padding(.horizontal, tokens.Layout.horizontalPadding)
-        .padding(.top, tokens.Layout.searchPadding)
+        .padding(.horizontal, 12)
+        .padding(.top, 16)
         .padding(.bottom, 8)
     }
 

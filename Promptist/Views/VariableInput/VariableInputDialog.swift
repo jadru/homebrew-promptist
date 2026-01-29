@@ -56,7 +56,7 @@ struct VariableInputDialog: View {
 
             // Content
             ScrollView {
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.lg) {
+                VStack(alignment: .leading, spacing: 20) {
                     // Clipboard selection
                     if let history = clipboardHistory, !history.isEmpty {
                         clipboardSection(history: history)
@@ -67,7 +67,7 @@ struct VariableInputDialog: View {
                         inputSection
                     }
                 }
-                .padding(DesignTokens.Spacing.lg)
+                .padding(20)
             }
 
             Divider()
@@ -75,7 +75,6 @@ struct VariableInputDialog: View {
             // Footer
             footer
         }
-        .background(DesignTokens.Colors.backgroundElevated)
         .frame(width: 480)
         .frame(minHeight: 280, maxHeight: 560)
         .interactiveDismissDisabled(false)
@@ -165,29 +164,29 @@ struct VariableInputDialog: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(languageSettings.localized("variable_input.title"))
-                .font(DesignTokens.Typography.headline(DesignTokens.Typography.headlineLarge))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.primary)
 
             Text(promptTitle)
-                .font(DesignTokens.Typography.caption())
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DesignTokens.Spacing.lg)
+        .padding(20)
     }
 
     // MARK: - Clipboard Section
 
     private func clipboardSection(history: [ClipboardEntry]) -> some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(languageSettings.localized("variable_input.clipboard_section"))
-                .font(DesignTokens.Typography.label(weight: .semibold))
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
 
-            VStack(spacing: DesignTokens.Spacing.xs) {
+            VStack(spacing: 6) {
                 ForEach(history) { entry in
                     ClipboardEntryRow(
                         entry: entry,
@@ -202,12 +201,12 @@ struct VariableInputDialog: View {
     // MARK: - Input Section
 
     private var inputSection: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(languageSettings.localized("variable_input.input_section"))
-                .font(DesignTokens.Typography.label(weight: .semibold))
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
 
-            VStack(spacing: DesignTokens.Spacing.md) {
+            VStack(spacing: 12) {
                 ForEach(Array(inputQuestions.enumerated()), id: \.element) { index, question in
                     InputFieldRow(
                         question: question,
@@ -240,7 +239,7 @@ struct VariableInputDialog: View {
             .keyboardShortcut(.return, modifiers: [])
             .buttonStyle(.borderedProminent)
         }
-        .padding(DesignTokens.Spacing.lg)
+        .padding(20)
     }
 
     // MARK: - Actions
@@ -271,28 +270,28 @@ private struct ClipboardEntryRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: DesignTokens.Spacing.sm) {
+            HStack(spacing: 8) {
                 Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-                    .font(.system(size: DesignTokens.IconSize.md))
-                    .foregroundColor(isSelected ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.foregroundTertiary)
+                    .font(.system(size: 16))
+                    .foregroundStyle(isSelected ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.tertiary))
 
                 Text(entry.preview)
-                    .font(DesignTokens.Typography.body())
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.primary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
 
                 Spacer()
             }
-            .padding(DesignTokens.Spacing.sm)
+            .padding(8)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                    .fill(isSelected ? DesignTokens.Colors.selectedBackground : Color.clear)
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.clear)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .stroke(
-                        isSelected ? DesignTokens.Colors.accentPrimary.opacity(0.3) : DesignTokens.Colors.borderSubtle,
+                        isSelected ? Color.accentColor.opacity(0.3) : Color.primary.opacity(0.1),
                         lineWidth: 1
                     )
             )
@@ -309,14 +308,14 @@ private struct InputFieldRow: View {
     let isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(question)
-                .font(DesignTokens.Typography.label())
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.primary)
 
             TextField("", text: $text)
                 .textFieldStyle(.roundedBorder)
-                .font(DesignTokens.Typography.body())
+                .font(.system(size: 14))
                 // Ensure TextField is always enabled and interactive
                 .disabled(false)
                 .allowsHitTesting(true)

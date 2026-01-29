@@ -19,12 +19,12 @@ struct TemplateCard: View {
     @State private var isHovering = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+        VStack(alignment: .leading, spacing: 8) {
             // Title row with app badges
             HStack(alignment: .top) {
                 Text(template.title.isEmpty ? "Untitled" : template.title)
-                    .font(DesignTokens.Typography.headline(14))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
                     .lineLimit(1)
 
                 Spacer()
@@ -37,8 +37,8 @@ struct TemplateCard: View {
                         }
                         if template.linkedApps.count > 3 {
                             Text("+\(template.linkedApps.count - 3)")
-                                .font(DesignTokens.Typography.caption(9))
-                                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                                .font(.system(size: 9))
+                                .foregroundStyle(.tertiary)
                         }
                     }
                 }
@@ -46,8 +46,8 @@ struct TemplateCard: View {
 
             // Content preview
             Text(template.content)
-                .font(DesignTokens.Typography.body(12))
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
 
@@ -57,9 +57,9 @@ struct TemplateCard: View {
                     Image(systemName: "folder")
                         .font(.system(size: 9))
                     Text(categoryName)
-                        .font(DesignTokens.Typography.caption(10))
+                        .font(.system(size: 10))
                 }
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .foregroundStyle(.tertiary)
                 .padding(.top, 2)
             }
 
@@ -71,7 +71,7 @@ struct TemplateCard: View {
                     Button(action: onEdit) {
                         Image(systemName: "square.and.pencil")
                             .font(.system(size: 12))
-                            .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                            .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
                     .help("Edit")
@@ -79,26 +79,22 @@ struct TemplateCard: View {
                     Button(action: onDelete) {
                         Image(systemName: "trash")
                             .font(.system(size: 12))
-                            .foregroundColor(DesignTokens.Colors.error.opacity(0.8))
+                            .foregroundStyle(.red.opacity(0.8))
                     }
                     .buttonStyle(.plain)
                     .help("Delete")
                 }
-                .padding(.top, DesignTokens.Spacing.xs)
+                .padding(.top, 6)
             }
         }
-        .padding(DesignTokens.Spacing.md)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.lg)
-                .fill(isHovering ? DesignTokens.Colors.backgroundSecondary : DesignTokens.Colors.backgroundElevated)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.lg)
-                .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(isHovering ? AnyShapeStyle(Color.primary.opacity(0.06)) : AnyShapeStyle(.regularMaterial))
         )
         .contentShape(Rectangle())
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.fast) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isHovering = hovering
             }
         }
@@ -116,7 +112,7 @@ struct AppBadge: View {
     var body: some View {
         Text(initial)
             .font(.system(size: 9, weight: .bold))
-            .foregroundColor(.white)
+            .foregroundStyle(.white)
             .frame(width: 18, height: 18)
             .background(
                 Circle()
@@ -153,7 +149,7 @@ struct TemplateListView: View {
             )
         } else {
             ScrollView {
-                LazyVStack(spacing: DesignTokens.Spacing.sm) {
+                LazyVStack(spacing: 8) {
                     ForEach(templates) { template in
                         TemplateCard(
                             template: template,
@@ -166,7 +162,7 @@ struct TemplateListView: View {
                         )
                     }
                 }
-                .padding(DesignTokens.Spacing.md)
+                .padding(12)
             }
         }
     }
@@ -184,29 +180,29 @@ struct EmptyTemplateState: View {
     let onClearFilters: () -> Void
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.lg) {
+        VStack(spacing: 20) {
             Image(systemName: hasFilters ? "magnifyingglass" : "doc.text")
                 .font(.system(size: 40))
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .foregroundStyle(.tertiary)
 
             Text(hasFilters ? "No matching templates" : "No templates yet")
-                .font(DesignTokens.Typography.headline(16))
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.secondary)
 
             Text(hasFilters ? "Try adjusting your filters" : "Create your first prompt template")
-                .font(DesignTokens.Typography.body(13))
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .font(.system(size: 13))
+                .foregroundStyle(.tertiary)
 
             if hasFilters {
                 Button(action: onClearFilters) {
                     Text("Clear Filters")
-                        .font(DesignTokens.Typography.label())
-                        .foregroundColor(DesignTokens.Colors.accentPrimary)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.accent)
                 }
                 .buttonStyle(.plain)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(DesignTokens.Spacing.xxxl)
+        .padding(40)
     }
 }

@@ -12,48 +12,38 @@ struct PromptListRow: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: isCompact ? DesignTokens.Spacing.xs : DesignTokens.Spacing.sm) {
-                HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: isCompact ? 6 : 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(template.title)
-                        .font(DesignTokens.Typography.headline(isCompact ? 14 : 15))
-                        .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                        .font(.system(size: isCompact ? 14 : 15, weight: .semibold))
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
 
                     Spacer()
 
                     if let linkedAppsText {
                         Text(linkedAppsText)
-                            .font(DesignTokens.Typography.caption(10))
-                            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.tertiary)
                             .lineLimit(1)
                     }
                 }
 
                 Text(template.content)
-                    .font(DesignTokens.Typography.body(isCompact ? 12 : 13))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: isCompact ? 12 : 13))
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
-
-                // Note: Keywords are NOT displayed in the UI per design spec.
-                // They are only used for search matching.
             }
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, isCompact ? DesignTokens.Spacing.sm : DesignTokens.Spacing.md)
+            .padding(.horizontal, 12)
+            .padding(.vertical, isCompact ? 8 : 12)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .fill(isHovering ? DesignTokens.Colors.hoverBackground : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .stroke(
-                        isHovering ? DesignTokens.Colors.borderDefault : DesignTokens.Colors.borderSubtle,
-                        lineWidth: 0.5
-                    )
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isHovering ? Color.primary.opacity(0.06) : Color.clear)
             )
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovering = hovering
             }
         }
@@ -67,13 +57,13 @@ struct PromptSectionHeader: View {
 
     var body: some View {
         Text(title.uppercased())
-            .font(DesignTokens.Typography.caption(DesignTokens.Typography.captionSmall, weight: .medium))
-            .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundStyle(.tertiary)
             .tracking(0.5)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, DesignTokens.Spacing.xxs)
-            .padding(.top, DesignTokens.Spacing.sm)
-            .padding(.bottom, DesignTokens.Spacing.xxs)
+            .padding(.horizontal, 4)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
     }
 }
 
