@@ -39,11 +39,9 @@ struct OnboardingContainerView: View {
 
     private func closeOnboardingWindow() {
         DispatchQueue.main.async {
-            // Find and close the onboarding window
+            // Find and close the onboarding window by identifier only
             for window in NSApp.windows {
-                if window.identifier?.rawValue == "onboarding" ||
-                   window.title.contains("Welcome") ||
-                   window.title.contains("Promptist") {
+                if window.identifier?.rawValue == "onboarding" {
                     window.close()
                     break
                 }

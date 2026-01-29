@@ -5,8 +5,7 @@ import SwiftUI
 /// Displayed in MenuBarExtra and Manager window when onboarding is not completed
 struct OnboardingBlockedView: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
-
-    let onSetup: () -> Void
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.lg) {
@@ -32,12 +31,17 @@ struct OnboardingBlockedView: View {
                 languageSettings.localized("onboarding.blocked.button"),
                 variant: .primary
             ) {
-                onSetup()
+                openOnboardingWindow()
             }
         }
         .padding(DesignTokens.Spacing.xl)
         .frame(width: 280)
         .environment(\.locale, languageSettings.locale)
+    }
+
+    private func openOnboardingWindow() {
+        openWindow(id: "onboarding")
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
@@ -45,8 +49,7 @@ struct OnboardingBlockedView: View {
 
 struct OnboardingBlockedCompactView: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
-
-    let onSetup: () -> Void
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.md) {
@@ -65,7 +68,7 @@ struct OnboardingBlockedCompactView: View {
                 .foregroundColor(DesignTokens.Colors.foregroundSecondary)
                 .multilineTextAlignment(.center)
 
-            Button(action: onSetup) {
+            Button(action: openOnboardingWindow) {
                 Text(languageSettings.localized("onboarding.blocked.button"))
                     .font(DesignTokens.Typography.label(weight: .medium))
                     .foregroundColor(.white)
@@ -82,18 +85,23 @@ struct OnboardingBlockedCompactView: View {
         .frame(width: 260)
         .environment(\.locale, languageSettings.locale)
     }
+
+    private func openOnboardingWindow() {
+        openWindow(id: "onboarding")
+        NSApp.activate(ignoringOtherApps: true)
+    }
 }
 
 // MARK: - Preview
 
 #Preview("Blocked View") {
-    OnboardingBlockedView(onSetup: {})
+    OnboardingBlockedView()
         .background(DesignTokens.Colors.backgroundElevated)
         .environmentObject(LanguageSettings())
 }
 
 #Preview("Compact Blocked View") {
-    OnboardingBlockedCompactView(onSetup: {})
+    OnboardingBlockedCompactView()
         .background(DesignTokens.Colors.backgroundElevated)
         .environmentObject(LanguageSettings())
 }
