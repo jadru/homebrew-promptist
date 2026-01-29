@@ -30,12 +30,32 @@ struct LauncherDesignTokens {
     // MARK: - Colors
     struct Colors {
         // Background
-        static let popoverBackground = Color(nsColor: .windowBackgroundColor)
-        static let searchBackground = Color(nsColor: .controlBackgroundColor)
+        static var popoverBackground: Color {
+            if isLiquidGlassAvailable {
+                return Color.clear  // 시스템 glass 투과
+            }
+            return Color(nsColor: .windowBackgroundColor)
+        }
+        static var searchBackground: Color {
+            if isLiquidGlassAvailable {
+                return Color.clear  // glass modifier가 처리
+            }
+            return Color(nsColor: .controlBackgroundColor)
+        }
 
         // Row states
-        static let rowHover = Color.primary.opacity(0.05)
-        static let rowSelected = Color.accentColor.opacity(0.12)
+        static var rowHover: Color {
+            if isLiquidGlassAvailable {
+                return Color.primary.opacity(0.08)  // glass 위 대비 강화
+            }
+            return Color.primary.opacity(0.05)
+        }
+        static var rowSelected: Color {
+            if isLiquidGlassAvailable {
+                return Color.accentColor.opacity(0.15)
+            }
+            return Color.accentColor.opacity(0.12)
+        }
         static let rowPressed = Color.accentColor.opacity(0.18)
 
         // Text
@@ -51,7 +71,12 @@ struct LauncherDesignTokens {
         static let tagText = Color.accentColor
 
         // Separator
-        static let separator = Color.primary.opacity(0.08)
+        static var separator: Color {
+            if isLiquidGlassAvailable {
+                return Color.primary.opacity(0.05)  // glass에서 더 미묘하게
+            }
+            return Color.primary.opacity(0.08)
+        }
 
         // Feedback overlay
         static let copiedOverlayBackground = Color.black.opacity(0.85)
@@ -80,12 +105,12 @@ struct LauncherDesignTokens {
 
     // MARK: - Shadows
     struct Shadows {
-        static let popoverShadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) = (
-            color: Color.black.opacity(0.15),
-            radius: 20,
-            x: 0,
-            y: 8
-        )
+        static var popoverShadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
+            if isLiquidGlassAvailable {
+                return (color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+            }
+            return (color: Color.black.opacity(0.15), radius: 20, x: 0, y: 8)
+        }
     }
 
     // MARK: - Animation

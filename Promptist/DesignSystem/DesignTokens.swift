@@ -60,35 +60,66 @@ enum DesignTokens {
 
         /// Main window background
         static var backgroundPrimary: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color.clear
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy900) : NSColor.fromSwiftUI(Blue.lightBg)
             })
         }
 
         /// Secondary surface (cards, panels)
         static var backgroundSecondary: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.05))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.03))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy850) : NSColor.fromSwiftUI(Blue.lightBg2)
             })
         }
 
         /// Tertiary surface (nested cards, hover states)
         static var backgroundTertiary: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.08))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.05))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy800) : NSColor.fromSwiftUI(Blue.lightBg3)
             })
         }
 
         /// Elevated surface (modals, popovers)
         static var backgroundElevated: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.1))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.03))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy700) : NSColor.white
             })
         }
 
         /// Search bar / input background
         static var backgroundInput: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.06))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.04))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy800.opacity(0.6)) : NSColor.fromSwiftUI(Blue.lightBg3)
             })
         }
@@ -127,14 +158,28 @@ enum DesignTokens {
 
         /// Subtle border (cards, inputs)
         static var borderSubtle: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.1))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.06))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy600.opacity(0.5)) : NSColor.fromSwiftUI(Blue.lightBorder.opacity(0.5))
             })
         }
 
         /// Default border
         static var borderDefault: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.15))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.1))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy600) : NSColor.fromSwiftUI(Blue.lightBorder)
             })
         }
@@ -155,24 +200,41 @@ enum DesignTokens {
 
         /// Hover state background
         static var hoverBackground: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.12))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.06))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy700.opacity(0.6)) : NSColor.fromSwiftUI(Blue.lightBg3)
             })
         }
 
         /// Pressed state background
         static var pressedBackground: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.18))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.1))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy700.opacity(0.8)) : NSColor.fromSwiftUI(Blue.lightBorder)
             })
         }
 
-        /// Selected state background (for list items) - uses blue highlight in light mode
+        /// Selected state background (for list items)
         static var selectedBackground: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color.accentColor.opacity(0.12)
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark
                     ? NSColor.fromSwiftUI(Blue.accent500.opacity(0.15))
-                    : NSColor.fromSwiftUI(Blue.lightHighlight)  // Subtle blue highlight
+                    : NSColor.fromSwiftUI(Blue.lightHighlight)
             })
         }
 
@@ -268,13 +330,27 @@ enum DesignTokens {
         // MARK: Card Colors (for light mode)
 
         static var cardBackground: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.07))
+                        : NSColor.fromSwiftUI(Color.white.opacity(0.85))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy850) : NSColor.white
             })
         }
 
         static var cardBorder: Color {
-            Color(nsColor: NSColor(name: nil) { appearance in
+            if isLiquidGlassAvailable {
+                return Color(nsColor: NSColor(name: nil) { appearance in
+                    appearance.isDark
+                        ? NSColor.fromSwiftUI(Color.white.opacity(0.1))
+                        : NSColor.fromSwiftUI(Color.black.opacity(0.06))
+                })
+            }
+            return Color(nsColor: NSColor(name: nil) { appearance in
                 appearance.isDark ? NSColor.fromSwiftUI(Blue.navy600.opacity(0.5)) : NSColor.fromSwiftUI(Blue.lightBorder)
             })
         }
@@ -412,24 +488,37 @@ enum DesignTokens {
         )
 
         static var sm: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-            (color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+            if isLiquidGlassAvailable { return none }
+            return (color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
         }
 
         static var md: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-            (color: Color.black.opacity(0.2), radius: 12, x: 0, y: 4)
+            if isLiquidGlassAvailable {
+                return (color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+            }
+            return (color: Color.black.opacity(0.2), radius: 12, x: 0, y: 4)
         }
 
         static var lg: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-            (color: Color.black.opacity(0.25), radius: 20, x: 0, y: 6)
+            if isLiquidGlassAvailable {
+                return (color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
+            }
+            return (color: Color.black.opacity(0.25), radius: 20, x: 0, y: 6)
         }
 
         static var xl: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-            (color: Color.black.opacity(0.3), radius: 30, x: 0, y: 10)
+            if isLiquidGlassAvailable {
+                return (color: Color.black.opacity(0.1), radius: 12, x: 0, y: 4)
+            }
+            return (color: Color.black.opacity(0.3), radius: 30, x: 0, y: 10)
         }
 
         /// Glow effect for selected/focused items
         static var glow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
-            (color: Colors.Blue.accent500.opacity(0.3), radius: 12, x: 0, y: 0)
+            if isLiquidGlassAvailable {
+                return (color: Colors.Blue.accent500.opacity(0.15), radius: 8, x: 0, y: 0)
+            }
+            return (color: Colors.Blue.accent500.opacity(0.3), radius: 12, x: 0, y: 0)
         }
     }
 
@@ -485,6 +574,29 @@ enum DesignTokens {
 
         /// Bouncy spring for selections
         static let bouncy: SwiftUI.Animation = .spring(response: 0.35, dampingFraction: 0.7)
+
+        /// Glass-optimized spring for macOS 26+ interactions
+        static var glassSpring: SwiftUI.Animation {
+            isLiquidGlassAvailable
+                ? .spring(response: 0.4, dampingFraction: 0.75)
+                : spring
+        }
+    }
+
+    // MARK: - Border Width
+
+    enum BorderWidth {
+        static var `default`: CGFloat {
+            isLiquidGlassAvailable ? 0.5 : 1.0
+        }
+
+        static var selected: CGFloat {
+            isLiquidGlassAvailable ? 1.0 : 1.5
+        }
+
+        static var subtle: CGFloat {
+            isLiquidGlassAvailable ? 0.0 : 0.5
+        }
     }
 }
 
@@ -558,23 +670,85 @@ extension NSAppearance {
 
 // MARK: - Liquid Glass View Modifier (macOS 26+)
 
+/// Glass variant for Liquid Glass effects
+enum GlassVariant {
+    /// Standard glass - balanced transparency for general navigation elements
+    case regular
+    /// Clear glass - higher transparency for media-rich backgrounds
+    case clear
+    /// Prominent glass - tinted blue for primary call-to-action elements
+    case prominent
+}
+
 struct LiquidGlassModifier: ViewModifier {
+    let variant: GlassVariant
     let isEnabled: Bool
 
     func body(content: Content) -> some View {
-        if isEnabled && isLiquidGlassAvailable {
-            content
-                .background(.ultraThinMaterial)
+        if isEnabled {
+            if #available(macOS 26.0, *) {
+                applyGlass(content)
+            } else {
+                content
+            }
         } else {
             content
+        }
+    }
+
+    @available(macOS 26.0, *)
+    @ViewBuilder
+    private func applyGlass(_ content: Content) -> some View {
+        switch variant {
+        case .regular:
+            content.glassEffect()
+        case .clear:
+            content.glassEffect(.clear)
+        case .prominent:
+            content.glassEffect(.regular.tint(.blue))
         }
     }
 }
 
 extension View {
-    /// Applies liquid glass effect on macOS 26+
-    func liquidGlass(_ enabled: Bool = true) -> some View {
-        modifier(LiquidGlassModifier(isEnabled: enabled))
+    /// Applies Liquid Glass effect on macOS 26+
+    /// - Parameters:
+    ///   - variant: The glass style variant (regular, clear, or prominent)
+    ///   - enabled: Whether the effect is active
+    func liquidGlass(_ variant: GlassVariant = .regular, enabled: Bool = true) -> some View {
+        modifier(LiquidGlassModifier(variant: variant, isEnabled: enabled))
+    }
+
+    /// Applies navigation-layer glass background on macOS 26+, opaque fallback on older OS
+    @ViewBuilder
+    func navigationBackground() -> some View {
+        if #available(macOS 26.0, *) {
+            self.glassEffect(.regular, in: Rectangle())
+        } else {
+            self.background(DesignTokens.Colors.backgroundElevated)
+        }
+    }
+}
+
+// MARK: - Glass Effect Container (macOS 26+)
+
+/// Wraps content in GlassEffectContainer on macOS 26+, pass-through on older OS.
+/// Use this to group multiple adjacent glass elements and prevent glass-on-glass artifacts.
+struct GlassContainer<Content: View>: View {
+    let spacing: CGFloat?
+    let content: Content
+
+    init(spacing: CGFloat? = nil, @ViewBuilder content: () -> Content) {
+        self.spacing = spacing
+        self.content = content()
+    }
+
+    var body: some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: spacing) { content }
+        } else {
+            content
+        }
     }
 }
 
@@ -612,7 +786,7 @@ struct PrompistCardBackground<Content: View>: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(
                         isSelected ? DesignTokens.Colors.selectedBorder : (showBorder ? DesignTokens.Colors.borderSubtle : .clear),
-                        lineWidth: isSelected ? 1.5 : 1
+                        lineWidth: isSelected ? DesignTokens.BorderWidth.selected : DesignTokens.BorderWidth.default
                     )
             )
             .shadow(

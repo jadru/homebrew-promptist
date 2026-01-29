@@ -40,7 +40,7 @@ struct TopFilterBar: View {
         }
         .padding(.horizontal, DesignTokens.Spacing.lg)
         .padding(.vertical, DesignTokens.Spacing.md)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .navigationBackground()
     }
 }
 
@@ -78,7 +78,7 @@ struct SearchField: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
-                .stroke(isFocused ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle, lineWidth: 1)
+                .stroke(isFocused ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle, lineWidth: DesignTokens.BorderWidth.default)
         )
     }
 }

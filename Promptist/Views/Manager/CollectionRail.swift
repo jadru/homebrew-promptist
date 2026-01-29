@@ -68,7 +68,7 @@ struct CollectionRail: View {
             .padding(.horizontal, DesignTokens.Spacing.md)
             .padding(.vertical, DesignTokens.Spacing.sm)
         }
-        .background(DesignTokens.Colors.backgroundElevated)
+        .navigationBackground()
         .sheet(isPresented: $showAddCollection) {
             CollectionEditorView(
                 collectionName: $newCollectionName,
@@ -127,6 +127,7 @@ struct CollectionChip: View {
                     .fill(backgroundColor)
             )
             .foregroundColor(foregroundColor)
+            .liquidGlass(.prominent, enabled: isSelected)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
