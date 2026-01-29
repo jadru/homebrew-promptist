@@ -13,76 +13,93 @@ struct ShortcutManagerView: View {
     @State private var showPermissionAlert = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Toolbar
-            HStack {
-                Text(languageSettings.localized("shortcut_manager.title"))
-                    .font(DesignTokens.Typography.headline(18))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
-                Spacer()
-            }
-            .padding(DesignTokens.Spacing.md)
-            .background(DesignTokens.Colors.backgroundElevated)
-
-            Separator()
-
+        Form {
             // Accessibility Permission Banner
             if !permissionManager.hasPermission {
-                AccessibilityPermissionBanner(permissionManager: permissionManager)
-                    .padding(DesignTokens.Spacing.md)
-
-                Separator()
+                Section {
+                    AccessibilityPermissionBanner(permissionManager: permissionManager)
+                }
             }
 
-            // Scope filter bar
+            // Scope Filter
             if !appFilters.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: DesignTokens.Spacing.xs) {
-                        filterChip(title: languageSettings.localized("shortcut_manager.filter.all_apps"), scope: .all)
-                        filterChip(title: languageSettings.localized("shortcut_manager.filter.global"), scope: .global)
-                        ForEach(appFilters, id: \.self) { app in
-                            filterChip(title: app.displayName, scope: .app(app))
+                Section {
+                    HStack {
+                        Text(languageSettings.localized("shortcut_manager.filter.scope"))
+                        Spacer()
+                        Menu {
+                            Button {
+                                viewModel.selectedScopeFilter = .all
+                            } label: {
+                                if viewModel.selectedScopeFilter == .all {
+                                    Label(languageSettings.localized("shortcut_manager.filter.all_apps"), systemImage: "checkmark")
+                                } else {
+                                    Text(languageSettings.localized("shortcut_manager.filter.all_apps"))
+                                }
+                            }
+
+                            Button {
+                                viewModel.selectedScopeFilter = .global
+                            } label: {
+                                if viewModel.selectedScopeFilter == .global {
+                                    Label(languageSettings.localized("shortcut_manager.filter.global"), systemImage: "checkmark")
+                                } else {
+                                    Text(languageSettings.localized("shortcut_manager.filter.global"))
+                                }
+                            }
+
+                            Divider()
+
+                            ForEach(appFilters, id: \.self) { app in
+                                Button {
+                                    viewModel.selectedScopeFilter = .app(app)
+                                } label: {
+                                    if viewModel.selectedScopeFilter == .app(app) {
+                                        Label(app.displayName, systemImage: "checkmark")
+                                    } else {
+                                        Text(app.displayName)
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text(scopeFilterLabel)
+                                .foregroundStyle(.secondary)
                         }
                     }
-                    .padding(.horizontal, DesignTokens.Spacing.md)
                 }
-                .padding(.vertical, DesignTokens.Spacing.sm)
-
-                Separator()
             }
 
-            // Template list with shortcuts
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-                    let displayedItems = viewModel.displayedTemplatesWithShortcuts
+            // Shortcut List
+            let displayedItems = viewModel.displayedTemplatesWithShortcuts
 
-                    if displayedItems.isEmpty {
-                        EmptyStateView(
-                            icon: "command",
-                            title: languageSettings.localized("shortcut_manager.empty.title"),
-                            description: languageSettings.localized("shortcut_manager.empty.description"),
-                            actionLabel: nil,
-                            action: nil
+            if displayedItems.isEmpty {
+                Section {
+                    ContentUnavailableView {
+                        Label(
+                            languageSettings.localized("shortcut_manager.empty.title"),
+                            systemImage: "command"
                         )
-                        .padding(.top, DesignTokens.Spacing.xxxl)
-                    } else {
-                        ForEach(displayedItems) { item in
-                            ShortcutTemplateRow(
-                                templateWithShortcuts: item,
-                                isFocused: focusedTemplateId == item.template.id,
-                                conflicts: viewModel.conflicts,
-                                onAddShortcut: { presentRecorder(for: item.template.id) },
-                                onEditShortcut: { presentRecorder(for: item.template.id, editing: $0) },
-                                onDeleteShortcut: { viewModel.deleteShortcut(id: $0) },
-                                onToggleEnabled: { viewModel.toggleShortcutEnabled(id: $0) }
-                            )
-                        }
+                    } description: {
+                        Text(languageSettings.localized("shortcut_manager.empty.description"))
                     }
                 }
-                .padding(DesignTokens.Spacing.lg)
+            } else {
+                Section(languageSettings.localized("shortcut_manager.title")) {
+                    ForEach(displayedItems) { item in
+                        ShortcutTemplateRow(
+                            templateWithShortcuts: item,
+                            isFocused: focusedTemplateId == item.template.id,
+                            conflicts: viewModel.conflicts,
+                            onAddShortcut: { presentRecorder(for: item.template.id) },
+                            onEditShortcut: { presentRecorder(for: item.template.id, editing: $0) },
+                            onDeleteShortcut: { viewModel.deleteShortcut(id: $0) },
+                            onToggleEnabled: { viewModel.toggleShortcutEnabled(id: $0) }
+                        )
+                    }
+                }
             }
         }
-        .background(DesignTokens.Colors.backgroundPrimary)
+        .formStyle(.grouped)
         .sheet(isPresented: $isPresentingRecorder) {
             if let templateId = recordingTemplateId {
                 ShortcutRecorderSheet(
@@ -109,12 +126,9 @@ struct ShortcutManagerView: View {
             .environmentObject(languageSettings)
         }
         .onAppear {
-            // Check permission on appear
             permissionManager.checkPermission()
 
             if focusedTemplateId != nil {
-                // Scroll happens automatically via LazyVStack
-                // Clear after a moment
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     focusedTemplateId = nil
                 }
@@ -124,6 +138,17 @@ struct ShortcutManagerView: View {
 
     private var appFilters: [PromptAppTarget] {
         viewModel.uniqueAppTargets
+    }
+
+    private var scopeFilterLabel: String {
+        switch viewModel.selectedScopeFilter {
+        case .all:
+            return languageSettings.localized("shortcut_manager.filter.all_apps")
+        case .global:
+            return languageSettings.localized("shortcut_manager.filter.global")
+        case .app(let app):
+            return app.displayName
+        }
     }
 
     private var currentAppTarget: PromptAppTarget? {
@@ -136,66 +161,9 @@ struct ShortcutManagerView: View {
         return nil
     }
 
-    private func filterChip(title: String, scope: ShortcutManagerViewModel.ShortcutScopeFilter) -> some View {
-        FilterChipButton(
-            title: title,
-            isSelected: viewModel.selectedScopeFilter == scope,
-            action: {
-                withAnimation(DesignTokens.Animation.normal) {
-                    viewModel.selectedScopeFilter = scope
-                }
-            }
-        )
-    }
-
     private func presentRecorder(for templateId: UUID, editing shortcut: TemplateShortcut? = nil) {
         recordingTemplateId = templateId
         isPresentingRecorder = true
-    }
-}
-
-// MARK: - Filter Chip Button
-
-private struct FilterChipButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(DesignTokens.Typography.label())
-                .foregroundColor(
-                    isSelected
-                        ? DesignTokens.Colors.foregroundPrimary
-                        : DesignTokens.Colors.foregroundSecondary
-                )
-                .padding(.horizontal, DesignTokens.Spacing.md)
-                .padding(.vertical, DesignTokens.Spacing.xs)
-                .background(
-                    Capsule()
-                        .fill(
-                            isSelected
-                                ? DesignTokens.Colors.selectedBackground
-                                : (isHovering ? DesignTokens.Colors.hoverBackground : DesignTokens.Colors.backgroundSecondary)
-                        )
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(
-                            isSelected ? DesignTokens.Colors.accentPrimary.opacity(0.3) : DesignTokens.Colors.borderSubtle,
-                            lineWidth: isSelected ? 1 : 0.5
-                        )
-                )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
-                isHovering = hovering
-            }
-        }
     }
 }
 
@@ -213,68 +181,57 @@ private struct ShortcutTemplateRow: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-            // Template header
-            HStack {
-                Text(templateWithShortcuts.template.title)
-                    .font(DesignTokens.Typography.headline())
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
-                Spacer()
-                if !templateWithShortcuts.template.linkedApps.isEmpty {
-                    LinkedAppsDisplay(apps: templateWithShortcuts.template.linkedApps)
-                }
-            }
-
+        DisclosureGroup {
             // Shortcuts list
             if templateWithShortcuts.shortcuts.isEmpty {
-                Button(action: onAddShortcut) {
-                    HStack(spacing: DesignTokens.Spacing.xs) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: DesignTokens.IconSize.sm))
-                        Text(languageSettings.localized("shortcut_manager.add_shortcut"))
-                            .font(DesignTokens.Typography.body())
-                    }
-                    .foregroundColor(DesignTokens.Colors.accentPrimary)
+                Button {
+                    onAddShortcut()
+                } label: {
+                    Label(languageSettings.localized("shortcut_manager.add_shortcut"), systemImage: "plus.circle.fill")
                 }
-                .buttonStyle(.plain)
             } else {
-                VStack(spacing: DesignTokens.Spacing.sm) {
-                    ForEach(templateWithShortcuts.shortcuts) { shortcut in
-                        ShortcutItemRow(
-                            shortcut: shortcut,
-                            hasConflict: hasConflict(shortcut: shortcut),
-                            onEdit: { onEditShortcut(shortcut) },
-                            onDelete: { onDeleteShortcut(shortcut.id) },
-                            onToggleEnabled: { onToggleEnabled(shortcut.id) }
-                        )
-                    }
+                ForEach(templateWithShortcuts.shortcuts) { shortcut in
+                    ShortcutItemRow(
+                        shortcut: shortcut,
+                        hasConflict: hasConflict(shortcut: shortcut),
+                        onEdit: { onEditShortcut(shortcut) },
+                        onDelete: { onDeleteShortcut(shortcut.id) },
+                        onToggleEnabled: { onToggleEnabled(shortcut.id) }
+                    )
                 }
 
-                Button(action: onAddShortcut) {
-                    HStack(spacing: DesignTokens.Spacing.xs) {
-                        Image(systemName: "plus.circle")
-                            .font(.system(size: DesignTokens.IconSize.sm))
-                        Text(languageSettings.localized("shortcut_manager.add_another"))
-                            .font(DesignTokens.Typography.caption())
-                    }
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                Button {
+                    onAddShortcut()
+                } label: {
+                    Label(languageSettings.localized("shortcut_manager.add_another"), systemImage: "plus.circle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .buttonStyle(.plain)
+            }
+        } label: {
+            HStack {
+                Text(templateWithShortcuts.template.title)
+                    .font(.headline)
+
+                Spacer()
+
+                if !templateWithShortcuts.template.linkedApps.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(Array(templateWithShortcuts.template.linkedApps.prefix(2).enumerated()), id: \.offset) { _, app in
+                            Text(app.displayName)
+                                .font(.caption2)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(.accent.opacity(0.1), in: Capsule())
+                                .foregroundStyle(.accent)
+                        }
+                    }
+                }
             }
         }
-        .padding(DesignTokens.Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                .fill(isFocused ? DesignTokens.Colors.selectedBackground : DesignTokens.Colors.backgroundElevated)
+        .listRowBackground(
+            isFocused ? Color.accentColor.opacity(0.08) : nil
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                .stroke(
-                    isFocused ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle,
-                    lineWidth: 1
-                )
-        )
-        .animation(DesignTokens.Animation.normal, value: isFocused)
     }
 
     private func hasConflict(shortcut: TemplateShortcut) -> Bool {
@@ -293,38 +250,28 @@ private struct ShortcutItemRow: View {
     let onDelete: () -> Void
     let onToggleEnabled: () -> Void
 
-    @State private var isHovering = false
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
-            // Key combo badge
+        HStack(spacing: 12) {
+            // Key combo
             Text(shortcut.keyCombo.displayString)
-                .font(DesignTokens.Typography.mono(13))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
-                .padding(.horizontal, DesignTokens.Spacing.sm)
-                .padding(.vertical, DesignTokens.Spacing.xs)
-                .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                        .fill(DesignTokens.Colors.backgroundSecondary)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                        .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 0.5)
-                )
+                .font(.system(.body, design: .monospaced))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
 
             // Scope
             Text(shortcut.scope.displayName)
-                .font(DesignTokens.Typography.caption())
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             Spacer()
 
             // Conflict indicator
             if hasConflict {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: DesignTokens.IconSize.sm))
-                    .foregroundColor(DesignTokens.Colors.warning)
+                    .foregroundStyle(.yellow)
                     .help(languageSettings.localized("shortcut_manager.conflict.tooltip"))
             }
 
@@ -336,51 +283,14 @@ private struct ShortcutItemRow: View {
             .toggleStyle(.switch)
             .labelsHidden()
 
-            // Actions
-            if isHovering {
-                HStack(spacing: DesignTokens.Spacing.xxs) {
-                    IconButton(icon: "trash", size: DesignTokens.IconSize.sm, action: onDelete)
-                }
-                .transition(.opacity)
+            // Delete
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Image(systemName: "trash")
+                    .font(.caption)
             }
-        }
-        .padding(.vertical, DesignTokens.Spacing.xs)
-        .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
-                isHovering = hovering
-            }
-        }
-    }
-}
-
-// MARK: - Linked Apps Display
-
-private struct LinkedAppsDisplay: View {
-    let apps: [PromptAppTarget]
-
-    var body: some View {
-        HStack(spacing: DesignTokens.Spacing.xxs) {
-            ForEach(Array(apps.prefix(3).enumerated()), id: \.offset) { _, app in
-                Text(app.displayName)
-                    .font(DesignTokens.Typography.caption(11, weight: .medium))
-                    .foregroundColor(DesignTokens.Colors.accentPrimary)
-                    .padding(.horizontal, DesignTokens.Spacing.sm)
-                    .padding(.vertical, DesignTokens.Spacing.xxs)
-                    .background(
-                        Capsule()
-                            .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(DesignTokens.Colors.accentPrimary.opacity(0.2), lineWidth: 0.5)
-                    )
-            }
-
-            if apps.count > 3 {
-                Text("+\(apps.count - 3)")
-                    .font(DesignTokens.Typography.caption(10, weight: .medium))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
-            }
+            .buttonStyle(.borderless)
         }
     }
 }

@@ -115,7 +115,7 @@ final class OnboardingManager: ObservableObject {
             return
         }
 
-        withAnimation(DesignTokens.Animation.normal) {
+        withAnimation(.easeInOut(duration: 0.3)) {
             currentStep = next
         }
     }
@@ -123,13 +123,13 @@ final class OnboardingManager: ObservableObject {
     func previousStep() {
         guard let previous = currentStep.previous else { return }
 
-        withAnimation(DesignTokens.Animation.normal) {
+        withAnimation(.easeInOut(duration: 0.3)) {
             currentStep = previous
         }
     }
 
     func goToStep(_ step: OnboardingStep) {
-        withAnimation(DesignTokens.Animation.normal) {
+        withAnimation(.easeInOut(duration: 0.3)) {
             currentStep = step
         }
     }

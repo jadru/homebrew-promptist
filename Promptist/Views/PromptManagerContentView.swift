@@ -3,18 +3,10 @@ import Combine
 import AppKit
 import UniformTypeIdentifiers
 
-/// Content view for the Template Manager tab with 3-axis filter layout.
-/// Layout: TopFilterBar | CategorySidebar | CollectionRail + TemplateList
 struct PromptManagerContentView: View {
-    enum PresentationStyle {
-        case window
-        case floatingPanel
-    }
-
     @EnvironmentObject private var languageSettings: LanguageSettings
     @ObservedObject var viewModel: PromptListViewModel
     @ObservedObject var shortcutViewModel: ShortcutManagerViewModel
-    var presentationStyle: PresentationStyle = .window
     let onNavigateToShortcut: (UUID) -> Void
 
     @State private var isPresentingEditor = false
@@ -26,37 +18,50 @@ struct PromptManagerContentView: View {
     @State private var editingCollectionId: UUID?
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Top bar with search and app filter
-            TopFilterBar(viewModel: viewModel, onNewPrompt: presentCreateEditor)
-
-            Divider()
-
-            // Main content with sidebar
-            HStack(spacing: 0) {
-                // Left: Category Sidebar
-                CategorySidebar(viewModel: viewModel)
-
-                Divider()
-
-                // Right: Collection Rail + Template List
-                VStack(spacing: 0) {
-                    // Collection Rail
-                    CollectionRail(viewModel: viewModel)
-
-                    Divider()
-
-                    // Template List
-                    TemplateListView(
-                        templates: viewModel.filteredTemplates,
-                        viewModel: viewModel,
-                        onEdit: presentEditEditor,
-                        onDelete: confirmDelete
+        List {
+            ForEach(viewModel.filteredTemplates) { template in
+                TemplateListRow(
+                    template: template,
+                    categoryPath: viewModel.categoryPath(for: template.categoryId ?? UUID()),
+                    onEdit: { presentEditEditor(for: template) },
+                    onDelete: { confirmDelete(template: template) }
+                )
+            }
+        }
+        .listStyle(.inset(alternatesRowBackgrounds: true))
+        .searchable(
+            text: $viewModel.filterState.searchText,
+            prompt: languageSettings.localized("prompt_manager.search.placeholder")
+        )
+        .overlay {
+            if viewModel.filteredTemplates.isEmpty {
+                ContentUnavailableView {
+                    Label(
+                        languageSettings.localized("prompt_manager.empty.title"),
+                        systemImage: "doc.text"
                     )
+                } description: {
+                    Text(languageSettings.localized("prompt_manager.empty.description"))
+                } actions: {
+                    Button(languageSettings.localized("prompt_manager.empty.create")) {
+                        presentCreateEditor()
+                    }
                 }
             }
         }
-        .background(DesignTokens.Colors.backgroundPrimary)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    presentCreateEditor()
+                } label: {
+                    Label(languageSettings.localized("prompt_manager.new_prompt"), systemImage: "plus")
+                }
+            }
+
+            ToolbarItem(placement: .automatic) {
+                AppFilterToggle(viewModel: viewModel)
+            }
+        }
         .sheet(isPresented: $isPresentingEditor) {
             PromptEditorView(
                 mode: editorMode,
@@ -147,24 +152,83 @@ struct PromptManagerContentView: View {
     }
 }
 
-// MARK: - Presentation Style Extension
+// MARK: - Template List Row
 
-private extension PromptManagerContentView.PresentationStyle {
-    var minWidth: CGFloat {
-        switch self {
-        case .window:
-            return 800
-        case .floatingPanel:
-            return 600
+private struct TemplateListRow: View {
+    let template: PromptTemplate
+    let categoryPath: String
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(template.title)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                if !template.content.isEmpty {
+                    Text(template.content)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+
+                if !categoryPath.isEmpty {
+                    Text(categoryPath)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            Spacer()
+
+            if !template.linkedApps.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(Array(template.linkedApps.prefix(3).enumerated()), id: \.offset) { _, app in
+                        Text(String(app.displayName.prefix(1)))
+                            .font(.caption2.weight(.medium))
+                            .frame(width: 22, height: 22)
+                            .background(Circle().fill(.accent.opacity(0.12)))
+                            .foregroundStyle(.accent)
+                    }
+                    if template.linkedApps.count > 3 {
+                        Text("+\(template.linkedApps.count - 3)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            if isHovering {
+                HStack(spacing: 4) {
+                    Button {
+                        onEdit()
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.borderless)
+
+                    Button(role: .destructive) {
+                        onDelete()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.borderless)
+                }
+                .transition(.opacity)
+            }
         }
-    }
-
-    var minHeight: CGFloat {
-        switch self {
-        case .window:
-            return 600
-        case .floatingPanel:
-            return 500
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovering = hovering
+            }
         }
     }
 }

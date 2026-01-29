@@ -69,68 +69,68 @@ struct ActionButton: View {
             buttonLabel
                 .background(backgroundColor)
                 .foregroundColor(foregroundColor)
-                .cornerRadius(DesignTokens.Radius.md)
+                .cornerRadius(8)
                 .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
-                        .stroke(borderColor, lineWidth: variant == .subtle ? 0 : DesignTokens.BorderWidth.default)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(borderColor, lineWidth: variant == .subtle ? 0 : 1)
                 )
                 .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovering = hovering
             }
         }
-        .animation(DesignTokens.Animation.fast, value: isPressed)
+        .animation(.easeInOut(duration: 0.15), value: isPressed)
     }
 
     private var buttonLabel: some View {
-        HStack(spacing: DesignTokens.Spacing.xs) {
+        HStack(spacing: 6) {
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: DesignTokens.IconSize.sm, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
             }
             Text(title)
-                .font(DesignTokens.Typography.label())
+                .font(.system(size: 12, weight: .medium))
         }
-        .padding(.horizontal, DesignTokens.Spacing.md)
-        .padding(.vertical, DesignTokens.Spacing.xs)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
     }
 
     private var backgroundColor: Color {
         switch variant {
         case .primary:
             if isPressed {
-                return DesignTokens.Colors.accentPressed
+                return Color.accentColor.opacity(0.8)
             } else if isHovering {
-                return DesignTokens.Colors.accentHover
+                return Color.accentColor.opacity(0.9)
             } else {
-                return DesignTokens.Colors.accentPrimary
+                return Color.accentColor
             }
         case .secondary:
             if isPressed {
-                return DesignTokens.Colors.pressedBackground
+                return Color.primary.opacity(0.12)
             } else if isHovering {
-                return DesignTokens.Colors.hoverBackground
+                return Color.primary.opacity(0.08)
             } else {
-                return DesignTokens.Colors.backgroundSecondary
+                return Color.primary.opacity(0.05)
             }
         case .subtle:
             if isPressed {
-                return DesignTokens.Colors.pressedBackground
+                return Color.primary.opacity(0.12)
             } else if isHovering {
-                return DesignTokens.Colors.hoverBackground
+                return Color.primary.opacity(0.08)
             } else {
                 return Color.clear
             }
         case .danger:
             if isPressed {
-                return DesignTokens.Colors.error.opacity(0.15)
+                return Color.red.opacity(0.15)
             } else if isHovering {
-                return DesignTokens.Colors.error.opacity(0.1)
+                return Color.red.opacity(0.1)
             } else {
-                return DesignTokens.Colors.backgroundSecondary
+                return Color.primary.opacity(0.05)
             }
         }
     }
@@ -140,9 +140,9 @@ struct ActionButton: View {
         case .primary:
             return .white
         case .secondary, .subtle:
-            return DesignTokens.Colors.foregroundPrimary
+            return Color.primary
         case .danger:
-            return DesignTokens.Colors.error
+            return Color.red
         }
     }
 
@@ -151,11 +151,11 @@ struct ActionButton: View {
         case .primary:
             return Color.clear
         case .secondary:
-            return isHovering ? DesignTokens.Colors.borderDefault : DesignTokens.Colors.borderSubtle
+            return isHovering ? Color.primary.opacity(0.15) : Color.primary.opacity(0.1)
         case .subtle:
             return Color.clear
         case .danger:
-            return isHovering ? DesignTokens.Colors.error.opacity(0.3) : DesignTokens.Colors.borderSubtle
+            return isHovering ? Color.red.opacity(0.3) : Color.primary.opacity(0.1)
         }
     }
 }
@@ -169,7 +169,7 @@ struct IconButton: View {
 
     @State private var isHovering = false
 
-    init(icon: String, size: CGFloat = DesignTokens.IconSize.md, action: @escaping () -> Void) {
+    init(icon: String, size: CGFloat = 16, action: @escaping () -> Void) {
         self.icon = icon
         self.size = size
         self.action = action
@@ -197,16 +197,16 @@ struct IconButton: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: size, weight: .medium))
-                .foregroundColor(isHovering ? DesignTokens.Colors.foregroundPrimary : DesignTokens.Colors.foregroundSecondary)
+                .foregroundColor(isHovering ? Color.primary : Color.secondary)
                 .frame(width: size + 12, height: size + 12)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm)
-                        .fill(isHovering ? DesignTokens.Colors.hoverBackground : Color.clear)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isHovering ? Color.primary.opacity(0.08) : Color.clear)
                 )
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.normal) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 isHovering = hovering
             }
         }

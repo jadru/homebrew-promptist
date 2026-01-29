@@ -15,7 +15,7 @@ struct CardBackground<Content: View>: View {
 
         var shadow: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) {
             switch self {
-            case .none: return DesignTokens.Shadow.none
+            case .none: return (color: .clear, radius: 0, x: 0, y: 0)
             case .sm: return DesignTokens.Shadow.sm
             case .md: return DesignTokens.Shadow.md
             case .lg: return DesignTokens.Shadow.lg
@@ -24,7 +24,7 @@ struct CardBackground<Content: View>: View {
     }
 
     init(
-        padding: EdgeInsets = DesignTokens.Layout.edgeInsetNormal,
+        padding: EdgeInsets = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12),
         elevation: ShadowElevation = .sm,
         @ViewBuilder content: () -> Content
     ) {
@@ -37,12 +37,8 @@ struct CardBackground<Content: View>: View {
         content
             .padding(padding)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .fill(DesignTokens.Colors.backgroundElevated)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: DesignTokens.BorderWidth.default)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(.regularMaterial)
             )
             .shadow(
                 color: elevation.shadow.color,
@@ -85,7 +81,7 @@ struct ListCardRow<Content: View>: View {
         }
         .onHover { hovering in
             if isHoverable {
-                withAnimation(DesignTokens.Animation.normal) {
+                withAnimation(.easeInOut(duration: 0.2)) {
                     isHovering = hovering
                 }
             }
@@ -94,18 +90,11 @@ struct ListCardRow<Content: View>: View {
 
     private var rowContent: some View {
         content
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, DesignTokens.Spacing.sm)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .fill(isHovering ? DesignTokens.Colors.hoverBackground : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .stroke(
-                        isHovering ? DesignTokens.Colors.borderDefault : DesignTokens.Colors.borderSubtle,
-                        lineWidth: DesignTokens.BorderWidth.subtle
-                    )
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isHovering ? Color.primary.opacity(0.06) : Color.clear)
             )
     }
 }

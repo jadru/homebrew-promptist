@@ -24,19 +24,19 @@ struct EmptyStateView: View {
     }
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.lg) {
+        VStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: DesignTokens.IconSize.xxl, weight: .light))
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .font(.system(size: 32, weight: .light))
+                .foregroundStyle(.tertiary)
 
-            VStack(spacing: DesignTokens.Spacing.xs) {
+            VStack(spacing: 6) {
                 Text(title)
-                    .font(DesignTokens.Typography.headline(DesignTokens.Typography.headlineMedium))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
 
                 Text(description)
-                    .font(DesignTokens.Typography.body())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
@@ -44,7 +44,7 @@ struct EmptyStateView: View {
                 ActionButton(actionLabel, icon: "plus", variant: .primary, action: action)
             }
         }
-        .padding(DesignTokens.Spacing.xxxl)
+        .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

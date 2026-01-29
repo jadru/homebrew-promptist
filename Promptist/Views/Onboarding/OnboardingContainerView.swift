@@ -17,21 +17,18 @@ struct OnboardingContainerView: View {
                     }
             } else {
                 VStack(spacing: 0) {
-                    // Content area
                     contentView
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                    // Progress indicator (except on complete step)
                     if onboardingManager.currentStep != .complete {
                         OnboardingProgressIndicator(
                             currentStep: onboardingManager.currentStep.rawValue,
-                            totalSteps: onboardingManager.totalSteps - 1 // Exclude complete step from dots
+                            totalSteps: onboardingManager.totalSteps - 1
                         )
-                        .padding(.bottom, DesignTokens.Spacing.xl)
+                        .padding(.bottom, 24)
                     }
                 }
                 .frame(width: 520, height: 480)
-                .background(DesignTokens.Colors.backgroundElevated)
                 .environment(\.locale, languageSettings.locale)
             }
         }
@@ -90,14 +87,14 @@ struct OnboardingProgressIndicator: View {
     let totalSteps: Int
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.sm) {
+        HStack(spacing: 8) {
             ForEach(0..<totalSteps, id: \.self) { index in
                 Circle()
                     .fill(index <= currentStep
-                        ? DesignTokens.Colors.accentPrimary
-                        : DesignTokens.Colors.foregroundTertiary.opacity(0.3))
+                        ? Color.accentColor
+                        : Color.primary.opacity(0.15))
                     .frame(width: 8, height: 8)
-                    .animation(DesignTokens.Animation.normal, value: currentStep)
+                    .animation(.easeInOut(duration: 0.3), value: currentStep)
             }
         }
     }

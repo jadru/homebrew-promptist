@@ -14,8 +14,6 @@ struct PromptList: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
     @Namespace private var promptListNamespace
 
-    private let tokens = LauncherDesignTokens.self
-
     var body: some View {
         ScrollViewReader { scrollProxy in
             ScrollView(.vertical, showsIndicators: true) {
@@ -127,12 +125,12 @@ struct PromptList: View {
                     .font(.system(size: 14, weight: .semibold))
                 Spacer()
             }
-            .foregroundColor(tokens.Colors.accent)
+            .foregroundStyle(.accent)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
-        .background(tokens.Colors.rowHover.opacity(0.3))
+        .background(Color.primary.opacity(0.04))
     }
 
     // MARK: - Show Other Prompts Button
@@ -147,12 +145,12 @@ struct PromptList: View {
                 Text(L("launcher.show_other_prompts"))
                     .font(.system(size: 13, weight: .medium))
             }
-            .foregroundColor(tokens.Colors.secondaryText)
+            .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(tokens.Colors.rowHover)
+                    .fill(Color.primary.opacity(0.06))
             )
         }
         .buttonStyle(.plain)
@@ -166,11 +164,11 @@ struct PromptList: View {
         VStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 32, weight: .light))
-                .foregroundColor(tokens.Colors.tertiaryText)
+                .foregroundStyle(.tertiary)
 
             Text(emptyStateMessage)
-                .font(tokens.Typography.emptyStateFont)
-                .foregroundColor(tokens.Colors.secondaryText)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -205,17 +203,15 @@ struct PromptList: View {
 private struct SectionHeader: View {
     let title: String
 
-    private let tokens = LauncherDesignTokens.self
-
     var body: some View {
         HStack {
             Text(title)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(tokens.Colors.tertiaryText)
+                .foregroundStyle(.tertiary)
                 .textCase(.uppercase)
             Spacer()
         }
-        .padding(.horizontal, tokens.Layout.horizontalPadding)
+        .padding(.horizontal, 12)
         .padding(.top, 12)
         .padding(.bottom, 4)
     }

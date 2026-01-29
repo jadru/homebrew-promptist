@@ -12,24 +12,24 @@ struct ShortcutBadge: View {
                 Image(systemName: "command")
                     .font(.system(size: 10, weight: .medium))
                 Text("\(count)")
-                    .font(DesignTokens.Typography.caption(10, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
             }
-            .foregroundColor(DesignTokens.Colors.accentPrimary)
+            .foregroundStyle(.accent)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(
                 Capsule()
                     .fill(
                         isHovering ?
-                            DesignTokens.Colors.accentPrimary.opacity(0.15) :
-                            DesignTokens.Colors.accentPrimary.opacity(0.1)
+                            Color.accentColor.opacity(0.15) :
+                            Color.accentColor.opacity(0.1)
                     )
             )
             .liquidGlass(.clear)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            withAnimation(DesignTokens.Animation.fast) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isHovering = hovering
             }
         }

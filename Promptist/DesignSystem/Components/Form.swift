@@ -20,14 +20,14 @@ struct SearchBar: View {
     }
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.xs) {
+        HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: DesignTokens.IconSize.sm, weight: .medium))
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.secondary)
 
             TextField(placeholder, text: $text)
                 .textFieldStyle(.plain)
-                .font(DesignTokens.Typography.body())
+                .font(.system(size: 14))
                 .onSubmit(onSubmit)
                 .disableAutocorrection(true)
 
@@ -36,24 +36,17 @@ struct SearchBar: View {
                     text = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: DesignTokens.IconSize.sm))
-                        .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                        .font(.system(size: 14))
+                        .foregroundStyle(.tertiary)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, DesignTokens.Spacing.md)
-        .padding(.vertical, DesignTokens.Spacing.xs)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.backgroundSecondary)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .stroke(
-                    isFocused ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle,
-                    lineWidth: isFocused ? DesignTokens.BorderWidth.selected : DesignTokens.BorderWidth.default
-                )
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.quaternary)
         )
     }
 }
@@ -72,16 +65,16 @@ struct SettingsToggleRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: DesignTokens.Spacing.md) {
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(DesignTokens.Typography.body())
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.primary)
 
                 if let description {
                     Text(description)
-                        .font(DesignTokens.Typography.caption())
-                        .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -91,8 +84,8 @@ struct SettingsToggleRow: View {
                 .toggleStyle(.switch)
                 .labelsHidden()
         }
-        .padding(.horizontal, DesignTokens.Spacing.md)
-        .padding(.vertical, DesignTokens.Spacing.sm)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 }
 
@@ -105,46 +98,37 @@ struct FilterSegmentedControl: View {
     @State private var hoveredIndex: Int?
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.xxs) {
+        HStack(spacing: 4) {
             ForEach(Array(options.enumerated()), id: \.offset) { index, option in
                 segmentButton(option, index: index)
             }
         }
-        .padding(DesignTokens.Spacing.xxs)
+        .padding(4)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.backgroundSecondary)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(.quaternary)
         )
     }
 
     private func segmentButton(_ title: String, index: Int) -> some View {
         Button {
-            withAnimation(DesignTokens.Animation.normal) {
+            withAnimation(.easeInOut(duration: 0.2)) {
                 selectedIndex = index
             }
         } label: {
             Text(title)
-                .font(DesignTokens.Typography.label(DesignTokens.Typography.labelMedium, weight: .medium))
-                .foregroundColor(
-                    selectedIndex == index
-                        ? DesignTokens.Colors.foregroundPrimary
-                        : DesignTokens.Colors.foregroundSecondary
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(
+                    selectedIndex == index ? .primary : .secondary
                 )
-                .padding(.horizontal, DesignTokens.Spacing.md)
-                .padding(.vertical, DesignTokens.Spacing.xs)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
                         .fill(
                             selectedIndex == index
-                                ? DesignTokens.Colors.backgroundElevated
-                                : (hoveredIndex == index ? DesignTokens.Colors.hoverBackground : Color.clear)
-                        )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                        .stroke(
-                            selectedIndex == index ? DesignTokens.Colors.borderDefault : Color.clear,
-                            lineWidth: DesignTokens.BorderWidth.subtle
+                                ? Color.primary.opacity(0.1)
+                                : (hoveredIndex == index ? Color.primary.opacity(0.06) : Color.clear)
                         )
                 )
                 .liquidGlass(enabled: selectedIndex == index)

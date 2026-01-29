@@ -7,45 +7,35 @@ struct OnboardingWelcomeStep: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.xxl) {
+        VStack(spacing: 32) {
             Spacer()
 
-            // App Icon
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 96, height: 96)
-                .shadow(
-                    color: DesignTokens.Shadow.lg.color,
-                    radius: DesignTokens.Shadow.lg.radius,
-                    x: DesignTokens.Shadow.lg.x,
-                    y: DesignTokens.Shadow.lg.y
-                )
 
-            // Title & Subtitle
-            VStack(spacing: DesignTokens.Spacing.sm) {
+            VStack(spacing: 8) {
                 Text(languageSettings.localized("onboarding.welcome.title"))
-                    .font(DesignTokens.Typography.display(28, weight: .bold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized("onboarding.welcome.subtitle"))
-                    .font(DesignTokens.Typography.body(15))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
             Spacer()
 
-            // Language Selector
-            VStack(spacing: DesignTokens.Spacing.xs) {
+            VStack(spacing: 4) {
                 Text(languageSettings.localized("onboarding.welcome.language"))
-                    .font(DesignTokens.Typography.caption())
-                    .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
 
                 LanguageSegmentedControl()
             }
 
-            // Get Started Button
             ActionButton(
                 languageSettings.localized("onboarding.welcome.get_started"),
                 variant: .primary
@@ -55,9 +45,9 @@ struct OnboardingWelcomeStep: View {
             .frame(width: 200)
 
             Spacer()
-                .frame(height: DesignTokens.Spacing.lg)
+                .frame(height: 20)
         }
-        .padding(.horizontal, DesignTokens.Spacing.xxxl)
+        .padding(.horizontal, 48)
     }
 }
 
@@ -83,7 +73,7 @@ private struct LanguageSegmentedControl: View {
 #Preview {
     OnboardingWelcomeStep()
         .frame(width: 520, height: 480)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(OnboardingManager())
         .environmentObject(LanguageSettings())
 }

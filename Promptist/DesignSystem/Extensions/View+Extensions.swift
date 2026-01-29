@@ -5,7 +5,7 @@ extension View {
     // MARK: - Card Style
 
     func cardStyle(
-        padding: EdgeInsets = DesignTokens.Layout.edgeInsetNormal,
+        padding: EdgeInsets = EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12),
         elevation: CardBackground<AnyView>.ShadowElevation = .sm
     ) -> some View {
         self.modifier(CardStyleModifier(padding: padding, elevation: elevation))
@@ -37,12 +37,8 @@ private struct CardStyleModifier: ViewModifier {
         content
             .padding(padding)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .fill(DesignTokens.Colors.backgroundElevated)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: DesignTokens.BorderWidth.default)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(.regularMaterial)
             )
             .shadow(
                 color: elevation.shadow.color,
@@ -66,7 +62,7 @@ private struct HoverEffectModifier: ViewModifier {
             .scaleEffect(isHovering ? scale : 1.0)
             .opacity(isHovering ? opacity : 1.0)
             .onHover { hovering in
-                withAnimation(DesignTokens.Animation.normal) {
+                withAnimation(.easeInOut(duration: 0.2)) {
                     isHovering = hovering
                 }
             }

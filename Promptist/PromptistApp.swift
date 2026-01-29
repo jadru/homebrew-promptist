@@ -44,6 +44,7 @@ struct PromptistApp: App {
             managerWindowContent
         }
         .windowResizability(.contentSize)
+        .windowStyle(.automatic)
 
         Settings {
             SettingsView()

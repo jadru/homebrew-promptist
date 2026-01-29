@@ -9,18 +9,17 @@ struct OnboardingCompleteStep: View {
     @State private var showCheckmark = false
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.xxl) {
+        VStack(spacing: 32) {
             Spacer()
 
-            // Success Icon
             ZStack {
                 Circle()
-                    .fill(DesignTokens.Colors.success.opacity(0.1))
+                    .fill(Color.green.opacity(0.1))
                     .frame(width: 96, height: 96)
 
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 56))
-                    .foregroundColor(DesignTokens.Colors.success)
+                    .foregroundStyle(.green)
                     .scaleEffect(showCheckmark ? 1.0 : 0.5)
                     .opacity(showCheckmark ? 1.0 : 0.0)
             }
@@ -30,25 +29,22 @@ struct OnboardingCompleteStep: View {
                 }
             }
 
-            // Title & Subtitle
-            VStack(spacing: DesignTokens.Spacing.sm) {
+            VStack(spacing: 8) {
                 Text(languageSettings.localized("onboarding.complete.title"))
-                    .font(DesignTokens.Typography.display(28, weight: .bold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized("onboarding.complete.subtitle"))
-                    .font(DesignTokens.Typography.body(15))
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
-            // Tip Card
             TipCard()
-                .padding(.horizontal, DesignTokens.Spacing.xl)
+                .padding(.horizontal, 24)
 
             Spacer()
 
-            // Start Button
             ActionButton(
                 languageSettings.localized("onboarding.complete.start"),
                 variant: .primary
@@ -58,9 +54,9 @@ struct OnboardingCompleteStep: View {
             .frame(width: 240)
 
             Spacer()
-                .frame(height: DesignTokens.Spacing.xl)
+                .frame(height: 24)
         }
-        .padding(.horizontal, DesignTokens.Spacing.xl)
+        .padding(.horizontal, 24)
     }
 }
 
@@ -70,26 +66,26 @@ private struct TipCard: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
+        HStack(spacing: 12) {
             Image(systemName: "lightbulb.fill")
-                .font(.system(size: DesignTokens.IconSize.md))
-                .foregroundColor(DesignTokens.Colors.warning)
+                .font(.system(size: 16))
+                .foregroundStyle(.orange)
 
             Text(languageSettings.localized("onboarding.complete.tip"))
-                .font(DesignTokens.Typography.caption())
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
         }
-        .padding(DesignTokens.Spacing.md)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.warning.opacity(0.08))
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.orange.opacity(0.08))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .stroke(DesignTokens.Colors.warning.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
         )
     }
 }
@@ -99,7 +95,7 @@ private struct TipCard: View {
 #Preview {
     OnboardingCompleteStep()
         .frame(width: 520, height: 480)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(OnboardingManager())
         .environmentObject(LanguageSettings())
 }

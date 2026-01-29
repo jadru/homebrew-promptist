@@ -8,25 +8,22 @@ struct OnboardingBlockedView: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.lg) {
-            // Icon
+        VStack(spacing: 20) {
             Image(systemName: "gearshape.circle")
                 .font(.system(size: 40))
-                .foregroundColor(DesignTokens.Colors.foregroundTertiary)
+                .foregroundStyle(.tertiary)
 
-            // Title & Description
-            VStack(spacing: DesignTokens.Spacing.xs) {
+            VStack(spacing: 4) {
                 Text(languageSettings.localized("onboarding.blocked.title"))
-                    .font(DesignTokens.Typography.headline(16, weight: .semibold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized("onboarding.blocked.description"))
-                    .font(DesignTokens.Typography.caption())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
-            // Setup Button
             ActionButton(
                 languageSettings.localized("onboarding.blocked.button"),
                 variant: .primary
@@ -34,7 +31,7 @@ struct OnboardingBlockedView: View {
                 openOnboardingWindow()
             }
         }
-        .padding(DesignTokens.Spacing.xl)
+        .padding(24)
         .frame(width: 280)
         .environment(\.locale, languageSettings.locale)
     }
@@ -52,36 +49,36 @@ struct OnboardingBlockedCompactView: View {
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.md) {
-            HStack(spacing: DesignTokens.Spacing.sm) {
+        VStack(spacing: 12) {
+            HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: DesignTokens.IconSize.sm))
-                    .foregroundColor(DesignTokens.Colors.warning)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.orange)
 
                 Text(languageSettings.localized("onboarding.blocked.title"))
-                    .font(DesignTokens.Typography.label(weight: .medium))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary)
             }
 
             Text(languageSettings.localized("onboarding.blocked.description"))
-                .font(DesignTokens.Typography.caption())
-                .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
 
             Button(action: openOnboardingWindow) {
                 Text(languageSettings.localized("onboarding.blocked.button"))
-                    .font(DesignTokens.Typography.label(weight: .medium))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, DesignTokens.Spacing.md)
-                    .padding(.vertical, DesignTokens.Spacing.sm)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                            .fill(DesignTokens.Colors.accentPrimary)
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.accentColor)
                     )
             }
             .buttonStyle(.plain)
         }
-        .padding(DesignTokens.Spacing.lg)
+        .padding(20)
         .frame(width: 260)
         .environment(\.locale, languageSettings.locale)
     }
@@ -96,12 +93,12 @@ struct OnboardingBlockedCompactView: View {
 
 #Preview("Blocked View") {
     OnboardingBlockedView()
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(LanguageSettings())
 }
 
 #Preview("Compact Blocked View") {
     OnboardingBlockedCompactView()
-        .background(DesignTokens.Colors.backgroundElevated)
+        .background(Color(nsColor: .windowBackgroundColor))
         .environmentObject(LanguageSettings())
 }

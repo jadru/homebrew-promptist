@@ -120,20 +120,20 @@ struct AccessibilityPermissionAlert: View {
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: DesignTokens.Spacing.lg) {
+        VStack(spacing: 20) {
             // Icon
             Image(systemName: "lock.shield")
                 .font(.system(size: 48))
-                .foregroundColor(DesignTokens.Colors.accentPrimary)
+                .foregroundStyle(.accent)
 
             // Title
             Text(languageSettings.localized("accessibility.alert.title"))
-                .font(DesignTokens.Typography.headline(20, weight: .semibold))
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
 
             // Instructions
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+            VStack(alignment: .leading, spacing: 12) {
                 instructionStep(
                     number: "1",
                     text: languageSettings.localized("accessibility.alert.step1")
@@ -155,34 +155,34 @@ struct AccessibilityPermissionAlert: View {
                     text: languageSettings.localized("accessibility.alert.step5")
                 )
             }
-            .padding(DesignTokens.Spacing.md)
+            .padding(12)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                    .fill(DesignTokens.Colors.backgroundSecondary)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.quaternary)
             )
 
             // Warning
-            HStack(spacing: DesignTokens.Spacing.sm) {
+            HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: DesignTokens.IconSize.md))
-                    .foregroundColor(DesignTokens.Colors.warning)
+                    .font(.system(size: 16))
+                    .foregroundStyle(.orange)
 
                 Text(languageSettings.localized("accessibility.alert.warning"))
-                    .font(DesignTokens.Typography.caption())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(DesignTokens.Spacing.sm)
+            .padding(8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                    .fill(DesignTokens.Colors.warning.opacity(0.1))
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(Color.orange.opacity(0.1))
             )
 
             Spacer()
 
             // Buttons
-            VStack(spacing: DesignTokens.Spacing.sm) {
+            VStack(spacing: 8) {
                 ActionButton(
                     languageSettings.localized("accessibility.alert.open_settings"),
                     variant: .primary
@@ -204,26 +204,25 @@ struct AccessibilityPermissionAlert: View {
                 )
             }
         }
-        .padding(DesignTokens.Spacing.xl)
+        .padding(24)
         .frame(width: 500)
         .frame(minHeight: 520, maxHeight: 600)
-        .background(DesignTokens.Colors.backgroundElevated)
     }
 
     private func instructionStep(number: String, text: String) -> some View {
-        HStack(alignment: .top, spacing: DesignTokens.Spacing.md) {
+        HStack(alignment: .top, spacing: 12) {
             Text(number)
-                .font(DesignTokens.Typography.headline(14, weight: .semibold))
-                .foregroundColor(DesignTokens.Colors.accentPrimary)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.accent)
                 .frame(width: 24, height: 24)
                 .background(
                     Circle()
-                        .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
+                        .fill(Color.accentColor.opacity(0.1))
                 )
 
             Text(text)
-                .font(DesignTokens.Typography.body())
-                .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                .font(.system(size: 14))
+                .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
@@ -238,19 +237,19 @@ struct AccessibilityPermissionBanner: View {
     @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
+        HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: DesignTokens.IconSize.md))
-                .foregroundColor(DesignTokens.Colors.warning)
+                .font(.system(size: 16))
+                .foregroundStyle(.orange)
 
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xxs) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(languageSettings.localized("accessibility.banner.title"))
-                    .font(DesignTokens.Typography.label(weight: .semibold))
-                    .foregroundColor(DesignTokens.Colors.foregroundPrimary)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.primary)
 
                 Text(languageSettings.localized("accessibility.banner.description"))
-                    .font(DesignTokens.Typography.caption())
-                    .foregroundColor(DesignTokens.Colors.foregroundSecondary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -259,25 +258,25 @@ struct AccessibilityPermissionBanner: View {
                 permissionManager.openSystemSettings()
             }) {
                 Text(languageSettings.localized("accessibility.banner.button"))
-                    .font(DesignTokens.Typography.label(weight: .medium))
-                    .foregroundColor(DesignTokens.Colors.accentPrimary)
-                    .padding(.horizontal, DesignTokens.Spacing.md)
-                    .padding(.vertical, DesignTokens.Spacing.sm)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.accent)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
-                            .fill(DesignTokens.Colors.accentPrimary.opacity(0.1))
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.accentColor.opacity(0.1))
                     )
             }
             .buttonStyle(.plain)
         }
-        .padding(DesignTokens.Spacing.md)
+        .padding(12)
         .background(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .fill(DesignTokens.Colors.warning.opacity(0.1))
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.orange.opacity(0.1))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
-                .stroke(DesignTokens.Colors.warning.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
         )
     }
 }
