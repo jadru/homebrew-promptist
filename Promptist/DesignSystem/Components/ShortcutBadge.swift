@@ -25,6 +25,7 @@ struct ShortcutBadge: View {
                             DesignTokens.Colors.accentPrimary.opacity(0.1)
                     )
             )
+            .liquidGlass(.clear)
         }
         .buttonStyle(.plain)
         .onHover { hovering in

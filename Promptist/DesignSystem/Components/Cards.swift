@@ -42,7 +42,7 @@ struct CardBackground<Content: View>: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 1)
+                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: DesignTokens.BorderWidth.default)
             )
             .shadow(
                 color: elevation.shadow.color,
@@ -104,7 +104,7 @@ struct ListCardRow<Content: View>: View {
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
                     .stroke(
                         isHovering ? DesignTokens.Colors.borderDefault : DesignTokens.Colors.borderSubtle,
-                        lineWidth: 0.5
+                        lineWidth: DesignTokens.BorderWidth.subtle
                     )
             )
     }

@@ -33,6 +33,32 @@ struct ActionButton: View {
     }
 
     var body: some View {
+        if #available(macOS 26.0, *) {
+            glassButton
+        } else {
+            legacyButton
+        }
+    }
+
+    @available(macOS 26.0, *)
+    @ViewBuilder
+    private var glassButton: some View {
+        switch variant {
+        case .primary:
+            Button(action: action) { buttonLabel }
+                .buttonStyle(.glassProminent)
+        case .secondary:
+            Button(action: action) { buttonLabel }
+                .buttonStyle(.glass)
+        case .subtle:
+            Button(action: action) { buttonLabel }
+                .buttonStyle(.plain)
+        case .danger:
+            legacyButton
+        }
+    }
+
+    private var legacyButton: some View {
         Button(action: {
             isPressed = true
             action()
@@ -40,24 +66,15 @@ struct ActionButton: View {
                 isPressed = false
             }
         }) {
-            HStack(spacing: DesignTokens.Spacing.xs) {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(.system(size: DesignTokens.IconSize.sm, weight: .medium))
-                }
-                Text(title)
-                    .font(DesignTokens.Typography.label())
-            }
-            .padding(.horizontal, DesignTokens.Spacing.md)
-            .padding(.vertical, DesignTokens.Spacing.xs)
-            .background(backgroundColor)
-            .foregroundColor(foregroundColor)
-            .cornerRadius(DesignTokens.Radius.md)
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
-                    .stroke(borderColor, lineWidth: variant == .subtle ? 0 : 1)
-            )
-            .scaleEffect(isPressed ? 0.97 : 1.0)
+            buttonLabel
+                .background(backgroundColor)
+                .foregroundColor(foregroundColor)
+                .cornerRadius(DesignTokens.Radius.md)
+                .overlay(
+                    RoundedRectangle(cornerRadius: DesignTokens.Radius.md)
+                        .stroke(borderColor, lineWidth: variant == .subtle ? 0 : DesignTokens.BorderWidth.default)
+                )
+                .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -66,6 +83,19 @@ struct ActionButton: View {
             }
         }
         .animation(DesignTokens.Animation.fast, value: isPressed)
+    }
+
+    private var buttonLabel: some View {
+        HStack(spacing: DesignTokens.Spacing.xs) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: DesignTokens.IconSize.sm, weight: .medium))
+            }
+            Text(title)
+                .font(DesignTokens.Typography.label())
+        }
+        .padding(.horizontal, DesignTokens.Spacing.md)
+        .padding(.vertical, DesignTokens.Spacing.xs)
     }
 
     private var backgroundColor: Color {
@@ -146,6 +176,24 @@ struct IconButton: View {
     }
 
     var body: some View {
+        if #available(macOS 26.0, *) {
+            glassIconButton
+        } else {
+            legacyIconButton
+        }
+    }
+
+    @available(macOS 26.0, *)
+    private var glassIconButton: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: size, weight: .medium))
+                .frame(width: size + 12, height: size + 12)
+        }
+        .buttonStyle(.glass)
+    }
+
+    private var legacyIconButton: some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: size, weight: .medium))
