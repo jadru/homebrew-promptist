@@ -42,7 +42,7 @@ private struct CardStyleModifier: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.lg, style: .continuous)
-                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: 1)
+                    .stroke(DesignTokens.Colors.borderSubtle, lineWidth: DesignTokens.BorderWidth.default)
             )
             .shadow(
                 color: elevation.shadow.color,

@@ -37,46 +37,48 @@ struct PromptLauncherView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Preview panel on left (when needed)
-            if viewModel.previewPrompt != nil && previewOnLeft {
-                PromptPreviewPanel(
-                    prompt: viewModel.previewPrompt,
-                    shortcut: viewModel.previewShortcut
-                )
+        GlassContainer {
+            HStack(spacing: 0) {
+                // Preview panel on left (when needed)
+                if viewModel.previewPrompt != nil && previewOnLeft {
+                    PromptPreviewPanel(
+                        prompt: viewModel.previewPrompt,
+                        shortcut: viewModel.previewShortcut
+                    )
 
-                Divider()
-            }
+                    Divider()
+                }
 
-            // Main launcher content
-            VStack(spacing: 0) {
-                // Search bar
-                PromptSearchBar(
-                    searchText: $viewModel.searchText,
-                    isFocused: $searchFocused,
-                    onManage: openManagerWindow
-                )
+                // Main launcher content
+                VStack(spacing: 0) {
+                    // Search bar
+                    PromptSearchBar(
+                        searchText: $viewModel.searchText,
+                        isFocused: $searchFocused,
+                        onManage: openManagerWindow
+                    )
 
-                // Thin separator
-                Divider()
-                    .background(tokens.Colors.separator)
+                    // Thin separator
+                    Divider()
+                        .background(tokens.Colors.separator)
 
-                // Prompt list
-                PromptList(
-                    viewModel: viewModel,
-                    onExecute: executePrompt
-                )
-            }
-            .frame(width: tokens.Layout.popoverWidth)
+                    // Prompt list
+                    PromptList(
+                        viewModel: viewModel,
+                        onExecute: executePrompt
+                    )
+                }
+                .frame(width: tokens.Layout.popoverWidth)
 
-            // Preview panel on right (default)
-            if viewModel.previewPrompt != nil && !previewOnLeft {
-                Divider()
+                // Preview panel on right (default)
+                if viewModel.previewPrompt != nil && !previewOnLeft {
+                    Divider()
 
-                PromptPreviewPanel(
-                    prompt: viewModel.previewPrompt,
-                    shortcut: viewModel.previewShortcut
-                )
+                    PromptPreviewPanel(
+                        prompt: viewModel.previewPrompt,
+                        shortcut: viewModel.previewShortcut
+                    )
+                }
             }
         }
         .frame(

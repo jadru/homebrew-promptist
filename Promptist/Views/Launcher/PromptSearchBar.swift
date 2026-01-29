@@ -51,6 +51,7 @@ struct PromptSearchBar: View {
             .padding(.vertical, 10)
             .background(tokens.Colors.searchBackground)
             .cornerRadius(8)
+            .liquidGlass(.clear)
 
             // More menu button (vertical ellipsis)
             Menu {
@@ -71,6 +72,7 @@ struct PromptSearchBar: View {
                     .frame(width: 32, height: 32)
                     .background(tokens.Colors.searchBackground)
                     .cornerRadius(8)
+                    .liquidGlass(.clear)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)

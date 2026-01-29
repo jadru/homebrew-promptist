@@ -14,6 +14,7 @@ struct ShortcutKeyBadge: View {
                 Capsule()
                     .fill(DesignTokens.Colors.backgroundTertiary)
             )
+            .liquidGlass(.clear)
     }
 }
 

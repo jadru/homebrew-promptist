@@ -31,6 +31,6 @@ struct ManageToolbar: View {
             ActionButton("New Prompt", icon: "plus", variant: .primary, action: onNewPrompt)
         }
         .padding(DesignTokens.Spacing.md)
-        .background(DesignTokens.Colors.backgroundElevated)
+        .navigationBackground()
     }
 }

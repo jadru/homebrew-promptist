@@ -157,6 +157,7 @@ private struct NavigationTabButton: View {
                             (isHovering ? DesignTokens.Colors.hoverBackground : Color.clear)
                     )
             )
+            .liquidGlass(enabled: isSelected)
         }
         .buttonStyle(.plain)
         .onHover { hovering in

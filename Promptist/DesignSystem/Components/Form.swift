@@ -52,7 +52,7 @@ struct SearchBar: View {
             RoundedRectangle(cornerRadius: DesignTokens.Radius.md, style: .continuous)
                 .stroke(
                     isFocused ? DesignTokens.Colors.accentPrimary : DesignTokens.Colors.borderSubtle,
-                    lineWidth: isFocused ? 1.5 : 1
+                    lineWidth: isFocused ? DesignTokens.BorderWidth.selected : DesignTokens.BorderWidth.default
                 )
         )
     }
@@ -144,9 +144,10 @@ struct FilterSegmentedControl: View {
                     RoundedRectangle(cornerRadius: DesignTokens.Radius.sm, style: .continuous)
                         .stroke(
                             selectedIndex == index ? DesignTokens.Colors.borderDefault : Color.clear,
-                            lineWidth: 0.5
+                            lineWidth: DesignTokens.BorderWidth.subtle
                         )
                 )
+                .liquidGlass(enabled: selectedIndex == index)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
