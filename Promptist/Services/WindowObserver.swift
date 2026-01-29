@@ -99,11 +99,7 @@ final class WindowObserver: ObservableObject {
 
     private func closeGhostOnboardingWindows() {
         for window in NSApp.windows {
-            let isOnboarding = window.identifier?.rawValue == "onboarding"
-            let isWelcome = window.title.contains("Welcome")
-            let isNonManagerPromptist = window.title.contains("Promptist") && !window.title.contains("Manager")
-
-            if isOnboarding || isWelcome || isNonManagerPromptist {
+            if window.identifier?.rawValue == "onboarding" {
                 window.orderOut(nil)
                 window.close()
             }

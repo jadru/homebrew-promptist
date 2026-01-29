@@ -235,3 +235,8 @@
 // Accessibility Labels
 "accessibility.prompt_row_hint" = "Double-click to copy to clipboard";
 "accessibility.shortcut_prefix" = "Shortcut";
+
+// Quit App
+"settings.quit.title" = "Quit Application";
+"settings.quit.subtitle" = "Exit Promptist completely.";
+"settings.quit.button" = "Quit";

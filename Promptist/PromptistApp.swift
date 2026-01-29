@@ -57,11 +57,9 @@ struct PromptistApp: App {
     @ViewBuilder
     private var menuBarContent: some View {
         if container.onboardingManager.shouldShowOnboarding {
-            OnboardingBlockedCompactView {
-                openOnboardingWindow()
-            }
-            .environmentObject(container.languageSettings)
-            .environment(\.locale, container.languageSettings.locale)
+            OnboardingBlockedCompactView()
+                .environmentObject(container.languageSettings)
+                .environment(\.locale, container.languageSettings.locale)
         } else {
             PromptLauncherView()
                 .environmentObject(container.appContext)
@@ -94,11 +92,9 @@ struct PromptistApp: App {
     @ViewBuilder
     private var managerWindowContent: some View {
         if container.onboardingManager.shouldShowOnboarding {
-            OnboardingBlockedView {
-                openOnboardingWindow()
-            }
-            .environmentObject(container.languageSettings)
-            .environment(\.locale, container.languageSettings.locale)
+            OnboardingBlockedView()
+                .environmentObject(container.languageSettings)
+                .environment(\.locale, container.languageSettings.locale)
         } else {
             PromptManagerRootView(
                 promptListViewModel: container.promptListViewModel,
@@ -152,10 +148,8 @@ struct PromptistApp: App {
     }
 
     private func closeOnboardingWindow() {
-        if let onboardingWindow = NSApp.windows.first(where: { window in
-            window.identifier?.rawValue == "onboarding" ||
-            window.title.contains("Promptist") ||
-            window.title.contains("Welcome")
+        if let onboardingWindow = NSApp.windows.first(where: {
+            $0.identifier?.rawValue == "onboarding"
         }) {
             onboardingWindow.close()
         }
