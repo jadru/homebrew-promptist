@@ -20,7 +20,7 @@ struct PromptList: View {
                 if viewModel.allDisplayablePrompts.isEmpty && viewModel.collectionsWithPrompts.isEmpty {
                     emptyStateView
                 } else {
-                    LazyVStack(spacing: 0) {
+                    LazyVStack(spacing: 4) {
                         // Show back button if in a collection
                         if viewModel.currentCollectionId != nil {
                             backToAllPromptsButton
@@ -75,6 +75,7 @@ struct PromptList: View {
                             showOtherPromptsButton
                         }
                     }
+                    .padding(.horizontal, 8)
                 }
             }
             .onChange(of: viewModel.selectedIndex) { _, _ in
@@ -126,11 +127,11 @@ struct PromptList: View {
                 Spacer()
             }
             .foregroundStyle(.accent)
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
-        .background(Color.primary.opacity(0.04))
+        .glassInteractiveRow(isHovered: true, cornerRadius: 8)
     }
 
     // MARK: - Show Other Prompts Button
@@ -149,22 +150,22 @@ struct PromptList: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                Capsule()
                     .fill(Color.primary.opacity(0.06))
             )
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 8)
         .padding(.vertical, 8)
     }
 
     // MARK: - Empty State
 
     private var emptyStateView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 32, weight: .light))
                 .foregroundStyle(.tertiary)
+                .glassCircleBackground(size: 64)
 
             Text(emptyStateMessage)
                 .font(.system(size: 13))
@@ -206,14 +207,13 @@ private struct SectionHeader: View {
     var body: some View {
         HStack {
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.tertiary)
-                .textCase(.uppercase)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(.secondary)
             Spacer()
         }
-        .padding(.horizontal, 12)
-        .padding(.top, 12)
-        .padding(.bottom, 4)
+        .padding(.horizontal, 8)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
     }
 }
 

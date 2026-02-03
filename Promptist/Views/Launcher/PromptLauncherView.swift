@@ -167,7 +167,7 @@ struct PromptLauncherView: View {
 
     private func showNotification(for prompt: PromptTemplate) {
         let content = UNMutableNotificationContent()
-        content.title = "Prompt Copied"
+        content.title = languageSettings.localized("notification.prompt_copied")
         content.body = prompt.title
         content.sound = .default
 
@@ -224,7 +224,7 @@ struct PromptLauncherView: View {
         window.contentViewController = hostingController
         window.isReleasedWhenClosed = false
         window.level = .floating  // Keep above menu bar popover
-        window.title = "Variable Input"
+        window.title = languageSettings.localized("prompt_editor.hint.variables")
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.isMovableByWindowBackground = true

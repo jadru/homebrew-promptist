@@ -6,10 +6,11 @@ struct ManageToolbar: View {
     @Binding var searchText: String
     @Binding var isCompactMode: Bool
     let onNewPrompt: () -> Void
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
         HStack(spacing: 12) {
-            SearchBar(text: $searchText, placeholder: "Search prompts...") {}
+            SearchBar(text: $searchText, placeholder: languageSettings.localized("toolbar.search.placeholder")) {}
                 .frame(maxWidth: 400)
 
             Spacer()
@@ -26,9 +27,9 @@ struct ManageToolbar: View {
                     .frame(width: 28, height: 28)
             }
             .buttonStyle(.plain)
-            .help(isCompactMode ? "Normal Density" : "Compact Density")
+            .help(isCompactMode ? languageSettings.localized("toolbar.density.normal") : languageSettings.localized("toolbar.density.compact"))
 
-            ActionButton("New Prompt", icon: "plus", variant: .primary, action: onNewPrompt)
+            ActionButton(languageSettings.localized("prompt_manager.toolbar.new_prompt"), icon: "plus", variant: .primary, action: onNewPrompt)
         }
         .padding(12)
         .navigationBackground()

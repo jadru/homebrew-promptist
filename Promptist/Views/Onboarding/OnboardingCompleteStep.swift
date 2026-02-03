@@ -13,9 +13,18 @@ struct OnboardingCompleteStep: View {
             Spacer()
 
             ZStack {
-                Circle()
-                    .fill(Color.green.opacity(0.1))
-                    .frame(width: 96, height: 96)
+                Group {
+                    if #available(macOS 26.0, *) {
+                        Circle()
+                            .fill(.clear)
+                            .frame(width: 96, height: 96)
+                            .glassEffect(.regular.tint(.green), in: Circle())
+                    } else {
+                        Circle()
+                            .fill(Color.green.opacity(0.1))
+                            .frame(width: 96, height: 96)
+                    }
+                }
 
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 56))
@@ -79,14 +88,20 @@ private struct TipCard: View {
             Spacer()
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.orange.opacity(0.08))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-        )
+        .background {
+            if #available(macOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.clear)
+                    .glassEffect(.regular.tint(.orange), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            } else {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.orange.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                    )
+            }
+        }
     }
 }
 

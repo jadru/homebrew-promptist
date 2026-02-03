@@ -34,18 +34,24 @@ private struct CardStyleModifier: ViewModifier {
     let elevation: CardBackground<AnyView>.ShadowElevation
 
     func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(.regularMaterial)
-            )
-            .shadow(
-                color: elevation.shadow.color,
-                radius: elevation.shadow.radius,
-                x: elevation.shadow.x,
-                y: elevation.shadow.y
-            )
+        if #available(macOS 26.0, *) {
+            content
+                .padding(padding)
+                .glassCardBackground(cornerRadius: 10)
+        } else {
+            content
+                .padding(padding)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(.regularMaterial)
+                )
+                .shadow(
+                    color: elevation.shadow.color,
+                    radius: elevation.shadow.radius,
+                    x: elevation.shadow.x,
+                    y: elevation.shadow.y
+                )
+        }
     }
 }
 
@@ -61,6 +67,10 @@ private struct HoverEffectModifier: ViewModifier {
         content
             .scaleEffect(isHovering ? scale : 1.0)
             .opacity(isHovering ? opacity : 1.0)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.primary.opacity(isHovering ? 0.06 : 0))
+            )
             .onHover { hovering in
                 withAnimation(.easeInOut(duration: 0.2)) {
                     isHovering = hovering

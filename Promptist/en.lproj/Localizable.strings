@@ -240,3 +240,61 @@
 "settings.quit.title" = "Quit Application";
 "settings.quit.subtitle" = "Exit Promptist completely.";
 "settings.quit.button" = "Quit";
+
+// Settings - Missing keys
+"settings.appearance.mode" = "Appearance";
+"settings.language.select" = "Language";
+"settings.general.title" = "General";
+
+// Shortcut Manager - Missing key
+"shortcut_manager.filter.scope" = "Scope";
+
+// Collection Rail
+"collection.filter.all.short" = "All";
+"collection.rename.ellipsis" = "Rename...";
+"collection.new" = "New";
+
+// Template Card
+"template.untitled" = "Untitled";
+"template.action.edit" = "Edit";
+"template.action.delete" = "Delete";
+
+// Top Filter Bar
+"search.templates.placeholder" = "Search templates...";
+"filter.auto" = "Auto";
+
+// Prompt Editor
+"prompt_editor.field.keywords.label" = "Keywords";
+"prompt_editor.field.keywords.for_search" = "(for search)";
+"prompt_editor.field.keywords.example" = "e.g., code, review, debug";
+
+// App Pills
+"app.action.add" = "Add";
+
+// Toolbar
+"toolbar.search.placeholder" = "Search prompts...";
+"toolbar.density.normal" = "Normal Density";
+"toolbar.density.compact" = "Compact Density";
+
+// Shortcut Badge
+"shortcut.badge.help" = "View shortcuts for this template";
+
+// Search
+"search.clear" = "Clear search";
+
+// App Selector
+"app_selector.field.app_name" = "App name";
+"app_selector.field.bundle_id" = "Bundle identifier (optional)";
+"app_selector.search.placeholder" = "Search apps";
+
+// Notification
+"notification.prompt_copied" = "Prompt Copied";
+
+// Manager Content View
+"prompt_manager.nav.all_templates" = "All Templates";
+"prompt_manager.nav.categories" = "Categories";
+"prompt_manager.nav.collections" = "Collections";
+"prompt_manager.template_count" = "templates";
+"prompt_manager.new_prompt" = "New Prompt";
+"prompt_manager.empty.create" = "Create Prompt";
+"prompt_manager.search.placeholder" = "Search prompts...";

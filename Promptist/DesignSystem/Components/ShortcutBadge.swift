@@ -4,6 +4,7 @@ struct ShortcutBadge: View {
     let count: Int
     let action: () -> Void
 
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @State private var isHovering = false
 
     var body: some View {
@@ -33,6 +34,6 @@ struct ShortcutBadge: View {
                 isHovering = hovering
             }
         }
-        .help("View shortcuts for this template")
+        .help(languageSettings.localized("shortcut.badge.help"))
     }
 }

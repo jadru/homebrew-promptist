@@ -89,12 +89,18 @@ struct OnboardingProgressIndicator: View {
     var body: some View {
         HStack(spacing: 8) {
             ForEach(0..<totalSteps, id: \.self) { index in
-                Circle()
-                    .fill(index <= currentStep
-                        ? Color.accentColor
-                        : Color.primary.opacity(0.15))
-                    .frame(width: 8, height: 8)
-                    .animation(.easeInOut(duration: 0.3), value: currentStep)
+                if index <= currentStep {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 8, height: 8)
+                        .liquidGlass(.prominent)
+                        .animation(.easeInOut(duration: 0.3), value: currentStep)
+                } else {
+                    Circle()
+                        .fill(Color.primary.opacity(0.15))
+                        .frame(width: 8, height: 8)
+                        .animation(.easeInOut(duration: 0.3), value: currentStep)
+                }
             }
         }
     }

@@ -241,3 +241,61 @@
 "settings.quit.title" = "앱 종료";
 "settings.quit.subtitle" = "Promptist를 완전히 종료합니다.";
 "settings.quit.button" = "종료";
+
+// Settings - 누락된 키
+"settings.appearance.mode" = "외관";
+"settings.language.select" = "언어";
+"settings.general.title" = "일반";
+
+// Shortcut Manager - 누락된 키
+"shortcut_manager.filter.scope" = "범위";
+
+// Collection Rail
+"collection.filter.all.short" = "전체";
+"collection.rename.ellipsis" = "이름 변경...";
+"collection.new" = "새로 만들기";
+
+// Template Card
+"template.untitled" = "제목 없음";
+"template.action.edit" = "편집";
+"template.action.delete" = "삭제";
+
+// Top Filter Bar
+"search.templates.placeholder" = "템플릿 검색...";
+"filter.auto" = "자동";
+
+// Prompt Editor
+"prompt_editor.field.keywords.label" = "키워드";
+"prompt_editor.field.keywords.for_search" = "(검색용)";
+"prompt_editor.field.keywords.example" = "예: 코드, 리뷰, 디버그";
+
+// App Pills
+"app.action.add" = "추가";
+
+// Toolbar
+"toolbar.search.placeholder" = "프롬프트 검색...";
+"toolbar.density.normal" = "일반 밀도";
+"toolbar.density.compact" = "콤팩트 밀도";
+
+// Shortcut Badge
+"shortcut.badge.help" = "이 템플릿의 단축키 보기";
+
+// Search
+"search.clear" = "검색 지우기";
+
+// App Selector
+"app_selector.field.app_name" = "앱 이름";
+"app_selector.field.bundle_id" = "번들 식별자 (선택)";
+"app_selector.search.placeholder" = "앱 검색";
+
+// Notification
+"notification.prompt_copied" = "프롬프트 복사됨";
+
+// Manager Content View
+"prompt_manager.nav.all_templates" = "모든 템플릿";
+"prompt_manager.nav.categories" = "카테고리";
+"prompt_manager.nav.collections" = "컬렉션";
+"prompt_manager.template_count" = "개 템플릿";
+"prompt_manager.new_prompt" = "새 프롬프트";
+"prompt_manager.empty.create" = "프롬프트 만들기";
+"prompt_manager.search.placeholder" = "프롬프트 검색...";

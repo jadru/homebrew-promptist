@@ -10,6 +10,7 @@ import SwiftUI
 struct TopFilterBar: View {
     @ObservedObject var viewModel: PromptListViewModel
     let onNewPrompt: () -> Void
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
         HStack(spacing: 12) {
@@ -23,20 +24,12 @@ struct TopFilterBar: View {
             AppFilterToggle(viewModel: viewModel)
 
             // New Prompt button
-            Button(action: onNewPrompt) {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 12, weight: .semibold))
-                    Text("New Prompt")
-                        .font(.system(size: 12, weight: .medium))
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.accentColor)
-                .foregroundStyle(.white)
-                .cornerRadius(8)
-            }
-            .buttonStyle(.plain)
+            ActionButton(
+                languageSettings.localized("prompt_manager.toolbar.new_prompt"),
+                icon: "plus",
+                variant: .primary,
+                action: onNewPrompt
+            )
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -48,6 +41,7 @@ struct TopFilterBar: View {
 
 struct SearchField: View {
     @Binding var text: String
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -56,7 +50,7 @@ struct SearchField: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
 
-            TextField("Search templates...", text: $text)
+            TextField(languageSettings.localized("search.templates.placeholder"), text: $text)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13))
                 .focused($isFocused)
@@ -83,6 +77,7 @@ struct SearchField: View {
 
 struct AppFilterToggle: View {
     @ObservedObject var viewModel: PromptListViewModel
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
         HStack(spacing: 8) {
@@ -91,14 +86,14 @@ struct AppFilterToggle: View {
                 HStack(spacing: 4) {
                     Image(systemName: viewModel.filterState.autoDetectedApp ? "scope" : "scope")
                         .font(.system(size: 12))
-                    Text("Auto")
+                    Text(languageSettings.localized("filter.auto"))
                         .font(.system(size: 12, weight: .medium))
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(viewModel.filterState.autoDetectedApp ? AnyShapeStyle(Color.accentColor.opacity(0.15)) : AnyShapeStyle(.quaternary))
+                        .fill(viewModel.filterState.autoDetectedApp ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.06))
                 )
                 .foregroundStyle(viewModel.filterState.autoDetectedApp ? Color.accentColor : .secondary)
             }
@@ -119,7 +114,7 @@ struct AppFilterToggle: View {
                 .padding(.vertical, 4)
                 .background(
                     Capsule()
-                        .fill(.quaternary)
+                        .fill(Color.primary.opacity(0.06))
                 )
             }
         }
