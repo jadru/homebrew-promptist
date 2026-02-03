@@ -36,7 +36,7 @@ struct PromptRow: View {
     var body: some View {
         Button(action: handleExecute) {
             HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(prompt.title)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.primary)
@@ -57,10 +57,10 @@ struct PromptRow: View {
                     ShortcutKeyBadge(keyCombo: shortcut.keyCombo)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .frame(height: 48)
-            .background(rowBackground)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .glassInteractiveRow(isSelected: isSelected, isHovered: isHovered, cornerRadius: 8)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .contentShape(Rectangle())
             .overlay(copiedOverlay)
         }
@@ -92,12 +92,14 @@ struct PromptRow: View {
     private var copiedOverlay: some View {
         if showCopied {
             ZStack {
-                Color.black.opacity(0.85)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.ultraThinMaterial)
 
                 Text(languageSettings.localized("prompt_row.copied"))
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
             }
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .transition(.opacity)
         }
     }
@@ -117,16 +119,6 @@ struct PromptRow: View {
         }
     }
 
-    @ViewBuilder
-    private var rowBackground: some View {
-        if isSelected {
-            Color.accentColor.opacity(0.15)
-        } else if isHovered {
-            Color.primary.opacity(0.08)
-        } else {
-            Color.clear
-        }
-    }
 }
 
 // MARK: - Button Style

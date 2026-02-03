@@ -36,10 +36,7 @@ struct PromptListRow: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, isCompact ? 8 : 12)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isHovering ? Color.primary.opacity(0.06) : Color.clear)
-            )
+            .glassInteractiveRow(isHovered: isHovering)
         }
         .buttonStyle(.plain)
         .onHover { hovering in

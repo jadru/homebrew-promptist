@@ -150,10 +150,7 @@ struct PromptEditorView: View {
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(.regularMaterial)
-                        )
+                        .glassCardBackground(cornerRadius: 6)
                     }
                     .menuStyle(.borderlessButton)
                 }
@@ -162,14 +159,14 @@ struct PromptEditorView: View {
             // Keywords (for search, not displayed in UI filtering)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Text("Keywords")
+                    Text(languageSettings.localized("prompt_editor.field.keywords.label"))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
-                    Text("(for search)")
+                    Text(languageSettings.localized("prompt_editor.field.keywords.for_search"))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
-                TextField("e.g., code, review, debug", text: $keywordInput)
+                TextField(languageSettings.localized("prompt_editor.field.keywords.example"), text: $keywordInput)
                     .textFieldStyle(.roundedBorder)
             }
 

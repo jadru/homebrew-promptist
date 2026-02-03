@@ -28,6 +28,7 @@ struct EmptyStateView: View {
             Image(systemName: icon)
                 .font(.system(size: 32, weight: .light))
                 .foregroundStyle(.tertiary)
+                .glassCircleBackground(size: 64)
 
             VStack(spacing: 6) {
                 Text(title)

@@ -80,11 +80,7 @@ private struct FeatureCard: View {
             Image(systemName: feature.icon)
                 .font(.system(size: 20))
                 .foregroundStyle(.accent)
-                .frame(width: 40, height: 40)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.accentColor.opacity(0.1))
-                )
+                .glassCircleBackground(size: 40, tint: .accentColor)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(languageSettings.localized(feature.titleKey))
@@ -100,10 +96,16 @@ private struct FeatureCard: View {
             Spacer()
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.quaternary)
-        )
+        .background {
+            if #available(macOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.clear)
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            } else {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.quaternary)
+            }
+        }
     }
 }
 

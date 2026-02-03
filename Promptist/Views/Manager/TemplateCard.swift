@@ -16,13 +16,14 @@ struct TemplateCard: View {
     let onDelete: () -> Void
     var onDrag: (() -> NSItemProvider)?
 
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @State private var isHovering = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Title row with app badges
             HStack(alignment: .top) {
-                Text(template.title.isEmpty ? "Untitled" : template.title)
+                Text(template.title.isEmpty ? languageSettings.localized("template.untitled") : template.title)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -74,7 +75,7 @@ struct TemplateCard: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
-                    .help("Edit")
+                    .help(languageSettings.localized("template.action.edit"))
 
                     Button(action: onDelete) {
                         Image(systemName: "trash")
@@ -82,16 +83,26 @@ struct TemplateCard: View {
                             .foregroundStyle(.red.opacity(0.8))
                     }
                     .buttonStyle(.plain)
-                    .help("Delete")
+                    .help(languageSettings.localized("template.action.delete"))
                 }
                 .padding(.top, 6)
             }
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isHovering ? AnyShapeStyle(Color.primary.opacity(0.06)) : AnyShapeStyle(.regularMaterial))
-        )
+        .frame(minHeight: 60)
+        .background {
+            if #available(macOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(.clear)
+                    .glassEffect(
+                        isHovering ? .clear : .regular,
+                        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    )
+            } else {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isHovering ? AnyShapeStyle(Color.primary.opacity(0.06)) : AnyShapeStyle(.regularMaterial))
+            }
+        }
         .contentShape(Rectangle())
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.15)) {
@@ -178,24 +189,26 @@ struct TemplateListView: View {
 struct EmptyTemplateState: View {
     let hasFilters: Bool
     let onClearFilters: () -> Void
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: hasFilters ? "magnifyingglass" : "doc.text")
                 .font(.system(size: 40))
                 .foregroundStyle(.tertiary)
+                .glassCircleBackground(size: 72)
 
-            Text(hasFilters ? "No matching templates" : "No templates yet")
+            Text(hasFilters ? languageSettings.localized("manager.empty.no_matches") : languageSettings.localized("manager.empty.no_templates"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(.secondary)
 
-            Text(hasFilters ? "Try adjusting your filters" : "Create your first prompt template")
+            Text(hasFilters ? languageSettings.localized("manager.empty.no_matches_hint") : languageSettings.localized("manager.empty.no_templates_hint"))
                 .font(.system(size: 13))
                 .foregroundStyle(.tertiary)
 
             if hasFilters {
                 Button(action: onClearFilters) {
-                    Text("Clear Filters")
+                    Text(languageSettings.localized("manager.empty.clear_filters"))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.accent)
                 }

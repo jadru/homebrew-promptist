@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Promptist/**"
+      - "Promptist.xcodeproj/**"
+
+env:
+  APP_NAME: Promptist
+  SCHEME: Promptist
+
+jobs:
+  release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep 'MARKETING_VERSION' Promptist.xcodeproj/project.pbxproj | head -1 | sed 's/.*= \(.*\);/\1/' | tr -d ' ')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+      - name: Check if release exists
+        id: check
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" &>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.version.outputs.tag }} already exists, skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "New release ${{ steps.version.outputs.tag }} will be created."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Release archive
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          xcodebuild \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -derivedDataPath build/DerivedData \
+            -archivePath "build/$APP_NAME.xcarchive" \
+            archive \
+            SKIP_INSTALL=NO \
+            BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+
+      - name: Create DMG
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          APP_PATH="build/$APP_NAME.xcarchive/Products/Applications/$APP_NAME.app"
+          DMG_DIR="build/dmg"
+
+          mkdir -p "$DMG_DIR"
+          cp -R "$APP_PATH" "$DMG_DIR/"
+          ln -s /Applications "$DMG_DIR/Applications"
+
+          hdiutil create \
+            -volname "$APP_NAME" \
+            -srcfolder "$DMG_DIR" \
+            -ov \
+            -format UDZO \
+            "build/$APP_NAME-$VERSION.dmg"
+
+          shasum -a 256 "build/$APP_NAME-$VERSION.dmg" | awk '{print $1}' > build/sha256.txt
+          echo "SHA256: $(cat build/sha256.txt)"
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+
+          gh release create "$TAG" \
+            "build/$APP_NAME-$VERSION.dmg" \
+            --title "$APP_NAME $TAG" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Cask formula
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SHA256=$(cat build/sha256.txt)
+
+          cat > Casks/promptist.rb << CASKEOF
+          cask "promptist" do
+            version "$VERSION"
+            sha256 "$SHA256"
+
+            url "https://github.com/jadru/homebrew-promptist/releases/download/v#{version}/Promptist-#{version}.dmg"
+            name "Promptist"
+            desc "AI prompt template launcher for macOS"
+            homepage "https://github.com/jadru/homebrew-promptist"
+
+            depends_on macos: ">= :sequoia"
+
+            app "Promptist.app"
+
+            zap trash: [
+              "~/Library/Preferences/com.jadru.promptist.plist",
+              "~/Library/Application Support/Promptist",
+            ]
+          end
+          CASKEOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/promptist.rb
+          git diff --cached --quiet || git commit -m "cask: update to v$VERSION"
+          git push

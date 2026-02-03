@@ -34,14 +34,25 @@ struct PromptistApp: App {
         .defaultPosition(.center)
 
         MenuBarExtra {
-            menuBarContent
+            MenuBarContentRouter(onboardingManager: container.onboardingManager)
+                .environmentObject(container.appContext)
+                .environmentObject(container.executionService)
+                .environmentObject(container.languageSettings)
+                .environment(\.locale, container.languageSettings.locale)
         } label: {
             menuBarLabel
         }
         .menuBarExtraStyle(.window)
 
         Window("prompt_manager.window_title", id: "manager") {
-            managerWindowContent
+            ManagerContentRouter(
+                onboardingManager: container.onboardingManager,
+                promptListViewModel: container.promptListViewModel,
+                shortcutManager: container.shortcutManager
+            )
+            .environmentObject(container.appContext)
+            .environmentObject(container.languageSettings)
+            .environment(\.locale, container.languageSettings.locale)
         }
         .windowResizability(.contentSize)
         .windowStyle(.automatic)
@@ -54,21 +65,6 @@ struct PromptistApp: App {
     }
 
     // MARK: - View Builders
-
-    @ViewBuilder
-    private var menuBarContent: some View {
-        if container.onboardingManager.shouldShowOnboarding {
-            OnboardingBlockedCompactView()
-                .environmentObject(container.languageSettings)
-                .environment(\.locale, container.languageSettings.locale)
-        } else {
-            PromptLauncherView()
-                .environmentObject(container.appContext)
-                .environmentObject(container.executionService)
-                .environmentObject(container.languageSettings)
-                .environment(\.locale, container.languageSettings.locale)
-        }
-    }
 
     private var menuBarLabel: some View {
         MenuBarIconView(
@@ -87,23 +83,6 @@ struct PromptistApp: App {
         }
         .onReceive(container.appContext.$frontmostAppName) { _ in
             container.syncAppContext()
-        }
-    }
-
-    @ViewBuilder
-    private var managerWindowContent: some View {
-        if container.onboardingManager.shouldShowOnboarding {
-            OnboardingBlockedView()
-                .environmentObject(container.languageSettings)
-                .environment(\.locale, container.languageSettings.locale)
-        } else {
-            PromptManagerRootView(
-                promptListViewModel: container.promptListViewModel,
-                shortcutManager: container.shortcutManager
-            )
-            .environmentObject(container.appContext)
-            .environmentObject(container.languageSettings)
-            .environment(\.locale, container.languageSettings.locale)
         }
     }
 
@@ -164,6 +143,41 @@ struct PromptistApp: App {
             }
         }
         NSApp.activate(ignoringOtherApps: true)
+    }
+}
+
+// MARK: - Content Routers
+
+/// Routes menu bar content based on onboarding state.
+/// Uses @ObservedObject to directly observe OnboardingManager,
+/// ensuring reactive updates when onboarding state changes.
+private struct MenuBarContentRouter: View {
+    @ObservedObject var onboardingManager: OnboardingManager
+
+    var body: some View {
+        if onboardingManager.shouldShowOnboarding {
+            OnboardingBlockedCompactView()
+        } else {
+            PromptLauncherView()
+        }
+    }
+}
+
+/// Routes manager window content based on onboarding state.
+private struct ManagerContentRouter: View {
+    @ObservedObject var onboardingManager: OnboardingManager
+    let promptListViewModel: PromptListViewModel
+    let shortcutManager: ShortcutManager
+
+    var body: some View {
+        if onboardingManager.shouldShowOnboarding {
+            OnboardingBlockedView()
+        } else {
+            PromptManagerRootView(
+                promptListViewModel: promptListViewModel,
+                shortcutManager: shortcutManager
+            )
+        }
     }
 }
 

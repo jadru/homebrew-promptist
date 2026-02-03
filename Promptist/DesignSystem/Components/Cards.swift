@@ -36,16 +36,7 @@ struct CardBackground<Content: View>: View {
     var body: some View {
         content
             .padding(padding)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(.regularMaterial)
-            )
-            .shadow(
-                color: elevation.shadow.color,
-                radius: elevation.shadow.radius,
-                x: elevation.shadow.x,
-                y: elevation.shadow.y
-            )
+            .glassCardBackground(cornerRadius: 10)
     }
 }
 
@@ -92,9 +83,6 @@ struct ListCardRow<Content: View>: View {
         content
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isHovering ? Color.primary.opacity(0.06) : Color.clear)
-            )
+            .glassInteractiveRow(isHovered: isHovering)
     }
 }

@@ -162,7 +162,7 @@ struct AppSelectorDrawerView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            TextField("Search apps", text: $viewModel.searchText)
+            TextField(languageSettings.localized("app_selector.search.placeholder"), text: $viewModel.searchText)
                 .textFieldStyle(.plain)
                 .disableAutocorrection(true)
         }
@@ -236,6 +236,7 @@ struct CustomAppEditorView: View {
     var isSelected: Bool
     var onToggle: () -> Void
     var onRemove: () -> Void
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -245,13 +246,13 @@ struct CustomAppEditorView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    TextField("App name", text: Binding(
+                    TextField(languageSettings.localized("app_selector.field.app_name"), text: Binding(
                         get: { app.name },
                         set: { app.name = $0 }
                     ))
                     .textFieldStyle(.roundedBorder)
 
-                    TextField("Bundle identifier (optional)", text: Binding(
+                    TextField(languageSettings.localized("app_selector.field.bundle_id"), text: Binding(
                         get: { app.bundleId ?? "" },
                         set: { app.bundleId = $0.isEmpty ? nil : $0 }
                     ))

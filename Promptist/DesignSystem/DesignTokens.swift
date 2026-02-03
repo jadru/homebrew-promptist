@@ -43,6 +43,10 @@ enum DesignTokens {
             }
             return (color: Color.black.opacity(0.25), radius: 20, x: 0, y: 6)
         }
+
+        static let glassCard: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) = (
+            color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2
+        )
     }
 }
 
@@ -123,6 +127,8 @@ enum GlassVariant {
     case clear
     /// Prominent glass - tinted blue for primary call-to-action elements
     case prominent
+    /// Tinted glass - glass with custom color tint for selected/active states
+    case tinted(Color)
 }
 
 struct LiquidGlassModifier: ViewModifier {
@@ -151,6 +157,8 @@ struct LiquidGlassModifier: ViewModifier {
             content.glassEffect(.clear)
         case .prominent:
             content.glassEffect(.regular.tint(.blue))
+        case .tinted(let color):
+            content.glassEffect(.regular.tint(color))
         }
     }
 }
@@ -171,6 +179,87 @@ extension View {
             self.glassEffect(.regular, in: Rectangle())
         } else {
             self.background(Color(nsColor: .windowBackgroundColor))
+        }
+    }
+}
+
+// MARK: - Glass Surface & Card Modifiers (macOS 26+)
+
+extension View {
+    /// Glass card background - for content cards with rounded corners
+    /// macOS 26+: `.glassEffect()` / Fallback: `.regularMaterial`
+    @ViewBuilder
+    func glassCardBackground(cornerRadius: CGFloat = 10) -> some View {
+        if #available(macOS 26.0, *) {
+            self
+                .background(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.clear)
+                        .glassEffect(in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                )
+        } else {
+            self
+                .background(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(.regularMaterial)
+                )
+                .shadow(
+                    color: DesignTokens.Shadow.glassCard.color,
+                    radius: DesignTokens.Shadow.glassCard.radius,
+                    x: DesignTokens.Shadow.glassCard.x,
+                    y: DesignTokens.Shadow.glassCard.y
+                )
+        }
+    }
+
+    /// Glass interactive row - for list rows with selected/hovered states
+    /// Uses a stable single-view tree (no ViewBuilder branching) to prevent hover animation loops.
+    /// Inside GlassEffectContainer, simple fills look glassy without needing per-row .glassEffect().
+    func glassInteractiveRow(
+        isSelected: Bool = false,
+        isHovered: Bool = false,
+        tint: Color = .accentColor,
+        cornerRadius: CGFloat = 8
+    ) -> some View {
+        self.background(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(isSelected ? tint.opacity(0.15) : (isHovered ? Color.primary.opacity(0.08) : Color.clear))
+        )
+    }
+
+    /// Glass surface - for panels, sidebars, and large surface areas
+    /// macOS 26+: `.ultraThinMaterial` for subtle frost / Fallback: `.quaternary`
+    /// Note: Avoids `.glassEffect()` here to prevent glass-on-glass artifacts inside GlassEffectContainer.
+    @ViewBuilder
+    func glassSurface() -> some View {
+        if #available(macOS 26.0, *) {
+            self.background(.ultraThinMaterial)
+        } else {
+            self.background(.quaternary)
+        }
+    }
+
+    /// Glass circle background - for icon containers
+    @ViewBuilder
+    func glassCircleBackground(size: CGFloat = 40, tint: Color? = nil) -> some View {
+        if #available(macOS 26.0, *) {
+            self
+                .frame(width: size, height: size)
+                .background(
+                    Circle()
+                        .fill(.clear)
+                        .glassEffect(
+                            tint.map { .regular.tint($0) } ?? .clear,
+                            in: Circle()
+                        )
+                )
+        } else {
+            self
+                .frame(width: size, height: size)
+                .background(
+                    Circle()
+                        .fill(tint?.opacity(0.12) ?? Color.primary.opacity(0.06))
+                )
         }
     }
 }

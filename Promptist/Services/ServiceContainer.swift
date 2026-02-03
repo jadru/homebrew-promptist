@@ -34,6 +34,8 @@ final class ServiceContainer: ObservableObject {
     @Published private(set) var promptListViewModel: PromptListViewModel
     @Published private(set) var windowObserver: WindowObserver
 
+    private var cancellables = Set<AnyCancellable>()
+
     // MARK: - Initialization
 
     private init() {
@@ -95,6 +97,29 @@ final class ServiceContainer: ObservableObject {
 
         // Configure shortcut callback
         configureShortcutCallback()
+
+        // Watch for accessibility permission changes to restart shortcut monitoring
+        observeAccessibilityPermission()
+
+        // Forward onboardingManager changes so PromptistApp re-evaluates its views
+        onboardingManager.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+    }
+
+    private func observeAccessibilityPermission() {
+        accessibilityManager.$hasPermission
+            .removeDuplicates()
+            .filter { $0 == true }
+            .sink { [weak self] _ in
+                guard let self else { return }
+                AppLogger.logShortcut("Accessibility permission granted — ensuring shortcut monitoring is active")
+                self.shortcutManager.ensureMonitoring()
+            }
+            .store(in: &cancellables)
+
+        // Start polling so we detect when the user grants permission in System Settings
+        accessibilityManager.startPollingForPermission(interval: 2.0)
     }
 
     private func configureShortcutCallback() {
