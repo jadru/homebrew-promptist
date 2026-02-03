@@ -18,8 +18,9 @@ struct CollectionRow: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 Image(systemName: "folder.fill")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.accent)
+                    .glassCircleBackground(size: 32, tint: .accentColor)
 
                 Text(collection.name)
                     .font(.system(size: 14, weight: .semibold))
@@ -29,17 +30,22 @@ struct CollectionRow: View {
                 Spacer()
 
                 Text("\(promptCount)")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        Capsule()
+                            .fill(Color.primary.opacity(0.06))
+                    )
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .frame(height: 48)
-            .background(isHovered ? Color.primary.opacity(0.08) : Color.clear)
+            .glassInteractiveRow(isHovered: isHovered, cornerRadius: 8)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

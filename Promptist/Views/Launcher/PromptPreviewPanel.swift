@@ -23,18 +23,16 @@ struct PromptPreviewPanel: View {
         }
         .frame(width: Layout.panelWidth)
         .frame(maxHeight: .infinity)
+        .glassSurface()
     }
 
     // MARK: - Preview Content
 
     @ViewBuilder
     private func previewContent(for prompt: PromptTemplate) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 12) {
             // Header
             header(for: prompt)
-
-            Divider()
-                .padding(.horizontal, Layout.padding)
 
             // Content
             ScrollView {
@@ -60,7 +58,7 @@ struct PromptPreviewPanel: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(prompt.title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.primary)
                     .lineLimit(2)
 
@@ -91,10 +89,10 @@ struct PromptPreviewPanel: View {
                 .textCase(.uppercase)
 
             Text(content)
-                .font(.system(size: 13))
+                .font(.system(size: 14))
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
-                .lineSpacing(4)
+                .lineSpacing(5)
         }
     }
 
@@ -109,7 +107,7 @@ struct PromptPreviewPanel: View {
                     .foregroundStyle(.tertiary)
                     .textCase(.uppercase)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     if let lastUsed = prompt.lastUsedAt {
                         HStack(spacing: 6) {
                             Image(systemName: "clock")
@@ -131,6 +129,9 @@ struct PromptPreviewPanel: View {
                         .foregroundStyle(.secondary)
                     }
                 }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .glassCardBackground(cornerRadius: 8)
             }
         }
     }
@@ -138,10 +139,11 @@ struct PromptPreviewPanel: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 32, weight: .light))
                 .foregroundStyle(.tertiary)
+                .glassCircleBackground(size: 64)
 
             Text(L("preview.empty"))
                 .font(.system(size: 13))

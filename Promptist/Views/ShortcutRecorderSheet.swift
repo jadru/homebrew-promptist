@@ -48,10 +48,19 @@ struct ShortcutRecorderSheet: View {
                 }
                 .padding(12)
                 .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isRecording ? AnyShapeStyle(Color.accentColor.opacity(0.12)) : AnyShapeStyle(.quaternary))
-                )
+                .background {
+                    if #available(macOS 26.0, *) {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(.clear)
+                            .glassEffect(
+                                isRecording ? .regular.tint(.accentColor) : .clear,
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            )
+                    } else {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(isRecording ? AnyShapeStyle(Color.accentColor.opacity(0.12)) : AnyShapeStyle(.quaternary))
+                    }
+                }
                 .overlay(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .stroke(
@@ -91,10 +100,16 @@ struct ShortcutRecorderSheet: View {
                 }
                 .foregroundStyle(.red)
                 .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Color.red.opacity(0.1))
-                )
+                .background {
+                    if #available(macOS 26.0, *) {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(.clear)
+                            .glassEffect(.regular.tint(.red), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    } else {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.red.opacity(0.1))
+                    }
+                }
             }
 
             // Warning message
@@ -108,18 +123,24 @@ struct ShortcutRecorderSheet: View {
                 }
                 .foregroundStyle(.orange)
                 .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Color.orange.opacity(0.1))
-                )
+                .background {
+                    if #available(macOS 26.0, *) {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(.clear)
+                            .glassEffect(.regular.tint(.orange), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    } else {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(Color.orange.opacity(0.1))
+                    }
+                }
             }
 
             Spacer()
 
             HStack(spacing: 12) {
-                ActionButton("Cancel", variant: .secondary, action: onCancel)
+                ActionButton(languageSettings.localized("button.cancel"), variant: .secondary, action: onCancel)
                 Spacer()
-                ActionButton("Save", variant: .primary) {
+                ActionButton(languageSettings.localized("button.save"), variant: .primary) {
                     if let keyCombo = recordedKeyCombo {
                         let scope: ShortcutScope = {
                             if selectedScopeIndex == 0 {

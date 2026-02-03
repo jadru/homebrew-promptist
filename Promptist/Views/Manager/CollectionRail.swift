@@ -10,6 +10,7 @@ import SwiftUI
 
 struct CollectionRail: View {
     @ObservedObject var viewModel: PromptListViewModel
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @State private var showAddCollection = false
     @State private var newCollectionName = ""
 
@@ -18,7 +19,7 @@ struct CollectionRail: View {
             HStack(spacing: 8) {
                 // "All" chip
                 CollectionChip(
-                    name: "All",
+                    name: languageSettings.localized("collection.filter.all.short"),
                     icon: "tray.full",
                     count: nil,
                     isSelected: viewModel.filterState.selectedCollectionId == nil,
@@ -41,11 +42,11 @@ struct CollectionRail: View {
                         onSelect: { viewModel.selectCollection(collection.id) }
                     )
                     .contextMenu {
-                        Button("Rename...") {
+                        Button(languageSettings.localized("collection.rename.ellipsis")) {
                             // Rename handled by parent view
                         }
                         Divider()
-                        Button("Delete", role: .destructive) {
+                        Button(languageSettings.localized("collection.delete"), role: .destructive) {
                             viewModel.deleteCollection(collection.id)
                         }
                     }
@@ -56,7 +57,7 @@ struct CollectionRail: View {
                     HStack(spacing: 4) {
                         Image(systemName: "plus.circle")
                             .font(.system(size: 12))
-                        Text("New")
+                        Text(languageSettings.localized("collection.new"))
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundStyle(.accent)
@@ -127,7 +128,6 @@ struct CollectionChip: View {
                     .fill(backgroundColor)
             )
             .foregroundStyle(foregroundColor)
-            .liquidGlass(.prominent, enabled: isSelected)
         }
         .buttonStyle(.plain)
         .onHover { hovering in
@@ -138,8 +138,6 @@ struct CollectionChip: View {
     private var backgroundColor: Color {
         if isSelected {
             return Color.accentColor
-        } else if isHovering {
-            return Color.primary.opacity(0.06)
         } else {
             return .clear
         }

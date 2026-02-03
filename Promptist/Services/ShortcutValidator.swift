@@ -86,10 +86,11 @@ final class ShortcutValidator {
             return .failure(.systemReserved("This shortcut is reserved by macOS and cannot be used"))
         }
 
-        // 3. Warn about discouraged shortcuts (but allow them)
+        // 3. Block discouraged shortcuts that conflict with standard app shortcuts
         if Self.discouragedShortcuts.contains(displayString) {
-            // For now, we'll allow these but could show a warning in the future
-            // return .failure(.systemReserved("This shortcut is commonly used by apps and may cause conflicts"))
+            return .failure(.systemReserved(
+                "\(displayString) is a common system/app shortcut and will conflict with most applications."
+            ))
         }
 
         // 4. Check if using only Shift (too simple)

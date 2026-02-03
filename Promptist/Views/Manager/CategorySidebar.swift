@@ -10,13 +10,14 @@ import SwiftUI
 
 struct CategorySidebar: View {
     @ObservedObject var viewModel: PromptListViewModel
+    @EnvironmentObject private var languageSettings: LanguageSettings
     @State private var expandedCategories: Set<UUID> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack {
-                Text("Categories")
+                Text(languageSettings.localized("category.sidebar.title"))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.primary)
                 Spacer()
@@ -28,7 +29,7 @@ struct CategorySidebar: View {
 
             // "All Categories" option
             CategoryRow(
-                name: "All Categories",
+                name: languageSettings.localized("category.all"),
                 icon: "square.grid.2x2",
                 count: viewModel.allTemplates.count,
                 isSelected: viewModel.filterState.selectedCategoryId == nil,
@@ -57,7 +58,7 @@ struct CategorySidebar: View {
             Spacer()
         }
         .frame(width: 220)
-        .background(.quaternary)
+        .glassSurface()
     }
 }
 
@@ -183,19 +184,13 @@ struct CategoryRow: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(.quaternary)
-                    )
+                    .background(countBadgeBackground)
             }
         }
         .padding(.horizontal, 12)
         .padding(.leading, CGFloat(indentLevel) * 20)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(backgroundColor)
-        )
+        .glassInteractiveRow(isSelected: isSelected, isHovered: isHovering, cornerRadius: 6)
         .contentShape(Rectangle())
         .onTapGesture {
             onSelect()
@@ -205,13 +200,17 @@ struct CategoryRow: View {
         }
     }
 
-    private var backgroundColor: Color {
-        if isSelected {
-            return Color.accentColor.opacity(0.12)
-        } else if isHovering {
-            return Color.primary.opacity(0.06)
-        } else {
-            return .clear
+    // Count badge glass
+    private var countBadgeBackground: some View {
+        Group {
+            if #available(macOS 26.0, *) {
+                Capsule()
+                    .fill(.clear)
+                    .glassEffect(.clear, in: Capsule())
+            } else {
+                Capsule()
+                    .fill(.quaternary)
+            }
         }
     }
 }

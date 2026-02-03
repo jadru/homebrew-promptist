@@ -63,6 +63,21 @@ final class ShortcutManager: ObservableObject {
         refreshMonitoring()
     }
 
+    /// Called when accessibility permissions change.
+    /// If monitoring should be active but isn't, (re)starts monitoring.
+    func ensureMonitoring() {
+        guard !isPaused else { return }
+        guard !registeredShortcuts.isEmpty else {
+            AppLogger.logShortcut("No shortcuts registered, skipping ensureMonitoring", level: .debug)
+            return
+        }
+
+        if eventMonitor == nil {
+            AppLogger.logShortcut("Monitor not active — attempting to start monitoring")
+            startMonitoring()
+        }
+    }
+
     // Temporarily pause monitoring (e.g., when recording shortcuts)
     func pauseMonitoring() {
         guard !isPaused else {

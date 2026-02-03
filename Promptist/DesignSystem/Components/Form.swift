@@ -44,10 +44,16 @@ struct SearchBar: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(.quaternary)
-        )
+        .background {
+            if #available(macOS 26.0, *) {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.clear)
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            } else {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.quaternary)
+            }
+        }
     }
 }
 
@@ -131,7 +137,6 @@ struct FilterSegmentedControl: View {
                                 : (hoveredIndex == index ? Color.primary.opacity(0.06) : Color.clear)
                         )
                 )
-                .liquidGlass(enabled: selectedIndex == index)
         }
         .buttonStyle(.plain)
         .onHover { hovering in

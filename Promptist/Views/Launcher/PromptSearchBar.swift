@@ -23,7 +23,7 @@ struct PromptSearchBar: View {
                     .foregroundStyle(.secondary)
                     .font(.system(size: 14, weight: .medium))
 
-                TextField("Search prompts...", text: $searchText)
+                TextField(languageSettings.localized("toolbar.search.placeholder"), text: $searchText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 15))
                     .focused($isFocused)
@@ -39,11 +39,11 @@ struct PromptSearchBar: View {
                             .font(.system(size: 14, weight: .medium))
                     }
                     .buttonStyle(.plain)
-                    .help("Clear search")
+                    .help(languageSettings.localized("search.clear"))
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.vertical, 12)
             .liquidGlass(.clear)
 
             // More menu button
@@ -71,7 +71,7 @@ struct PromptSearchBar: View {
         }
         .padding(.horizontal, 12)
         .padding(.top, 16)
-        .padding(.bottom, 8)
+        .padding(.bottom, 12)
     }
 
     private func quitApp() {

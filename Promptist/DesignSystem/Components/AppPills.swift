@@ -43,7 +43,7 @@ struct AppPill: View {
         .padding(.vertical, 4)
         .background(
             Capsule()
-                .fill(isHovering ? AnyShapeStyle(Color.primary.opacity(0.08)) : AnyShapeStyle(.quaternary))
+                .fill(isHovering ? Color.primary.opacity(0.12) : Color.primary.opacity(0.06))
         )
         .onHover { hovering in
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -60,6 +60,7 @@ struct AppPillRow: View {
     let showRemoveButtons: Bool
     let onRemove: ((AppInfo) -> Void)?
     let onAdd: (() -> Void)?
+    @EnvironmentObject private var languageSettings: LanguageSettings
 
     init(
         apps: [AppInfo],
@@ -89,7 +90,7 @@ struct AppPillRow: View {
                         HStack(spacing: 4) {
                             Image(systemName: "plus")
                                 .font(.system(size: 12, weight: .semibold))
-                            Text("Add")
+                            Text(languageSettings.localized("app.action.add"))
                                 .font(.system(size: 11, weight: .medium))
                         }
                         .foregroundStyle(.secondary)
